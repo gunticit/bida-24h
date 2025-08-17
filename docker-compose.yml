@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: 24h_billiard_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: 24h_billiard
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - 24h_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: 24h_billiard_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: laravel
+      PMA_PASSWORD: laravel123
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - 24h_network
+
+volumes:
+  mysql_data:
+
+networks:
+  24h_network:
+    driver: bridge

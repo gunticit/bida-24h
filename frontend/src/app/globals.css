@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* Reset CSS cho MUI */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: #171717;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Đảm bảo MUI components hiển thị đúng */
+#__next {
+  height: 100%;
+}
+
+/* Tùy chỉnh scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Đảm bảo MUI components không bị ảnh hưởng bởi Tailwind */
+.MuiBox-root,
+.MuiContainer-root,
+.MuiTypography-root,
+.MuiButton-root,
+.MuiCard-root,
+.MuiCardContent-root,
+.MuiGrid-root,
+.MuiAppBar-root,
+.MuiToolbar-root,
+.MuiIconButton-root,
+.MuiDrawer-root,
+.MuiList-root,
+.MuiListItem-root,
+.MuiListItemIcon-root,
+.MuiListItemText-root,
+.MuiDivider-root {
+  font-family: inherit !important;
+}

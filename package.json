@@ -1,0 +1,29 @@
+{
+  "name": "laravel-nextjs-mui-app",
+  "version": "1.0.0",
+  "description": "Fullstack application with Laravel backend and Next.js frontend using MUI",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && php artisan serve",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "install:all": "npm install && cd backend && composer install && cd ../frontend && npm install",
+    "setup": "npm run install:all && cd backend && php artisan migrate && php artisan key:generate",
+    "test": "cd backend && php artisan test && cd ../frontend && npm run test",
+    "clean": "cd frontend && npm run clean && cd ../backend && php artisan config:clear && php artisan cache:clear",
+    "fix": "cd frontend && npm run lint -- --fix"
+  },
+  "keywords": [
+    "laravel",
+    "nextjs",
+    "mui",
+    "fullstack",
+    "typescript",
+    "php"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
