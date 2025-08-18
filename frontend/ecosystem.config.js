@@ -4,7 +4,7 @@ module.exports = {
       name: 'bida-24h-frontend',
       script: 'npm',
       args: 'start',
-      cwd: './frontend',
+      cwd: __dirname,
       instances: 1,
       autorestart: true,
       watch: false,
