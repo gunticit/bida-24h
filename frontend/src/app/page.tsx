@@ -114,25 +114,64 @@ export default function Home() {
       </Drawer>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 16, mb: 4 }}>
-        {/* Hero Section */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h5" component="h5" gutterBottom>
-            Chào mừng đến với
-          </Typography>
-          <Typography variant="h3" component="h2" color="primary" gutterBottom>
-          Phần mềm quản lý 24h Billiard
-          </Typography>
-          <Typography variant="h6" color="text.secondary" paragraph>
-            Quản lý giờ chơi, bàn, món ăn, đồ uống và tính toán tổng tiền
-          </Typography>
-          <Box sx={{ mt: 3 }}>
-            <Button onClick={() => router.push('/playtime')} variant="contained" size="large" sx={{ mr: 2 }}>
-              Bắt đầu
-            </Button>
+      <>
+        <style>{`
+          body {
+            position: relative;
+            background-image: url(/bg-bida.jpg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+          }
+
+          body::after {
+            content: "";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: lch(61 0.01 356.63 / 0.56);
+            z-index: -1;
+          }
+
+          /* Đảm bảo rằng nội dung được hiển thị trên lớp phủ */
+          #__next, .MuiContainer-root {
+            position: relative;
+            z-index: 1;
+          }
+        `}</style>
+        <Container
+          maxWidth="lg"
+          sx={{
+            minHeight: 'calc(100vh - 64px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {/* Hero Section */}
+            <Box sx={{ textAlign: 'center', padding: '30px', background: '#fff', borderRadius: '5px' }}>
+            <Typography variant="h5" component="h5" gutterBottom>
+              Chào mừng đến với
+            </Typography>
+            <Typography variant="h3" component="h2" color="primary" gutterBottom>
+              Phần mềm quản lý 24h Billiard
+            </Typography>
+            <Typography variant="h6" color="text.secondary" paragraph>
+              Quản lý giờ chơi, bàn, món ăn, đồ uống và tính toán tổng tiền
+            </Typography>
+            <Box sx={{ mt: 3 }}>
+              <Button onClick={() => router.push('/playtime')} variant="contained" size="large" sx={{ mr: 2 }}>
+          Bắt đầu
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </Container>
+        </Container>
+      </>
     </Box>
   );
 }

@@ -134,7 +134,17 @@ export default function DashboardPage() {
       </AppBar>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          mt: 4,
+          mb: 4,
+          backgroundImage: 'url(/public/bg-bida.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           Chào mừng, {user?.name}!
         </Typography>
