@@ -837,34 +837,42 @@ export default function PlaytimePage() {
           {editingSession ? 'Chỉnh sửa Session' : 'Thêm Session mới'}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Chọn bàn</InputLabel>
               <Select
-                value={formData.table_id}
-                label="Chọn bàn"
-                onChange={(e) => {
-                  const tableId = e.target.value as number;
-                  const selectedTable = tables.find(t => t.id === tableId);
-                  setFormData({ 
-                    ...formData, 
-                    table_id: tableId,
-                    hour_price: selectedTable?.price_per_hour || formData.hour_price
-                  });
-                }}
+              value={formData.table_id}
+              label="Chọn bàn"
+              onChange={(e) => {
+                const tableId = e.target.value as number;
+                const selectedTable = tables.find(t => t.id === tableId);
+                setFormData({ 
+                ...formData, 
+                table_id: tableId,
+                hour_price: selectedTable?.price_per_hour || formData.hour_price
+                });
+              }}
               >
-                {tables.map((table) => (
-                  <MenuItem key={table.id} value={table.id}>
-                    {table.name} - {table.status === 'available' ? 'Sẵn sàng' : 
-                                   table.status === 'playing' ? 'Đang chơi' : 'Bảo trì'}
-                  </MenuItem>
-                ))}
+              {tables.map((table) => (
+                <MenuItem key={table.id} value={table.id}>
+                {table.name} - {table.status === 'available' ? 'Sẵn sàng' : 
+                         table.status === 'playing' ? 'Đang chơi' : 'Bảo trì'}
+                </MenuItem>
+              ))}
               </Select>
             </FormControl>
             <TextField
-              label="Thời gian bắt đầu"
+              label="Thời gian bắt đầu (GMT+7)"
               type="datetime-local"
-              value={formData.start_time}
+              value={
+              (() => {
+                // Convert the stored time to HCM timezone (GMT+7)
+                const date = new Date(formData.start_time);
+                const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+                const hcmDate = new Date(utc + 7 * 60 * 60000);
+                return hcmDate.toISOString().slice(0, 16);
+              })()
+              }
               onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -872,11 +880,11 @@ export default function PlaytimePage() {
             <TextField
               label="Giá/giờ (VNĐ)"
               type="number"
-              value={formData.hour_price}
+              value={parseInt(formData.hour_price.toString()).toLocaleString('vi-VN')}
               onChange={(e) => setFormData({ ...formData, hour_price: parseInt(e.target.value) })}
               fullWidth
             />
-          </Box>
+            </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Hủy</Button>
