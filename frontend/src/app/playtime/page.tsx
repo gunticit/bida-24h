@@ -554,7 +554,9 @@ export default function PlaytimePage() {
       
       printWindow.document.write(invoiceContent);
       printWindow.document.close();
+      printWindow.focus();
       printWindow.print();
+      printWindow.close();
     }
   };
 
