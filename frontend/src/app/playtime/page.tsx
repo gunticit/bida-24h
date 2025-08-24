@@ -496,10 +496,10 @@ export default function PlaytimePage() {
         <body>
           <div class="header">
             <h1>24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:13px;">Session #${invoiceData.session?.id}</p>
-            <p style="font-size:13px;">Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
-            <p style="font-size:13px;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
-            <p style="font-size:13px;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
+            <p style="font-size:13px; margin: 3px 0;">Session #${invoiceData.session?.id}</p>
+            <p style="font-size:13px; margin: 3px 0;">Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
+            <p style="font-size:13px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
+            <p style="font-size:13px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
           </div>
           
           <h3 style="font-size:14px; margin:4px 0;">Thông tin giờ chơi:</h3>
@@ -531,22 +531,22 @@ export default function PlaytimePage() {
               <tr>
                 <td>${menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
                 <td>${order.quantity}</td>
-                <td>${parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
-                <td>${parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
+                <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
+                <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
               </tr>
             `).join('')}
           </table>
           ` : ''}
           
           <div class="total">
-            <p style="font-size:15px;">Tiền bàn: ${parseFloat(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
-            ${invoiceData.orders.length > 0 ? `<p>Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
-            <p style="font-size:15px; font-weight: bold;"><strong>TỔNG: ${parseFloat(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
+            <p style="font-size:15px; margin: 3px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
+            ${invoiceData.orders.length > 0 ? `<p style="font-size:15px;; margin: 3px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
+            <p style="font-size:16px; font-weight: bold;; margin: 3px 0;"><strong>TỔNG: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
           </div>
           
           <div class="footer">
-            <p style="font-size:13px;">Cảm ơn quý khách!</p>
-            <p style="font-size:13px;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
+            <p style="font-size:13px; margin: 3px 0;">Cảm ơn quý khách!</p>
+            <p style="font-size:13px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
           </div>
         </body>
         </html>
