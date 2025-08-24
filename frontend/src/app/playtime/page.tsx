@@ -431,74 +431,82 @@ export default function PlaytimePage() {
   const handlePrintInvoice = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      let playTime = '';
-      if (invoiceData.session?.start_time && invoiceData.session?.end_time) {
-        const start = new Date(invoiceData.session.start_time);
-        const end = new Date(invoiceData.session.end_time);
-        const diffMs = end.getTime() - start.getTime();
-        const diffMin = Math.floor(diffMs / 60000);
-        const hours = Math.floor(diffMin / 60);
-        const mins = diffMin % 60;
-        playTime = `${hours > 0 ? hours + ' giờ ' : ''}${mins} phút`;
-      } else {
-        playTime = 'Đang chơi';
-      }
-
-      const tableName = tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A';
-      const startTime = invoiceData.session?.start_time ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : '';
-      const endTime = invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi';
-      const hourPrice = invoiceData.session?.hour_price?.toLocaleString('vi-VN') || '';
       const invoiceContent = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>HÓA ĐƠN BÀN ${tableName}</title>
+          <title>Hóa đơn - Session #${invoiceData.session?.id}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 0; width: 80mm; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .table { width: 100%; font-size: 13px; margin-top: 8px; margin-bottom: 8px; }
-            .table th, .table td { padding: 2px 4px; text-align: left; }
-            .table th { font-weight: bold; }
-            .right { text-align: right; }
-            .footer { text-align: center; font-size: 12px; color: #666; margin-top: 10px; }
-            @media print { body { width: 80mm; } }
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .table th { background-color: #f2f2f2; }
+            .total { font-weight: bold; font-size: 18px; margin-top: 20px; padding: 10px; background-color: #f9f9f9; }
+            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
           </style>
         </head>
         <body>
-          <div class="center bold">BILLIARDS CLUB NEW VIP</div>
-          <div class="center">58 Văn Đồn, Nại Hiên Đông<br/>01.679.679.979</div>
-          <div class="center bold" style="margin-top:8px;">HÓA ĐƠN BÀN ${tableName}</div>
-          <div>Giờ bắt đầu: ${startTime}</div>
-          <div>Giờ kết thúc: ${endTime}</div>
-          <div>Thời gian sử dụng: ${playTime}</div>
-          <table class="table">
-            <thead>
+          <div class="header">
+            <h1>HÓA ĐƠN 24H BILLIARDS & COFFEE</h1>
+            <p>Session #${invoiceData.session?.id}</p>
+            <p>Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
+          </div>
+          
+          <h3>Thông tin giờ chơi:</h3>
+          <div class="table">
+            <table>
               <tr>
-                <th>Tên</th>
-                <th>SL</th>
-                <th>Giá</th>
-                <th>Tổng</th>
+                <th>Bàn</th>
+                <th>Thời gian bắt đầu</th>
+                <th>Thời gian kết thúc</th>
+                <th>Giá/giờ</th>
+                <th>Thời gian chơi</th>
+                <th>Tiền bàn</th>
               </tr>
-            </thead>
-            <tbody>
-              ${invoiceData.orders.map(order => {
-                const menu = menus.find(menu => menu.id === order.menu_id);
-                return `
-                  <tr>
-                    <td>${menu?.name || `Món ${order.menu_id}`}</td>
-                    <td class="center">${order.quantity}</td>
-                    <td class="right">${parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')}</td>
-                    <td class="right">${parseFloat(order.total_price.toString()).toLocaleString('vi-VN')}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-          <div class="right">Tổng dịch vụ: ${parseFloat(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')}</div>
-          <div class="right">Tổng tiền giờ: ${parseFloat(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')}</div>
-          <div class="right bold" style="font-size:18px;">Thanh toán<br/>${parseFloat(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')}</div>
-          <div class="footer">Giá giờ: ${hourPrice} VNĐ</div>
+              <tr>
+                <td>${tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A'}</td>
+                <td>${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                <td>${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</td>
+                <td>${invoiceData.session?.hour_price?.toLocaleString('vi-VN')} VNĐ</td>
+                <td>${invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}</td>
+                <td>${invoiceData.totalTableMoney.toLocaleString('vi-VN')} VNĐ</td>
+              </tr>
+            </table>
+          </div>
+          
+          ${invoiceData.orders.length > 0 ? `
+          <h3>Thực đơn đã đặt:</h3>
+          <div class="table">
+            <table>
+              <tr>
+                <th>Món ăn</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+              </tr>
+              ${invoiceData.orders.map(order => `
+                <tr>
+                  <td>${menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
+                  <td>${order.quantity}</td>
+                  <td>${parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
+                  <td>${parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+          ` : ''}
+          
+          <div class="total">
+            <p>Tiền bàn: ${parseFloat(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
+            ${invoiceData.orders.length > 0 ? `<p>Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
+            <p><strong>TỔNG CỘNG: ${parseFloat(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
+          </div>
+          
+          <div class="footer">
+            <p>Cảm ơn quý khách đã sử dụng dịch vụ!</p>
+            <p>In ngày: ${new Date().toLocaleString('vi-VN')}</p>
+          </div>
         </body>
         </html>
       `;
