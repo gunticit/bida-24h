@@ -888,6 +888,18 @@ export default function PlaytimePage() {
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
+            <TextField 
+              label="Thời gian bắt đầu" 
+              value={
+                formData.start_time ? new Date(formData.start_time).toLocaleString('vi-VN') : ''
+              } 
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  start_time: e.target.value,
+                })
+              }
+            />
             <TextField
               label="Giá/giờ (VNĐ)"
               type="number"
