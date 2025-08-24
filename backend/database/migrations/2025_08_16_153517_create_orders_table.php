@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('session_id')->constrained('game_sessions')->onDelete('cascade');
             $table->foreignId('menu_id')->constrained('menus')->onDelete('cascade');
             $table->integer('quantity'); // Số lượng
-            $table->decimal('unit_price', 10, 2); // Đơn giá
-            $table->decimal('total_price', 10, 2); // Tổng tiền
+            $table->decimal('unit_price', 10, 0); // Đơn giá
+            $table->decimal('total_price', 10, 0); // Tổng tiền
             $table->timestamps();
         });
     }

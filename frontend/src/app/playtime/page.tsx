@@ -865,40 +865,23 @@ export default function PlaytimePage() {
               label="Thời gian bắt đầu (GMT+7)"
               type="datetime-local"
               value={(() => {
-                if (!formData.start_time) return "";
-
-                const date = new Date(formData.start_time);
-
-                // Tính lại theo HCM timezone
-                const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-                const hcmDate = new Date(utc + 7 * 60 * 60000);
-
-                // Format thủ công yyyy-MM-ddTHH:mm
-                const pad = (n: number) => String(n).padStart(2, "0");
-                const formatted = `${hcmDate.getFullYear()}-${pad(hcmDate.getMonth() + 1)}-${pad(hcmDate.getDate())}T${pad(hcmDate.getHours())}:${pad(hcmDate.getMinutes())}`;
-
-                return formatted;
+              if (!formData.start_time) return "";
+              const date = new Date(formData.start_time + 'Z');
+              // Chuyển về múi giờ HCM
+              const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+              const hcmDate = new Date(utc + 7 * 60 * 60000);
+              // Định dạng yyyy-MM-ddTHH:mm
+              const pad = (n: number) => String(n).padStart(2, "0");
+              return `${hcmDate.getFullYear()}-${pad(hcmDate.getMonth() + 1)}-${pad(hcmDate.getDate())}T${pad(hcmDate.getHours())}:${pad(hcmDate.getMinutes())}`;
               })()}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  start_time: e.target.value, // Lưu lại giá trị yyyy-MM-ddTHH:mm
-                })
+              setFormData({
+                ...formData,
+                start_time: e.target.value,
+              })
               }
               fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField 
-              label="Thời gian bắt đầu" 
-              value={
-                formData.start_time ? new Date(formData.start_time).toLocaleString('vi-VN') : ''
-              } 
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  start_time: e.target.value,
-                })
-              }
+              slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               label="Giá/giờ (VNĐ)"

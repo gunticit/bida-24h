@@ -392,13 +392,19 @@ export default function TableSettingPage() {
             <TextField
               label="Giá theo giờ (VNĐ)"
               type="number"
-              value={formData.price_per_hour}
-              onChange={(e) => handleInputChange('price_per_hour', parseFloat(e.target.value))}
-              fullWidth
-              required
+              value={
+                typeof formData.price_per_hour === 'number'
+                  ? parseInt(formData.price_per_hour.toString()).toString()
+                  : formData.price_per_hour
+                }
+                onChange={(e) =>
+                handleInputChange('price_per_hour', parseInt(e.target.value))
+                }
+                fullWidth
+                required
               inputProps={{ min: 0, step: 10000 }}
             />
-          </Box>
+            </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>

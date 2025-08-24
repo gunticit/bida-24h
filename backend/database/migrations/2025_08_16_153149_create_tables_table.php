@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Tên bàn: Bàn 1, Bàn 2,...
             $table->enum('status', ['available', 'playing', 'maintenance'])->default('available');
-            $table->decimal('price_per_hour', 10, 2); // Giá theo giờ
+            $table->decimal('price_per_hour', 10, 0); // Giá theo giờ
             $table->timestamps();
         });
     }
