@@ -512,7 +512,7 @@ export default function PlaytimePage() {
             </tr>
             <tr>
               <td>${tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A'}</td>
-              <td>${invoiceData.session?.hour_price?.toLocaleString('vi-VN')} VNĐ</td>
+              <td>${parseInt(invoiceData?.session?.hour_price?.toString() || '0').toLocaleString('vi-VN')} VNĐ</td>
               <td>${invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}</td>
               <td>${invoiceData.totalTableMoney.toLocaleString('vi-VN')} VNĐ</td>
             </tr>
@@ -567,9 +567,13 @@ export default function PlaytimePage() {
     const startTime = new Date(session.start_time);
     const endTime = new Date(session.end_time);
     const diffTime = Math.abs(endTime.getTime() - startTime.getTime());
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    
-    return `${diffHours} giờ`;
+    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    if (hours > 0) {
+      return `${hours} giờ ${minutes} phút`;
+    }
+    return `${minutes} phút`;
   };
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info') => {
