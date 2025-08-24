@@ -243,7 +243,8 @@ export default function PlaytimePage() {
     try {
       const updateData: UpdateSessionData = { status: newStatus };
       if (newStatus === 'finished' && !session.end_time) {
-        updateData.end_time = new Date().toISOString();
+        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+        updateData.end_time = now.toISOString();
       }
       await apiService.updateSession(session.id, updateData);
       showSnackbar('Cập nhật trạng thái thành công', 'success');
