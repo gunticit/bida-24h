@@ -838,58 +838,67 @@ export default function PlaytimePage() {
         </DialogTitle>
         <DialogContent>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <FormControl fullWidth>
+              <FormControl fullWidth>
               <InputLabel>Chọn bàn</InputLabel>
               <Select
-              value={formData.table_id}
-              label="Chọn bàn"
-              onChange={(e) => {
+                value={formData.table_id}
+                label="Chọn bàn"
+                onChange={(e) => {
                 const tableId = e.target.value as number;
                 const selectedTable = tables.find(t => t.id === tableId);
                 setFormData({ 
-                ...formData, 
-                table_id: tableId,
-                hour_price: selectedTable?.price_per_hour || formData.hour_price
+                  ...formData, 
+                  table_id: tableId,
+                  hour_price: selectedTable?.price_per_hour || formData.hour_price
                 });
-              }}
+                }}
               >
-              {tables.map((table) => (
+                {tables.map((table) => (
                 <MenuItem key={table.id} value={table.id}>
-                {table.name} - {table.status === 'available' ? 'Sẵn sàng' : 
-                         table.status === 'playing' ? 'Đang chơi' : 'Bảo trì'}
+                  {table.name} - {table.status === 'available' ? 'Sẵn sàng' : 
+                  table.status === 'playing' ? 'Đang chơi' : 'Bảo trì'}
                 </MenuItem>
-              ))}
+                ))}
               </Select>
-            </FormControl>
-            <TextField
+              </FormControl>
+              <TextField
               label="Thời gian bắt đầu (GMT+7)"
               type="datetime-local"
-              value={(() => {
-              if (!formData.start_time) return "";
-              const date = new Date(formData.start_time + 'Z');
-              // Chuyển về múi giờ HCM
-              const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-              const hcmDate = new Date(utc + 7 * 60 * 60000);
-              // Định dạng yyyy-MM-ddTHH:mm
-              const pad = (n: number) => String(n).padStart(2, "0");
-              return `${hcmDate.getFullYear()}-${pad(hcmDate.getMonth() + 1)}-${pad(hcmDate.getDate())}T${pad(hcmDate.getHours())}:${pad(hcmDate.getMinutes())}`;
+              value={formData.start_time || (() => {
+                const date = new Date();
+                const options: Intl.DateTimeFormatOptions = {
+                timeZone: 'Asia/Ho_Chi_Minh',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                };
+                const parts = new Intl.DateTimeFormat('en-CA', options).formatToParts(date);
+                const year = parts.find(part => part.type === 'year')?.value;
+                const month = parts.find(part => part.type === 'month')?.value;
+                const day = parts.find(part => part.type === 'day')?.value;
+                const hour = parts.find(part => part.type === 'hour')?.value;
+                const minute = parts.find(part => part.type === 'minute')?.value;
+                return `${year}-${month}-${day}T${hour}:${minute}`;
               })()}
               onChange={(e) =>
-              setFormData({
+                setFormData({
                 ...formData,
                 start_time: e.target.value,
-              })
+                })
               }
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
-            />
-            <TextField
+              />
+              <TextField
               label="Giá/giờ (VNĐ)"
               type="number"
               value={parseInt(formData.hour_price.toString()).toLocaleString('vi-VN')}
               onChange={(e) => setFormData({ ...formData, hour_price: parseInt(e.target.value) })}
               fullWidth
-            />
+              />
             </Box>
         </DialogContent>
         <DialogActions>
