@@ -54,6 +54,12 @@ import {
   Print as PrintIcon,
 } from '@mui/icons-material';
 import { apiService, User, Session, CreateSessionData, UpdateSessionData, Table, MenuItem as MenuItemType, Order } from '@/lib/api';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";       
+import timezone from "dayjs/plugin/timezone"; 
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default function PlaytimePage() {
   const router = useRouter();
@@ -66,7 +72,7 @@ export default function PlaytimePage() {
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [formData, setFormData] = useState<CreateSessionData>({
     table_id: 1,
-    start_time: new Date().toISOString().slice(0, 16),
+    start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
     hour_price: 50000,
   });
   const [menus, setMenus] = useState<MenuItemType[]>([]);
@@ -185,14 +191,14 @@ export default function PlaytimePage() {
       setEditingSession(session);
       setFormData({
         table_id: session.table_id,
-        start_time: session.start_time.slice(0, 16),
+        start_time: dayjs(session.start_time).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
         hour_price: session.hour_price,
       });
     } else {
       setEditingSession(null);
       setFormData({
         table_id: tables.length > 0 ? tables[0].id : 1,
-        start_time: new Date().toISOString().slice(0, 16),
+        start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
         hour_price: tables.length > 0 ? tables[0].price_per_hour : 50000,
       });
     }
@@ -204,7 +210,7 @@ export default function PlaytimePage() {
     setEditingSession(null);
     setFormData({
       table_id: tables.length > 0 ? tables[0].id : 1,
-      start_time: new Date().toISOString().slice(0, 16),
+      start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
       hour_price: tables.length > 0 ? tables[0].price_per_hour : 50000,
     });
   };
@@ -243,8 +249,7 @@ export default function PlaytimePage() {
     try {
       const updateData: UpdateSessionData = { status: newStatus };
       if (newStatus === 'finished' && !session.end_time) {
-        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
-        updateData.end_time = now.toISOString();
+        updateData.end_time = dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm');
       }
       await apiService.updateSession(session.id, updateData);
       showSnackbar('Cập nhật trạng thái thành công', 'success');
@@ -296,8 +301,8 @@ export default function PlaytimePage() {
       });
 
       // Tính toán tổng tiền đồ ăn mới
-      const orderTotal = selectedMenu.price * foodFormData.quantity;
-      const currentFoodTotal = selectedSession.total_money_food || 0;
+      const orderTotal = parseInt(selectedMenu?.price?.toString() || '0') * parseInt(foodFormData?.quantity?.toString() || '0');
+      const currentFoodTotal = parseInt(selectedSession?.total_money_food?.toString() || '0');
       const newFoodTotal = currentFoodTotal + orderTotal;
       
       // Tính tổng tiền mới (tiền bàn + tiền đồ ăn)
@@ -310,7 +315,7 @@ export default function PlaytimePage() {
         total_money: newTotalMoney,
       });
 
-      showSnackbar(`Thêm món ăn thành công! Tổng tiền đồ ăn: ${parseFloat(newFoodTotal.toString()).toLocaleString('vi-VN')} VNĐ`, 'success');
+      showSnackbar(`Thêm món ăn thành công! Tổng tiền đồ ăn: ${newFoodTotal.toLocaleString('vi-VN')} VNĐ`, 'success');
       handleCloseFoodDialog();
       loadSessions(); // Reload để cập nhật tổng tiền
     } catch (error) {
@@ -506,7 +511,7 @@ export default function PlaytimePage() {
           
           <div class="footer">
             <p>Cảm ơn quý khách đã sử dụng dịch vụ!</p>
-            <p>In ngày: ${new Date().toLocaleString('vi-VN')}</p>
+            <p>In ngày: ${dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm')}</p>
           </div>
         </body>
         </html>
@@ -863,35 +868,30 @@ export default function PlaytimePage() {
               </Select>
               </FormControl>
               <TextField
-              label="Thời gian bắt đầu (GMT+7)"
+              label={"Thời gian bắt đầu (GMT+7)" + formData.start_time}
               type="datetime-local"
-              value={formData.start_time || (() => {
-                const date = new Date();
-                const options: Intl.DateTimeFormatOptions = {
-                timeZone: 'Asia/Ho_Chi_Minh',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-                };
-                const parts = new Intl.DateTimeFormat('en-CA', options).formatToParts(date);
-                const year = parts.find(part => part.type === 'year')?.value;
-                const month = parts.find(part => part.type === 'month')?.value;
-                const day = parts.find(part => part.type === 'day')?.value;
-                const hour = parts.find(part => part.type === 'hour')?.value;
-                const minute = parts.find(part => part.type === 'minute')?.value;
-                return `${year}-${month}-${day}T${hour}:${minute}`;
-              })()}
-              onChange={(e) =>
+              value={
+                formData.start_time
+                ? (() => {
+                  // Nếu là dạng ISO, chuyển sang yyyy-MM-ddTHH:mm
+                  const d = new Date(formData.start_time);
+                  const year = d.getFullYear();
+                  const month = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  const hour = String(d.getHours()).padStart(2, '0');
+                  const minute = String(d.getMinutes()).padStart(2, '0');
+                  return `${year}-${month}-${day}T${hour}:${minute}`;
+                  })()
+                : ''
+              }
+              onChange={e =>
                 setFormData({
                 ...formData,
                 start_time: e.target.value,
                 })
               }
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
+              InputLabelProps={{ shrink: true }}
               />
               <TextField
               label="Giá/giờ (VNĐ)"
@@ -926,7 +926,7 @@ export default function PlaytimePage() {
               >
                 {menus.map((menu) => (
                   <MenuItem key={menu.id} value={menu.id}>
-                    {menu.name} - {menu.price.toLocaleString('vi-VN')} VNĐ
+                    {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} VNĐ
                   </MenuItem>
                 ))}
               </Select>
