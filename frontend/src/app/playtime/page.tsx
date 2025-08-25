@@ -468,7 +468,7 @@ export default function PlaytimePage() {
               width: 100%;
               border-collapse: collapse;
               margin: 6px 0;
-              font-size: 12px;
+              font-size: 14px;
             }
             .table th, .table td {
               border: 1px solid #000;
@@ -496,11 +496,11 @@ export default function PlaytimePage() {
         </head>
         <body>
           <div class="header">
-            <h1 style="font-size:18px;">24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:14px; margin: 3px 0; font-style: italic;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
-            <p style="font-size:14px; margin: 3px 0; font-style: italic;">Hotline: 096 718 13 03</p>
-            <p style="font-size:13px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
-            <p style="font-size:13px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
+            <h1 style="font-size:20px;">24H BILLIARDS & COFFEE</h1>
+            <p style="font-size:15px; margin: 3px 0; font-style: italic;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
+            <p style="font-size:15px; margin: 3px 0; font-style: italic;">Hotline: 096 718 13 03</p>
+            <p style="font-size:14px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
+            <p style="font-size:14px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
           </div>
           
           <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
@@ -542,7 +542,7 @@ export default function PlaytimePage() {
           <div class="total">
             <h3 style="font-size:15px; margin:4px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</h3>
             ${invoiceData.orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</h3>` : ''}
-            <h2 style="font-size:15px; margin:4px 0;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</h2>
+            <h2 style="font-size:18px; margin:4px 0;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</h2>
           </div>
           
           <div class="footer">
