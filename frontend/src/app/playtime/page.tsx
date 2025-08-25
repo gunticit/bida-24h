@@ -315,7 +315,7 @@ export default function PlaytimePage() {
         total_money: newTotalMoney,
       });
 
-      showSnackbar(`Thêm món ăn thành công! Tổng tiền đồ ăn: ${newFoodTotal.toLocaleString('vi-VN')} VNĐ`, 'success');
+      showSnackbar(`Thêm món ăn thành công! Tổng tiền đồ ăn: ${newFoodTotal.toLocaleString('vi-VN')} đ`, 'success');
       handleCloseFoodDialog();
       loadSessions(); // Reload để cập nhật tổng tiền
     } catch (error) {
@@ -497,8 +497,8 @@ export default function PlaytimePage() {
         <body>
           <div class="header">
             <h1 style="font-size:20px;">24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:15px; margin: 3px 0; font-style: italic;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
-            <p style="font-size:15px; margin: 3px 0; font-style: italic;">Hotline: 096 718 13 03</p>
+            <p style="font-size:15px; margin: 3px 0;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
+            <p style="font-size:15px; margin: 3px 0;">Hotline: 096 718 13 03</p>
             <p style="font-size:14px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
             <p style="font-size:14px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
           </div>
@@ -513,9 +513,9 @@ export default function PlaytimePage() {
             </tr>
             <tr>
               <td>${tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A'}</td>
-              <td>${parseInt(invoiceData?.session?.hour_price?.toString() || '0').toLocaleString('vi-VN')} VNĐ</td>
+              <td>${parseInt(invoiceData?.session?.hour_price?.toString() || '0').toLocaleString('vi-VN')} đ</td>
               <td>${invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}</td>
-              <td>${invoiceData.totalTableMoney.toLocaleString('vi-VN')} VNĐ</td>
+              <td>${invoiceData.totalTableMoney.toLocaleString('vi-VN')} đ</td>
             </tr>
           </table>
           
@@ -532,17 +532,17 @@ export default function PlaytimePage() {
               <tr>
                 <td>${menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
                 <td>${order.quantity}</td>
-                <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
-                <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</td>
+                <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} đ</td>
+                <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} đ</td>
               </tr>
             `).join('')}
           </table>
           ` : ''}
           
           <div class="total">
-            <h3 style="font-size:15px; margin:4px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</h3>
-            ${invoiceData.orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</h3>` : ''}
-            <h2 style="font-size:18px; margin:4px 0;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</h2>
+            <h3 style="font-size:15px; margin:4px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ</h3>
+            ${invoiceData.orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} đ</h3>` : ''}
+            <h1 style="font-size:20px; margin:4px 0;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ</h1>
           </div>
           
           <div class="footer">
@@ -616,7 +616,7 @@ export default function PlaytimePage() {
   };
 
   const formatMoney = (amount: number | null) => {
-    if (amount === null) return '0 VNĐ';
+    if (amount === null) return '0 đ';
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
@@ -936,7 +936,7 @@ export default function PlaytimePage() {
               InputLabelProps={{ shrink: true }}
               />
               <TextField
-              label="Giá/giờ (VNĐ)"
+              label="Giá/giờ (đ)"
               type="number"
               value={parseInt(formData.hour_price.toString()).toLocaleString('vi-VN')}
               onChange={(e) => setFormData({ ...formData, hour_price: parseInt(e.target.value) })}
@@ -968,7 +968,7 @@ export default function PlaytimePage() {
               >
                 {menus.map((menu) => (
                   <MenuItem key={menu.id} value={menu.id}>
-                    {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} VNĐ
+                    {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
                   </MenuItem>
                 ))}
               </Select>
@@ -987,7 +987,7 @@ export default function PlaytimePage() {
               <Typography variant="body2" color="text.secondary">
                 Tổng tiền: {(() => {
                   const selectedMenu = menus.find(menu => menu.id === foodFormData.menu_id);
-                  return selectedMenu ? (selectedMenu.price * foodFormData.quantity).toLocaleString('vi-VN') + ' VNĐ' : '0 VNĐ';
+                  return selectedMenu ? (selectedMenu.price * foodFormData.quantity).toLocaleString('vi-VN') + ' đ' : '0 đ';
                 })()}
               </Typography>
             )}
@@ -1036,8 +1036,8 @@ export default function PlaytimePage() {
                             {menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}
                           </TableCell>
                           <TableCell>{order.quantity}</TableCell>
-                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</TableCell>
-                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</TableCell>
+                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
+                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
                           <TableCell>{new Date(order.created_at).toLocaleString('vi-VN')}</TableCell>
                           <TableCell>
                             <MuiIconButton
@@ -1062,7 +1062,7 @@ export default function PlaytimePage() {
                   Tổng kết
                 </Typography>
                 <Typography variant="body1">
-                  Tổng tiền đồ ăn: <strong>{sessionOrders.reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0).toLocaleString('vi-VN')} VNĐ</strong>
+                  Tổng tiền đồ ăn: <strong>{sessionOrders.reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0).toLocaleString('vi-VN')} đ</strong>
                 </Typography>
                 <Typography variant="body1">
                   Số món đã đặt: <strong>{sessionOrders.length}</strong>
@@ -1076,7 +1076,7 @@ export default function PlaytimePage() {
             onClick={async () => {
               if (selectedSession) {
                 const newTotal = await recalculateFoodTotal(selectedSession.id);
-                showSnackbar(`Đã tính lại tổng tiền đồ ăn: ${parseFloat(newTotal.toString()).toLocaleString('vi-VN')} VNĐ`, 'success');
+                showSnackbar(`Đã tính lại tổng tiền đồ ăn: ${parseFloat(newTotal.toString()).toLocaleString('vi-VN')} đ`, 'success');
                 loadSessions(); // Reload để cập nhật dữ liệu
               }
             }}
@@ -1110,13 +1110,13 @@ export default function PlaytimePage() {
                 <strong>Thời gian kết thúc:</strong> {invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}
               </Typography>
               <Typography variant="body1">
-                <strong>Giá/giờ:</strong> {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString('vi-VN')} VNĐ
+                <strong>Giá/giờ:</strong> {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString('vi-VN')} đ
               </Typography>
               <Typography variant="body1">
                 <strong>Thời gian chơi:</strong> {invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}
               </Typography>
               <Typography variant="body1">
-                <strong>Tiền bàn:</strong> {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ
+                <strong>Tiền bàn:</strong> {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
               </Typography>
             </Box>
 
@@ -1142,8 +1142,8 @@ export default function PlaytimePage() {
                             {menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}
                           </TableCell>
                           <TableCell>{order.quantity}</TableCell>
-                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} VNĐ</TableCell>
-                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} VNĐ</TableCell>
+                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
+                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -1157,15 +1157,15 @@ export default function PlaytimePage() {
                 Tổng kết
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                Tiền bàn: <strong>{parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong>
+                Tiền bàn: <strong>{parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ</strong>
               </Typography>
               {invoiceData.orders.length > 0 && (
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  Tiền đồ ăn: <strong>{parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong>
+                  Tiền đồ ăn: <strong>{parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ</strong>
                 </Typography>
               )}
               <Typography variant="h6" sx={{ color: 'primary.main' }}>
-                TỔNG CỘNG: <strong>{parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong>
+                TỔNG CỘNG: <strong>{parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ</strong>
               </Typography>
             </Box>
           </Box>
