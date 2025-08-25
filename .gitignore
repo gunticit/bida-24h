@@ -71,6 +71,7 @@ backend/storage/framework/cache/*
 backend/storage/framework/sessions/*
 backend/storage/framework/views/*
 backend/bootstrap/cache/*
+backend/.env
 
 # Next.js specific
 frontend/.next/

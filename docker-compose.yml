@@ -8,8 +8,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: 24h_billiard
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel123
+      MYSQL_USER: backend_usr
+      MYSQL_PASSWORD: "@#Lrv@2025"
     ports:
       - "3306:3306"
     volumes:
@@ -25,8 +25,8 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
-      PMA_USER: laravel
-      PMA_PASSWORD: laravel123
+      PMA_USER: backend_usr
+      PMA_PASSWORD: "@#Lrv@2025"
     ports:
       - "8080:80"
     depends_on:
