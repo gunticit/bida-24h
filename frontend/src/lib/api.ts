@@ -34,7 +34,7 @@ export interface Session {
   id: number;
   table_id: number;
   start_time: string;
-  end_time: string | null;
+  end_time: string;
   total_time: number | null;
   hour_price: number;
   total_money_table: number | null;

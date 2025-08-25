@@ -449,7 +449,7 @@ export default function PlaytimePage() {
             }
             body {
               font-family: Arial, sans-serif;
-              font-size: 12px;
+              font-size: 15px;
               margin: 0;
               padding: 4px;
               width: 80mm; /* khổ giấy */
@@ -461,7 +461,7 @@ export default function PlaytimePage() {
               margin-bottom: 8px;
             }
             .header h1 {
-              font-size: 14px;
+              font-size: 15px;
               margin: 0;
             }
             .table {
@@ -481,7 +481,7 @@ export default function PlaytimePage() {
             }
             .total {
               font-weight: bold;
-              font-size: 13px;
+              font-size: 15px;
               margin-top: 6px;
               padding: 4px 0;
               border-top: 1px dashed #000;
@@ -495,14 +495,18 @@ export default function PlaytimePage() {
         </head>
         <body>
           <div class="header">
-            <h1>24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:13px; margin: 3px 0;">Session #${invoiceData.session?.id}</p>
-            <p style="font-size:13px; margin: 3px 0;">Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
-            <p style="font-size:13px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
-            <p style="font-size:13px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
+            <h1 style="font-size:18px;">24H BILLIARDS & COFFEE</h1>
+            <p style="font-size:14px; margin: 3px 0; font-style: italic;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
+            <p style="font-size:14px; margin: 3px 0; font-style: italic;">Hotline: 096 718 13 03</p>
+            <p style="font-size:15px; margin: 3px 0;">Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
+            <p style="font-size:15px; margin: 3px 0;">
+              Thời gian chơi: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+               - 
+              ${invoiceData.session ? new Date(invoiceData.session.end_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+            </p>
           </div>
           
-          <h3 style="font-size:14px; margin:4px 0;">Thông tin giờ chơi:</h3>
+          <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
           <table class="table">
             <tr>
               <th>Bàn</th>
@@ -519,7 +523,7 @@ export default function PlaytimePage() {
           </table>
           
           ${invoiceData.orders.length > 0 ? `
-          <h3 style="font-size:14px; margin:4px 0;">Thực đơn:</h3>
+          <h3 style="font-size:15px; margin:4px 0;">Thực đơn:</h3>
           <table class="table">
             <tr>
               <th>Món</th>
@@ -545,8 +549,8 @@ export default function PlaytimePage() {
           </div>
           
           <div class="footer">
-            <p style="font-size:13px; margin: 3px 0;">Cảm ơn quý khách!</p>
-            <p style="font-size:13px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
+            <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách đã luôn ủng hộ <br/> 24h Billiards Coffee!</p>
+            <p style="font-size:15px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
           </div>
         </body>
         </html>
