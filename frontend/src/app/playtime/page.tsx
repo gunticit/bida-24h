@@ -498,12 +498,8 @@ export default function PlaytimePage() {
             <h1 style="font-size:18px;">24H BILLIARDS & COFFEE</h1>
             <p style="font-size:14px; margin: 3px 0; font-style: italic;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
             <p style="font-size:14px; margin: 3px 0; font-style: italic;">Hotline: 096 718 13 03</p>
-            <p style="font-size:15px; margin: 3px 0;">Ngày: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleDateString('vi-VN') : ''}</p>
-            <p style="font-size:15px; margin: 3px 0;">
-              Thời gian chơi: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
-               - 
-              ${invoiceData.session ? new Date(invoiceData.session.end_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
-            </p>
+            <p style="font-size:13px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
+            <p style="font-size:13px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
           </div>
           
           <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
