@@ -485,6 +485,7 @@ export default function PlaytimePage() {
               margin-top: 6px;
               padding: 4px 0;
               border-top: 1px dashed #000;
+              text-right: right;
             }
             .footer {
               margin-top: 10px;
@@ -539,9 +540,9 @@ export default function PlaytimePage() {
           ` : ''}
           
           <div class="total">
-            <p style="font-size:15px; margin: 3px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
-            ${invoiceData.orders.length > 0 ? `<p style="font-size:15px;; margin: 3px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
-            <p style="font-size:16px; font-weight: bold;; margin: 3px 0;"><strong>TỔNG: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
+            <p style="font-size:15px; margin: 3px 0; text-align: right;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
+            ${invoiceData.orders.length > 0 ? `<p style="font-size:15px; margin: 3px 0; text-align: right;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
+            <p style="font-size:18px; font-weight: bold; margin: 3px 0; text-align: right;"><strong>TỔNG: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
           </div>
           
           <div class="footer">
