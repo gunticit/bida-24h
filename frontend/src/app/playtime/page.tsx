@@ -540,9 +540,9 @@ export default function PlaytimePage() {
           ` : ''}
           
           <div class="total">
-            <p style="font-size:15px; margin: 3px 0; text-align: right;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</p>
-            ${invoiceData.orders.length > 0 ? `<p style="font-size:15px; margin: 3px 0; text-align: right;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</p>` : ''}
-            <p style="font-size:18px; font-weight: bold; margin: 3px 0; text-align: right;"><strong>TỔNG: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</strong></p>
+            <h3 style="font-size:15px; margin:4px 0;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} VNĐ</h3>
+            ${invoiceData.orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} VNĐ</h3>` : ''}
+            <h2 style="font-size:15px; margin:4px 0;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} VNĐ</h2>
           </div>
           
           <div class="footer">
