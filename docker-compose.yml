@@ -6,10 +6,10 @@ services:
     container_name: 24h_billiard_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "@#RootLrv@2025"
+      MYSQL_ROOT_PASSWORD: RootLrv@#@2025
       MYSQL_DATABASE: 24h_billiard
       MYSQL_USER: backend_usr
-      MYSQL_PASSWORD: "@#Lrv@2025"
+      MYSQL_PASSWORD: Lrv@#@2025
     ports:
       - "3306:3306"
     volumes:
