@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: 24h_billiard_backend
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/backend
+    working_dir: /var/www/backend
+    ports:
+      - "8001:8000"
+    networks:
+        - 24h_network
   mysql:
     image: mysql:8.0
     container_name: 24h_billiard_mysql
