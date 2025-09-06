@@ -10,14 +10,6 @@ import {
   CardContent,
   Grid,
   Button,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Divider,
   Table as MuiTable,
   TableBody,
   TableCell,
@@ -33,16 +25,13 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
   Chip,
   IconButton as MuiIconButton,
   Alert,
   Snackbar,
 } from '@mui/material';
 import {
-  Dashboard as DashboardIcon,
-  Settings as SettingsIcon,
-  Logout as LogoutIcon,
-  Person as PersonIcon,
   CalendarToday as CalendarIcon,
   Add as AddIcon,
   Edit as EditIcon,
@@ -54,6 +43,7 @@ import {
   Print as PrintIcon,
 } from '@mui/icons-material';
 import { apiService, User, Session, CreateSessionData, UpdateSessionData, Table, MenuItem as MenuItemType, Order } from '@/lib/api';
+import { AppBar } from '@/components/ui';
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";       
 import timezone from "dayjs/plugin/timezone"; 
@@ -65,7 +55,6 @@ export default function PlaytimePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -167,14 +156,6 @@ export default function PlaytimePage() {
       console.error('Failed to load menus:', error);
       showSnackbar('Không thể tải danh sách thực đơn', 'error');
     }
-  };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
   };
 
   const handleLogout = async () => {
@@ -634,55 +615,12 @@ export default function PlaytimePage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          <CalendarIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Quản lý Giờ chơi
-          </Typography>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            onClick={handleMenuOpen}
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {user?.name?.charAt(0) || 'U'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => router.push('/dashboard')}>
-              <ListItemIcon>
-                <DashboardIcon fontSize="small" />
-              </ListItemIcon>
-              Dashboard
-            </MenuItem>
-            <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              Hồ sơ
-            </MenuItem>
-            <MenuItem onClick={() => router.push('/setting')}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              Cài đặt
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Đăng xuất
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <AppBar 
+        title="Quản lý Giờ chơi"
+        user={user}
+        onLogout={handleLogout}
+        icon={<CalendarIcon />}
+      />
 
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
