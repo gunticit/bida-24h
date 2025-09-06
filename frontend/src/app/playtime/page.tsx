@@ -908,6 +908,15 @@ export default function PlaytimePage() {
               >
                 {menus.map((menu) => (
                   <MenuItem key={menu.id} value={menu.id}>
+                    <span style={{ fontWeight: 'bold', color: 'red' }}>
+                      {
+                        menu.category === 'food' ? 'Đồ ăn' :
+                        menu.category === 'drink' ? 'Đồ uống' :
+                        menu.category === 'tobacco' ? 'Thuốc lá' :
+                        menu.category === 'takeaway' ? 'Mang về' :
+                        'Không xác định'
+                      }
+                    </span>
                     {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
                   </MenuItem>
                 ))}
