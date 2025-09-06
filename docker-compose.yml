@@ -12,6 +12,17 @@ services:
     working_dir: /var/www/backend
     ports:
       - "8001:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=24h_billiard
+      - DB_USERNAME=backend_usr
+      - DB_PASSWORD=Lrv@2025
+    depends_on:
+      - mysql
     networks:
         - 24h_network
   mysql:
