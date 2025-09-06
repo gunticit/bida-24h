@@ -41,6 +41,9 @@ import {
   Restaurant as FoodIcon,
   Visibility as ViewIcon,
   Print as PrintIcon,
+  LocalBar as DrinkIcon,
+  SmokingRooms as TobaccoIcon,
+  TakeoutDining as TakeawayIcon,
 } from '@mui/icons-material';
 import { apiService, User, Session, CreateSessionData, UpdateSessionData, Table, MenuItem as MenuItemType, Order } from '@/lib/api';
 import { AppBar } from '@/components/ui';
@@ -348,6 +351,34 @@ export default function PlaytimePage() {
       console.error('Failed to recalculate food total:', error);
       return 0;
     }
+  };
+
+  const getCategoryChip = (category: string) => {
+    const getCategoryInfo = (cat: string) => {
+      switch (cat) {
+        case 'food':
+          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const };
+        case 'drink':
+          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const };
+        case 'tobacco':
+          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const };
+        case 'takeaway':
+          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const };
+        default:
+          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const };
+      }
+    };
+
+    const categoryInfo = getCategoryInfo(category);
+    return (
+      <Chip
+        icon={categoryInfo.icon}
+        label={categoryInfo.label}
+        color={categoryInfo.color}
+        variant="outlined"
+        size="small"
+      />
+    );
   };
 
   // Hàm xóa món ăn và cập nhật tổng tiền
@@ -908,16 +939,10 @@ export default function PlaytimePage() {
               >
                 {menus.map((menu) => (
                   <MenuItem key={menu.id} value={menu.id}>
-                    <span style={{ fontWeight: 'bold', color: 'red' }}>
-                      {
-                        menu.category === 'food' ? 'Đồ ăn' :
-                        menu.category === 'drink' ? 'Đồ uống' :
-                        menu.category === 'tobacco' ? 'Thuốc lá' :
-                        menu.category === 'takeaway' ? 'Mang về' :
-                        'Không xác định'
-                      }
-                    </span>
-                    {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
+                    {
+                      getCategoryChip(menu.category)
+                    }
+                    : {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
                   </MenuItem>
                 ))}
               </Select>
