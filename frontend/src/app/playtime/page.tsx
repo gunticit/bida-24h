@@ -823,14 +823,16 @@ export default function PlaytimePage() {
                             >
                               <EditIcon />
                             </MuiIconButton>
-                            {/* <MuiIconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDelete(session.id)}
-                              title="Xóa"
-                            >
-                              <DeleteIcon />
-                            </MuiIconButton> */}
+                            {user?.role === 'admin' && (
+                              <MuiIconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDelete(session.id)}
+                                title="Xóa"
+                              >
+                                <DeleteIcon />
+                              </MuiIconButton>
+                            )}
                             {session.status === 'playing' && (
                               <>
                                 <MuiIconButton
