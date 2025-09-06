@@ -42,4 +42,14 @@ class Menu extends Model
     {
         return $query->where('category', 'drink');
     }
+
+    public function scopeTobacco($query)
+    {
+        return $query->where('category', 'tobacco');
+    }
+
+    public function scopeTakeaway($query)
+    {
+        return $query->where('category', 'takeaway');
+    }
 }

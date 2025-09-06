@@ -62,7 +62,7 @@ export interface MenuItem {
   id: number;
   name: string;
   price: number;
-  category: 'food' | 'drink';
+  category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
   created_at: string;
   updated_at: string;

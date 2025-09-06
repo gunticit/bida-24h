@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -54,8 +54,8 @@ import {
   Cancel as CancelIcon,
   Restaurant as FoodIcon,
   LocalBar as DrinkIcon,
-  Visibility as ViewIcon,
-  VisibilityOff as HideIcon,
+  SmokingRooms as TobaccoIcon,
+  TakeoutDining as TakeawayIcon,
 } from '@mui/icons-material';
 import { apiService, User } from '@/lib/api';
 
@@ -63,7 +63,7 @@ interface MenuItem {
   id: number;
   name: string;
   price: number;
-  category: 'food' | 'drink';
+  category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -72,7 +72,7 @@ interface MenuItem {
 interface MenuFormData {
   name: string;
   price: number;
-  category: 'food' | 'drink';
+  category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
 }
 
@@ -127,18 +127,15 @@ export default function MenuSettingPage() {
     severity: 'info',
   });
 
-  useEffect(() => {
-    const token = apiService.getToken();
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+  const showSnackbar = useCallback((message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  }, []);
 
-    loadUser();
-    loadMenus();
-  }, [router]);
-
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
       const userData = await apiService.getCurrentUser();
       setUser(userData);
@@ -148,9 +145,9 @@ export default function MenuSettingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const loadMenus = async () => {
+  const loadMenus = useCallback(async () => {
     try {
       const menusData = await apiService.getMenus();
       setMenus(menusData);
@@ -158,7 +155,18 @@ export default function MenuSettingPage() {
       console.error('Failed to load menus:', error);
       showSnackbar('Không thể tải danh sách thực đơn', 'error');
     }
-  };
+  }, [showSnackbar]);
+
+  useEffect(() => {
+    const token = apiService.getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    loadUser();
+    loadMenus();
+  }, [router, loadUser, loadMenus]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -213,7 +221,7 @@ export default function MenuSettingPage() {
     });
   };
 
-  const handleInputChange = (field: keyof MenuFormData, value: any) => {
+  const handleInputChange = (field: keyof MenuFormData, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -259,25 +267,32 @@ export default function MenuSettingPage() {
     }
   };
 
-  const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
   const handleCloseSnackbar = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const getCategoryChip = (category: string) => {
-    const isFood = category === 'food';
+    const getCategoryInfo = (cat: string) => {
+      switch (cat) {
+        case 'food':
+          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const };
+        case 'drink':
+          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const };
+        case 'tobacco':
+          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const };
+        case 'takeaway':
+          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const };
+        default:
+          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const };
+      }
+    };
+
+    const categoryInfo = getCategoryInfo(category);
     return (
       <Chip
-        icon={isFood ? <FoodIcon /> : <DrinkIcon />}
-        label={isFood ? 'Đồ ăn' : 'Đồ uống'}
-        color={isFood ? 'primary' : 'secondary'}
+        icon={categoryInfo.icon}
+        label={categoryInfo.label}
+        color={categoryInfo.color}
         variant="outlined"
         size="small"
       />
@@ -298,6 +313,8 @@ export default function MenuSettingPage() {
   const filteredMenus = menus.filter(menu => {
     if (tabValue === 0) return menu.category === 'food';
     if (tabValue === 1) return menu.category === 'drink';
+    if (tabValue === 2) return menu.category === 'tobacco';
+    if (tabValue === 3) return menu.category === 'takeaway';
     return true;
   });
 
@@ -386,6 +403,8 @@ export default function MenuSettingPage() {
               <Tabs value={tabValue} onChange={handleTabChange} aria-label="menu categories">
                 <Tab label="Đồ ăn" icon={<FoodIcon />} iconPosition="start" />
                 <Tab label="Đồ uống" icon={<DrinkIcon />} iconPosition="start" />
+                <Tab label="Thuốc" icon={<TobaccoIcon />} iconPosition="start" />
+                <Tab label="Mang về" icon={<TakeawayIcon />} iconPosition="start" />
                 <Tab label="Tất cả" />
               </Tabs>
             </Box>
@@ -411,6 +430,26 @@ export default function MenuSettingPage() {
             </TabPanel>
 
             <TabPanel value={tabValue} index={2}>
+              <MenuTable 
+                menus={filteredMenus} 
+                onEdit={handleOpenDialog} 
+                onDelete={handleDeleteMenu} 
+                getCategoryChip={getCategoryChip}
+                getStatusChip={getStatusChip}
+              />
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={3}>
+              <MenuTable 
+                menus={filteredMenus} 
+                onEdit={handleOpenDialog} 
+                onDelete={handleDeleteMenu} 
+                getCategoryChip={getCategoryChip}
+                getStatusChip={getStatusChip}
+              />
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={4}>
               <MenuTable 
                 menus={menus} 
                 onEdit={handleOpenDialog} 
@@ -457,6 +496,8 @@ export default function MenuSettingPage() {
               >
                 <MenuItem value="food">Đồ ăn</MenuItem>
                 <MenuItem value="drink">Đồ uống</MenuItem>
+                <MenuItem value="tobacco">Thuốc lá</MenuItem>
+                <MenuItem value="takeaway">Mang về</MenuItem>
               </Select>
             </FormControl>
             
