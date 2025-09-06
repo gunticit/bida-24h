@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: 24h_billiard_frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/var/www/frontend
+    working_dir: /var/www/frontend
+    command: "npm run start" # hoặc "yarn start" tùy bạn
+    ports:
+      - "3001:3000"
+    networks:
+      - 24h_network
   backend:
     build:
       context: ./backend
