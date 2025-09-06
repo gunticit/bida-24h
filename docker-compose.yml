@@ -6,12 +6,12 @@ services:
     container_name: 24h_billiard_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: RootLrv@#@2025
+      MYSQL_ROOT_PASSWORD: RootLrv@2025
       MYSQL_DATABASE: 24h_billiard
       MYSQL_USER: backend_usr
-      MYSQL_PASSWORD: Lrv@#@2025
+      MYSQL_PASSWORD: Lrv@2025
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
@@ -26,9 +26,25 @@ services:
       PMA_HOST: mysql
       PMA_PORT: 3306
       PMA_USER: backend_usr
-      PMA_PASSWORD: "@#Lrv@2025"
+      PMA_PASSWORD: Lrv@2025
     ports:
-      - "8080:80"
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - 24h_network
+
+  nginx:
+    image: nginx:latest
+    container_name: 24h_billiard_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend:/var/www/frontend
+      - ./backend:/var/www/backend
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - mysql
     networks:
