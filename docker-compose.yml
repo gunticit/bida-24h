@@ -23,8 +23,9 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://tinhtien.24hbilliardscoffee.com
       - DB_CONNECTION=mysql
       - DB_HOST=mysql
       - DB_PORT=3306

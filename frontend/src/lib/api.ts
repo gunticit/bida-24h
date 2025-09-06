@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.NEXT_PUBLIC_API_URL
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://tinhtien.24hbilliardscoffee.com/api')
   : 'http://localhost:8000/api';
 
 export interface User {
