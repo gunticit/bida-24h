@@ -8,7 +8,7 @@ class MenuService
 {
     public function getAll()
     {
-        return Menu::all();
+        return Menu::orderBy('category')->orderBy('id')->get();
     }
 
     public function getById($id)

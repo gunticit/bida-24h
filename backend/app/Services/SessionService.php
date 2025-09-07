@@ -9,7 +9,10 @@ class SessionService
 {
     public function getAll()
     {
-        return Session::with('table')->get();
+        return Session::with('table')
+            ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     public function getById($id)
