@@ -664,7 +664,7 @@ export default function PlaytimePage() {
             startIcon={<AddIcon />}
             onClick={() => handleOpenDialog()}
           >
-            Thêm Session mới
+            Tạo giờ chơi mới
           </Button>
         </Box>
 
@@ -851,7 +851,7 @@ export default function PlaytimePage() {
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingSession ? 'Chỉnh sửa Session' : 'Thêm Session mới'}
+          {editingSession ? 'Chỉnh sửa giờ chơi' : 'Thêm giờ chơi mới'}
         </DialogTitle>
         <DialogContent>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>

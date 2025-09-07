@@ -81,7 +81,7 @@ interface Table {
 
 1. **Truy cập trang**: Điều hướng đến `/playtime`
 2. **Xem danh sách**: Sessions được hiển thị trong bảng
-3. **Thêm mới**: Click nút "Thêm Session mới"
+3. **Thêm mới**: Click nút "Thêm giờ chơi mới"
 4. **Chỉnh sửa**: Click icon chỉnh sửa trên session
 5. **Thay đổi trạng thái**: Sử dụng các nút trạng thái
 6. **Xóa**: Click icon xóa (có xác nhận)
