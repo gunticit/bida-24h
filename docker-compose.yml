@@ -28,7 +28,7 @@ services:
       - APP_DEBUG=false
       - APP_URL=http://tinhtien.24hbilliardscoffee.com
       - DB_CONNECTION=mysql
-      - DB_HOST=mysql
+      - DB_HOST=24h_billiard_mysql
       - DB_PORT=3306
       - DB_DATABASE=24h_billiard
       - DB_USERNAME=backend_usr
