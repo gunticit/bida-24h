@@ -10,28 +10,23 @@ import {
   CardContent,
   Grid,
   Button,
-  AppBar,
   Toolbar,
   IconButton,
   Avatar,
   Menu,
   MenuItem,
-  List,
-  ListItem,
-  ListItemText,
   ListItemIcon,
   Divider,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  People as PeopleIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
-  Email as EmailIcon,
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
 import { apiService, User } from '@/lib/api';
+import { AppBar } from '@/components/ui';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -89,49 +84,12 @@ export default function DashboardPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          <DashboardIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Dashboard
-          </Typography>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            onClick={handleMenuOpen}
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {user?.name?.charAt(0) || 'U'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              Hồ sơ
-            </MenuItem>
-            <MenuItem onClick={() => router.push('/setting')}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              Cài đặt
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Đăng xuất
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <AppBar 
+        title="Dashboard"
+        user={user}
+        onLogout={handleLogout}
+        icon={<DashboardIcon />}
+      />
 
       {/* Main Content */}
       <Container
@@ -180,19 +138,19 @@ export default function DashboardPage() {
                 >
                   Quản lý Giờ chơi
                 </Button>
-                <Button
+                {user?.role === 'admin' && <Button
                   variant="outlined"
                   startIcon={<DashboardIcon />}
                 >
                   Xem thống kê
-                </Button>
-                <Button
+                </Button>}
+                {user?.role === 'admin' && <Button
                   variant="outlined"
                   startIcon={<SettingsIcon />}
                   onClick={() => router.push('/setting')}
                 >
                   Cài đặt hệ thống
-                </Button>
+                </Button>}
               </Box>
             </CardContent>
           </Card>

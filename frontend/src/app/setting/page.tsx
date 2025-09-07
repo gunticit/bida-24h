@@ -10,14 +10,6 @@ import {
   CardContent,
   Grid,
   Button,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Divider,
   List,
   ListItemButton,
   ListItemText
@@ -25,20 +17,18 @@ import {
 import MuiListItemIcon from '@mui/material/ListItemIcon';
 import {
   Settings as SettingsIcon,
-  Logout as LogoutIcon,
   Person as PersonIcon,
   TableRestaurant as TableIcon,
   Restaurant as MenuIcon,
-  ArrowBack as ArrowBackIcon,
   Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { apiService, User } from '@/lib/api';
+import { AppBar } from '@/components/ui';
 
 export default function SettingPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     const token = apiService.getToken();
@@ -62,14 +52,6 @@ export default function SettingPage() {
     }
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleLogout = async () => {
     try {
       await apiService.logout();
@@ -90,58 +72,12 @@ export default function SettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            onClick={() => router.push('/dashboard')}
-            sx={{ mr: 2 }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-          <SettingsIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Cài đặt hệ thống
-          </Typography>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            onClick={handleMenuOpen}
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {user?.name?.charAt(0) || 'U'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              Hồ sơ
-            </MenuItem>
-            <MenuItem onClick={() => router.push('/setting')}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              Cài đặt
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Đăng xuất
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <AppBar 
+        title="Quản lý Giờ chơi"
+        user={user}
+        onLogout={handleLogout}
+        icon={<SettingsIcon />}
+      />
 
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>

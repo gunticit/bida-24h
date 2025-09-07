@@ -37,8 +37,6 @@ import {
   IconButton as MuiIconButton,
   Tooltip,
   Chip,
-  Switch,
-  FormControlLabel,
 } from '@mui/material';
 import {
   Settings as SettingsIcon,

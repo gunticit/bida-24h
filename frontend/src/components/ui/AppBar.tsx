@@ -57,9 +57,6 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
       <Toolbar>
         {icon && <Box sx={{ mr: 2 }}>{icon}</Box>}
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {user?.name} - {user?.role}
-        </Typography>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
         <IconButton
@@ -83,18 +80,18 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
             </ListItemIcon>
             Dashboard
           </MenuItem>
-          <MenuItem onClick={handleMenuClose}>
+          {user?.role === 'admin' && <MenuItem onClick={handleMenuClose}>
             <ListItemIcon>
               <PersonIcon fontSize="small" />
             </ListItemIcon>
             Hồ sơ
-          </MenuItem>
-          <MenuItem onClick={() => router.push('/setting')}>
+          </MenuItem>}
+          {user?.role === 'admin' && <MenuItem onClick={() => router.push('/setting')}>
             <ListItemIcon>
               <SettingsIcon fontSize="small" />
             </ListItemIcon>
             Cài đặt
-          </MenuItem>
+          </MenuItem>}
           <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
