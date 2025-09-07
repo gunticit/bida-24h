@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
+  Container,
   Paper,
   Typography,
   TextField,
@@ -24,9 +26,10 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 import { apiService, User, UpdateProfileData } from '@/lib/api';
+import { AppBar } from '@/components/ui';
 
 export default function ProfilePage() {
-  const [, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +48,7 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserProfile();
@@ -78,6 +82,15 @@ export default function ProfilePage() {
     // Clear messages when user starts typing
     if (error) setError(null);
     if (success) setSuccess(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -167,7 +180,27 @@ export default function ProfilePage() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ flexGrow: 1 }}>
+      {/* App Bar */}
+      <AppBar 
+        title="Hồ sơ tài khoản"
+        user={user}
+        onLogout={handleLogout}
+        icon={<PersonIcon />}
+      />
+
+      {/* Main Content */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          mt: 4,
+          mb: 4,
+          backgroundImage: 'url(/public/bg-bida.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
       <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <PersonIcon />
         Hồ sơ tài khoản
@@ -337,6 +370,7 @@ export default function ProfilePage() {
           </Box>
         </form>
       </Paper>
+      </Container>
     </Box>
   );
 }
