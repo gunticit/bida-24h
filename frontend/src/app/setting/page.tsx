@@ -73,7 +73,7 @@ export default function SettingPage() {
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
       <AppBar 
-        title="Quản lý Giờ chơi"
+        title="Cài đặt hệ thống"
         user={user}
         onLogout={handleLogout}
         icon={<SettingsIcon />}

@@ -80,12 +80,15 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
             </ListItemIcon>
             Dashboard
           </MenuItem>
-          {user?.role === 'admin' && <MenuItem onClick={handleMenuClose}>
+          <MenuItem onClick={() => {
+            handleMenuClose();
+            router.push('/setting/profile');
+          }}>
             <ListItemIcon>
               <PersonIcon fontSize="small" />
             </ListItemIcon>
             Hồ sơ
-          </MenuItem>}
+          </MenuItem>
           {user?.role === 'admin' && <MenuItem onClick={() => router.push('/setting')}>
             <ListItemIcon>
               <SettingsIcon fontSize="small" />

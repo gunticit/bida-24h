@@ -24,6 +24,14 @@ export interface RegisterData {
   role?: 'admin' | 'staff';
 }
 
+export interface UpdateProfileData {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+  current_password?: string;
+}
+
 export interface AuthResponse {
   message: string;
   user: User;
@@ -188,9 +196,16 @@ class ApiService {
     return this.request<User>('/auth/user');
   }
 
+  async updateProfile(data: UpdateProfileData): Promise<{ message: string; user: User }> {
+    return this.request<{ message: string; user: User }>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
   // User management methods
-  async getUsers(): Promise<{ data: User[]; meta: any }> {
-    return this.request<{ data: User[]; meta: any }>('/users');
+  async getUsers(): Promise<{ data: User[]; meta: unknown }> {
+    return this.request<{ data: User[]; meta: unknown }>('/users');
   }
 
   async getUser(id: number): Promise<User> {

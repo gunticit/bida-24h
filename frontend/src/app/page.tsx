@@ -6,9 +6,6 @@ import {
   Container,
   Typography,
   Button,
-  Card,
-  CardContent,
-  Grid,
   AppBar,
   Toolbar,
   IconButton,
@@ -25,32 +22,12 @@ import {
   People as PeopleIcon,
   Login as LoginIcon,
   PersonAdd as PersonAddIcon,
-  Code as CodeIcon,
-  Storage as StorageIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
-
-  const features = [
-    {
-      title: 'Laravel Backend',
-      description: 'RESTful API với authentication, validation và database management',
-      icon: <StorageIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-    },
-    {
-      title: 'Next.js Frontend',
-      description: 'Modern React framework với App Router và TypeScript',
-      icon: <CodeIcon sx={{ fontSize: 40, color: 'secondary.main' }} />,
-    },
-    {
-      title: 'Material-UI',
-      description: 'Beautiful và responsive UI components từ Google Material Design',
-      icon: <DashboardIcon sx={{ fontSize: 40, color: 'success.main' }} />,
-    },
-  ];
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);

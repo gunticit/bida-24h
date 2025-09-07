@@ -85,4 +85,49 @@ class AuthController extends Controller
     {
         return (new UserResource($request->user()))->resolve();
     }
+
+    /**
+     * Cập nhật thông tin profile user hiện tại
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:8|confirmed',
+            'current_password' => 'required_with:password|string',
+        ]);
+
+        // Kiểm tra mật khẩu hiện tại nếu có thay đổi mật khẩu
+        if ($request->has('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'current_password' => ['Mật khẩu hiện tại không chính xác.'],
+                ]);
+            }
+        }
+
+        $updateData = [];
+        
+        if ($request->has('name')) {
+            $updateData['name'] = $request->name;
+        }
+        
+        if ($request->has('email')) {
+            $updateData['email'] = $request->email;
+        }
+        
+        if ($request->has('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+
+        return response()->json([
+            'message' => 'Cập nhật thông tin thành công',
+            'user' => new UserResource($user),
+        ]);
+    }
 }

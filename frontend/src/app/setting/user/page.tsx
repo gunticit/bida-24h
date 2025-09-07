@@ -9,14 +9,8 @@ import {
   Card,
   CardContent,
   Button,
-  AppBar,
-  Toolbar,
   IconButton,
-  Avatar,
-  Menu,
   MenuItem,
-  ListItemIcon,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -39,10 +33,7 @@ import {
   Chip,
 } from '@mui/material';
 import {
-  Settings as SettingsIcon,
-  Logout as LogoutIcon,
   Person as PersonIcon,
-  ArrowBack as ArrowBackIcon,
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
@@ -54,6 +45,7 @@ import {
   VisibilityOff as HideIcon,
 } from '@mui/icons-material';
 import { apiService, User } from '@/lib/api';
+import { AppBar } from '@/components/ui';
 
 interface UserFormData {
   name: string;
@@ -292,58 +284,12 @@ export default function UserSettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            onClick={() => router.push('/setting')}
-            sx={{ mr: 2 }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-          <SettingsIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Quản lý người dùng
-          </Typography>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            onClick={handleMenuOpen}
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {user?.name?.charAt(0) || 'U'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              Hồ sơ
-            </MenuItem>
-            <MenuItem onClick={() => router.push('/setting')}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              Cài đặt
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Đăng xuất
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <AppBar 
+        title="Quản lý người dùng"
+        user={user}
+        onLogout={handleLogout}
+        icon={<PersonIcon />}
+      />
 
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
