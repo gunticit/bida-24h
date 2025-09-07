@@ -116,6 +116,7 @@ export default function PlaytimePage() {
   const loadUser = async () => {
     try {
       const userData = await apiService.getCurrentUser();
+      console.log(userData);
       setUser(userData);
     } catch (error) {
       console.error('Failed to load user:', error);
@@ -509,10 +510,10 @@ export default function PlaytimePage() {
         <body>
           <div class="header">
             <h1 style="font-size:20px;">24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:15px; margin: 3px 0;">Địa chỉ: Eanur, Thị trấn Pơngđrang, Ban Krong Buk, Vietnam</p>
-            <p style="font-size:15px; margin: 3px 0;">Hotline: 096 718 13 03</p>
-            <p style="font-size:14px; margin: 3px 0;">Thời gian bắt đầu: ${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</p>
-            <p style="font-size:14px; margin: 3px 0;">Thời gian kết thúc: ${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</p>
+            <p style="font-size:15px; margin: 3px 0;">Địa chỉ: <b>Cổng chào thôn văn hoá Eanur, Pơngđrang, Đăk Lăk</b></p>
+            <p style="font-size:15px; margin: 3px 0;">Hotline: <b>096 718 13 03</b></p>
+            <p style="font-size:14px; margin: 3px 0;">Giờ bắt đầu: <b>${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</b></p>
+            <p style="font-size:14px; margin: 3px 0;">Giờ kết thúc: <b>${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</b></p>
           </div>
           
           <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
@@ -792,16 +793,14 @@ export default function PlaytimePage() {
                             >
                               <EditIcon />
                             </MuiIconButton>
-                            {user?.role === 'admin' && (
-                              <MuiIconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDelete(session.id)}
-                                title="Xóa"
-                              >
-                                <DeleteIcon />
-                              </MuiIconButton>
-                            )}
+                            <MuiIconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDelete(session.id)}
+                              title="Xóa"
+                            >
+                              <DeleteIcon />
+                            </MuiIconButton>
                             {session.status === 'playing' && (
                               <>
                                 <MuiIconButton
