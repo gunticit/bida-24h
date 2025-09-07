@@ -116,7 +116,6 @@ export default function PlaytimePage() {
   const loadUser = async () => {
     try {
       const userData = await apiService.getCurrentUser();
-      console.log(userData);
       setUser(userData);
     } catch (error) {
       console.error('Failed to load user:', error);
