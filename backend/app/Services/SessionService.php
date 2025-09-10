@@ -2,16 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Session;
+use App\Models\GameSession;
 use App\Models\Order;
 use App\Models\Menu;
-use Illuminate\Support\Facades\DB;
 
 class SessionService
 {
     public function getAll()
     {
-        return Session::with('table')
+        return GameSession::with('table')
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
             ->orderBy('id', 'desc')
             ->get();
@@ -19,7 +18,7 @@ class SessionService
 
     public function getTodayOrPlaying()
     {
-        return Session::with('table')
+        return GameSession::with('table')
             ->todayOrPlaying()
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
             ->orderBy('start_time', 'desc')
@@ -28,7 +27,7 @@ class SessionService
 
     public function getToday()
     {
-        return Session::with('table')
+        return GameSession::with('table')
             ->today()
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
             ->orderBy('start_time', 'desc')
@@ -37,56 +36,56 @@ class SessionService
 
     public function getById($id)
     {
-        return Session::with('table')->findOrFail($id);
+        return GameSession::with('table')->findOrFail($id);
     }
 
     public function create(array $data)
     {
-        return Session::create($data);
+        return GameSession::create($data);
     }
 
     public function update($id, array $data)
     {
-        $session = Session::findOrFail($id);
-        $session->update($data);
+        $gameSession = GameSession::findOrFail($id);
+        $gameSession->update($data);
         
         // Tự động tính toán nếu có thay đổi về thời gian
         if (isset($data['end_time']) || isset($data['start_time'])) {
-            $this->recalculateSession($session);
+            $this->recalculateSession($gameSession);
         }
         
-        return $session->fresh();
+        return $gameSession->fresh();
     }
 
     public function delete($id)
     {
-        $session = Session::findOrFail($id);
-        $session->delete();
+        $gameSession = GameSession::findOrFail($id);
+        $gameSession->delete();
         return true;
     }
 
-    private function recalculateSession(Session $session)
+    private function recalculateSession(GameSession $gameSession)
     {
         // Tính toán thời gian chơi
-        if ($session->end_time && $session->start_time) {
-            $session->total_time = $session->start_time->diffInMinutes($session->end_time);
+        if ($gameSession->end_time && $gameSession->start_time) {
+            $gameSession->total_time = $gameSession->start_time->diffInMinutes($gameSession->end_time);
         }
 
         // Tính toán tiền bàn
-        if ($session->total_time) {
-            $hours = $session->total_time / 60;
-            $session->total_money_table = $hours * $session->hour_price;
+        if ($gameSession->total_time) {
+            $hours = $gameSession->total_time / 60;
+            $gameSession->total_money_table = $hours * $gameSession->hour_price;
         }
 
         // Tính toán tổng tiền
-        $session->total_money = ($session->total_money_table ?? 0) + ($session->total_money_food ?? 0);
+        $gameSession->total_money = ($gameSession->total_money_table ?? 0) + ($gameSession->total_money_food ?? 0);
         
-        $session->save();
+        $gameSession->save();
     }
 
     public function addOrderToSession($sessionId, $menuId, $quantity)
     {
-        $session = Session::findOrFail($sessionId);
+        $gameSession = GameSession::findOrFail($sessionId);
         $menu = Menu::findOrFail($menuId);
 
         // Kiểm tra số lượng tồn kho
@@ -107,7 +106,7 @@ class SessionService
         $menu->decreaseQuantity($quantity);
 
         // Cập nhật tổng tiền đồ ăn của session
-        $this->updateSessionFoodTotal($session);
+        $this->updateSessionFoodTotal($gameSession);
 
         return $order;
     }
@@ -116,7 +115,7 @@ class SessionService
     {
         $order = Order::findOrFail($orderId);
         $menu = $order->menu;
-        $session = $order->session;
+        $gameSession = $order->session;
 
         // Hoàn trả số lượng tồn kho
         $menu->increaseQuantity($order->quantity);
@@ -125,7 +124,7 @@ class SessionService
         $order->delete();
 
         // Cập nhật tổng tiền đồ ăn của session
-        $this->updateSessionFoodTotal($session);
+        $this->updateSessionFoodTotal($gameSession);
 
         return true;
     }
@@ -134,7 +133,7 @@ class SessionService
     {
         $order = Order::findOrFail($orderId);
         $menu = $order->menu;
-        $session = $order->session;
+        $gameSession = $order->session;
 
         $oldQuantity = $order->quantity;
         $quantityDifference = $newQuantity - $oldQuantity;
@@ -156,16 +155,16 @@ class SessionService
         $order->save();
 
         // Cập nhật tổng tiền đồ ăn của session
-        $this->updateSessionFoodTotal($session);
+        $this->updateSessionFoodTotal($gameSession);
 
         return $order;
     }
 
-    private function updateSessionFoodTotal(Session $session)
+    private function updateSessionFoodTotal(GameSession $gameSession)
     {
-        $totalFoodMoney = $session->orders()->sum('total_price');
-        $session->total_money_food = $totalFoodMoney;
-        $session->total_money = ($session->total_money_table ?? 0) + $totalFoodMoney;
-        $session->save();
+        $totalFoodMoney = $gameSession->orders()->sum('total_price');
+        $gameSession->total_money_food = $totalFoodMoney;
+        $gameSession->total_money = ($gameSession->total_money_table ?? 0) + $totalFoodMoney;
+        $gameSession->save();
     }
 }

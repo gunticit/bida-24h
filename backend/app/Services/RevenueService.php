@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Session;
+use App\Models\GameSession;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RevenueService
 {
@@ -12,7 +11,7 @@ class RevenueService
     {
         $date = $date ? Carbon::parse($date) : Carbon::today();
         
-        $sessions = Session::whereDate('start_time', $date)
+        $sessions = GameSession::whereDate('start_time', $date)
             ->where('status', 'finished')
             ->get();
 
@@ -47,7 +46,7 @@ class RevenueService
         $year = $year ?? Carbon::now()->year;
         $month = $month ?? Carbon::now()->month;
         
-        $sessions = Session::whereYear('start_time', $year)
+        $sessions = GameSession::whereYear('start_time', $year)
             ->whereMonth('start_time', $month)
             ->where('status', 'finished')
             ->get();
@@ -86,7 +85,7 @@ class RevenueService
     {
         $year = $year ?? Carbon::now()->year;
         
-        $sessions = Session::whereYear('start_time', $year)
+        $sessions = GameSession::whereYear('start_time', $year)
             ->where('status', 'finished')
             ->get();
 
@@ -137,7 +136,7 @@ class RevenueService
 
     public function getTopTables($limit = 5, $period = 'this_month')
     {
-        $query = Session::where('status', 'finished')
+        $query = GameSession::where('status', 'finished')
             ->with('table');
 
         switch ($period) {

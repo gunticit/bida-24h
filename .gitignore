@@ -76,3 +76,6 @@ backend/.env
 # Next.js specific
 frontend/.next/
 frontend/out/
+
+# Mysql
+mysql_data/

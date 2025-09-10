@@ -89,6 +89,9 @@ class SessionController extends Controller
                 'end_time' => 'sometimes|nullable|date|after:start_time',
                 'hour_price' => 'sometimes|numeric|min:0',
                 'status' => ['sometimes', Rule::in(['playing', 'finished', 'canceled'])],
+                'total_money_food' => 'sometimes|numeric|min:0',
+                'total_money' => 'sometimes|numeric|min:0',
+                'total_money_table' => 'sometimes|numeric|min:0',
             ]);
 
             $session = $this->service->update($id, $validated);

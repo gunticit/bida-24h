@@ -191,7 +191,7 @@ export default function RevenuePage() {
     setTabValue(newValue);
   };
 
-  const RevenueCard = ({ title, value, icon, color = 'primary' }: any) => (
+  const RevenueCard = ({ title, value, icon, color = 'primary', isMoney = false }: any) => (
     <Card>
       <CardContent>
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -200,7 +200,7 @@ export default function RevenuePage() {
               {title}
             </Typography>
             <Typography variant="h4" component="h2" color={color}>
-              {formatCurrency(value)}
+              {isMoney ? formatCurrency(value) : value}
             </Typography>
           </Box>
           <Box color={`${color}.main`}>
@@ -220,49 +220,50 @@ export default function RevenuePage() {
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
+          sx={{ height: 56 }}
         />
-        <Button variant="contained" onClick={loadDailyRevenue} disabled={loading}>
+        <Button 
+          variant="contained" 
+          onClick={loadDailyRevenue} 
+          disabled={loading}
+          sx={{ height: 56 }}
+        >
           Tải lại
         </Button>
       </Box>
 
       {dailyData && (
         <>
-          <Grid container spacing={3} mb={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Tổng doanh thu"
-                value={dailyData.total_revenue}
-                icon={<AttachMoney sx={{ fontSize: 40 }} />}
-                color="primary"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu bàn"
-                value={dailyData.table_revenue}
-                icon={<AccessTime sx={{ fontSize: 40 }} />}
-                color="success"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu thức ăn"
-                value={dailyData.food_revenue}
-                icon={<Restaurant sx={{ fontSize: 40 }} />}
-                color="warning"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Số session"
-                value={dailyData.session_count}
-                icon={<BarChart sx={{ fontSize: 40 }} />}
-                color="info"
-              />
-            </Grid>
-          </Grid>
-
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={dailyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              color="primary"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Doanh thu bàn"
+              value={dailyData.table_revenue}
+              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              isMoney={true}
+              color="success"
+            />
+            <RevenueCard
+              title="Doanh thu thức ăn"
+              value={dailyData.food_revenue}
+              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              color="warning"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Số lần đặt bàn"
+              value={dailyData.session_count}
+              icon={<BarChart sx={{ fontSize: 40 }} />}
+              color="info"
+              isMoney={false}
+            />
+          </Box>
           {dailyData.sessions && dailyData.sessions.length > 0 && (
             <Card>
               <CardContent>
@@ -314,24 +315,26 @@ export default function RevenuePage() {
   const renderMonthlyTab = () => (
     <Box>
       <Box display="flex" alignItems="center" gap={2} mb={3}>
-        <FormControl sx={{ minWidth: 120 }}>
+        <FormControl sx={{ minWidth: 120, height: 56 }}>
           <InputLabel>Năm</InputLabel>
           <Select
             value={selectedYear}
             label="Năm"
             onChange={(e) => setSelectedYear(Number(e.target.value))}
+            sx={{ height: 56 }}
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
               <MenuItem key={year} value={year}>{year}</MenuItem>
             ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ minWidth: 120 }}>
+        <FormControl sx={{ minWidth: 120, height: 56 }}>
           <InputLabel>Tháng</InputLabel>
           <Select
             value={selectedMonth}
             label="Tháng"
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            sx={{ height: 56 }}
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
               <MenuItem key={month} value={month}>
@@ -340,48 +343,87 @@ export default function RevenuePage() {
             ))}
           </Select>
         </FormControl>
-        <Button variant="contained" onClick={loadMonthlyRevenue} disabled={loading}>
+        <Button 
+          variant="contained" 
+          onClick={loadMonthlyRevenue} 
+          disabled={loading}
+          sx={{ height: 56 }}
+        >
           Tải lại
         </Button>
       </Box>
 
       {monthlyData && (
         <>
-          <Grid container spacing={3} mb={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Tổng doanh thu"
-                value={monthlyData.total_revenue}
-                icon={<AttachMoney sx={{ fontSize: 40 }} />}
-                color="primary"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu bàn"
-                value={monthlyData.table_revenue}
-                icon={<AccessTime sx={{ fontSize: 40 }} />}
-                color="success"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu thức ăn"
-                value={monthlyData.food_revenue}
-                icon={<Restaurant sx={{ fontSize: 40 }} />}
-                color="warning"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Số session"
-                value={monthlyData.session_count}
-                icon={<BarChart sx={{ fontSize: 40 }} />}
-                color="info"
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={monthlyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              color="primary"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Doanh thu bàn"
+              value={monthlyData.table_revenue}
+              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              color="success"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Doanh thu thức ăn"
+              value={monthlyData.food_revenue}
+              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              color="warning"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Số lần đặt bàn"
+              value={monthlyData.session_count}
+              icon={<BarChart sx={{ fontSize: 40 }} />}
+              isMoney={false}
+              color="info"
+            />
+          </Box>
 
+      {/* Top Tables Section */}
+      {topTables.length > 0 && (
+        <Card sx={{ mt: 3 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Top 5 bàn có doanh thu cao nhất tháng này
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Bàn</TableCell>
+                    <TableCell>Tổng doanh thu</TableCell>
+                    <TableCell>Doanh thu bàn</TableCell>
+                    <TableCell>Doanh thu thức ăn</TableCell>
+                    <TableCell>Số lần đặt bàn</TableCell>
+                    <TableCell>Doanh thu TB/session</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {topTables.map((table: any) => (
+                    <TableRow key={table.table_id}>
+                      <TableCell>
+                        <Chip label={table.table_name} color="primary" />
+                      </TableCell>
+                      <TableCell>{formatCurrency(table.total_revenue)}</TableCell>
+                      <TableCell>{formatCurrency(table.table_revenue)}</TableCell>
+                      <TableCell>{formatCurrency(table.food_revenue)}</TableCell>
+                      <TableCell>{table.session_count}</TableCell>
+                      <TableCell>{formatCurrency(table.avg_revenue_per_session)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      )}
           {monthlyData.daily_breakdown && monthlyData.daily_breakdown.length > 0 && (
             <Card>
               <CardContent>
@@ -396,7 +438,7 @@ export default function RevenuePage() {
                         <TableCell>Tổng doanh thu</TableCell>
                         <TableCell>Doanh thu bàn</TableCell>
                         <TableCell>Doanh thu thức ăn</TableCell>
-                        <TableCell>Số session</TableCell>
+                        <TableCell>Số lần đặt bàn</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -423,59 +465,61 @@ export default function RevenuePage() {
   const renderYearlyTab = () => (
     <Box>
       <Box display="flex" alignItems="center" gap={2} mb={3}>
-        <FormControl sx={{ minWidth: 120 }}>
+        <FormControl sx={{ minWidth: 120, height: 56 }}>
           <InputLabel>Năm</InputLabel>
           <Select
             value={selectedYearForYearly}
             label="Năm"
             onChange={(e) => setSelectedYearForYearly(Number(e.target.value))}
+            sx={{ height: 56 }}
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
               <MenuItem key={year} value={year}>{year}</MenuItem>
             ))}
           </Select>
         </FormControl>
-        <Button variant="contained" onClick={loadYearlyRevenue} disabled={loading}>
+        <Button 
+          variant="contained" 
+          onClick={loadYearlyRevenue} 
+          disabled={loading}
+          sx={{ height: 56 }}
+        >
           Tải lại
         </Button>
       </Box>
 
       {yearlyData && (
         <>
-          <Grid container spacing={3} mb={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Tổng doanh thu"
-                value={yearlyData.total_revenue}
-                icon={<AttachMoney sx={{ fontSize: 40 }} />}
-                color="primary"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu bàn"
-                value={yearlyData.table_revenue}
-                icon={<AccessTime sx={{ fontSize: 40 }} />}
-                color="success"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Doanh thu thức ăn"
-                value={yearlyData.food_revenue}
-                icon={<Restaurant sx={{ fontSize: 40 }} />}
-                color="warning"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <RevenueCard
-                title="Số session"
-                value={yearlyData.session_count}
-                icon={<BarChart sx={{ fontSize: 40 }} />}
-                color="info"
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={yearlyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              color="primary"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Doanh thu bàn"
+              value={yearlyData.table_revenue}
+              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              isMoney={true}
+              color="success"
+            />
+            <RevenueCard
+              title="Doanh thu thức ăn"
+              value={yearlyData.food_revenue}
+              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              color="warning"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Số lần đặt bàn"
+              value={yearlyData.session_count}
+              icon={<BarChart sx={{ fontSize: 40 }} />}
+              isMoney={false}
+              color="info"
+            />
+          </Box>
 
           {yearlyData.monthly_breakdown && yearlyData.monthly_breakdown.length > 0 && (
             <Card>
@@ -491,7 +535,7 @@ export default function RevenuePage() {
                         <TableCell>Tổng doanh thu</TableCell>
                         <TableCell>Doanh thu bàn</TableCell>
                         <TableCell>Doanh thu thức ăn</TableCell>
-                        <TableCell>Số session</TableCell>
+                        <TableCell>Số lần đặt bàn</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -569,45 +613,6 @@ export default function RevenuePage() {
           renderYearlyTab()
         )}
       </TabPanel>
-
-      {/* Top Tables Section */}
-      {topTables.length > 0 && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Top 5 bàn có doanh thu cao nhất tháng này
-            </Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Bàn</TableCell>
-                    <TableCell>Tổng doanh thu</TableCell>
-                    <TableCell>Doanh thu bàn</TableCell>
-                    <TableCell>Doanh thu thức ăn</TableCell>
-                    <TableCell>Số session</TableCell>
-                    <TableCell>Doanh thu TB/session</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {topTables.map((table: any) => (
-                    <TableRow key={table.table_id}>
-                      <TableCell>
-                        <Chip label={table.table_name} color="primary" />
-                      </TableCell>
-                      <TableCell>{formatCurrency(table.total_revenue)}</TableCell>
-                      <TableCell>{formatCurrency(table.table_revenue)}</TableCell>
-                      <TableCell>{formatCurrency(table.food_revenue)}</TableCell>
-                      <TableCell>{table.session_count}</TableCell>
-                      <TableCell>{formatCurrency(table.avg_revenue_per_session)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      )}
       </Box>
     </Box>
   );

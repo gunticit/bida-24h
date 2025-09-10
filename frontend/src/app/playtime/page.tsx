@@ -8,7 +8,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Button,
   Table as MuiTable,
   TableBody,
@@ -47,6 +46,10 @@ import {
 } from '@mui/icons-material';
 import { apiService, User, Session, CreateSessionData, UpdateSessionData, Table, MenuItem as MenuItemType, Order } from '@/lib/api';
 import { AppBar } from '@/components/ui';
+import { StatisticsCards } from '@/components/playtime';
+import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters';
+import { getStatusText } from '@/utils/sessionHelpers';
+import { generateInvoiceContent, printInvoice } from '@/utils/invoiceUtils';
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";       
 import timezone from "dayjs/plugin/timezone"; 
@@ -284,22 +287,10 @@ export default function PlaytimePage() {
         total_price: selectedMenu.price * foodFormData.quantity,
       });
 
-      // Tính toán tổng tiền đồ ăn mới
-      const orderTotal = parseInt(selectedMenu?.price?.toString() || '0') * parseInt(foodFormData?.quantity?.toString() || '0');
-      const currentFoodTotal = parseInt(selectedSession?.total_money_food?.toString() || '0');
-      const newFoodTotal = currentFoodTotal + orderTotal;
-      
-      // Tính tổng tiền mới (tiền bàn + tiền đồ ăn)
-      const currentTableMoney = selectedSession.total_money_table || 0;
-      const newTotalMoney = currentTableMoney + newFoodTotal;
-      
-      // Cập nhật session với tổng tiền mới
-      await apiService.updateSession(selectedSession.id, {
-        total_money_food: newFoodTotal,
-        total_money: newTotalMoney,
-      });
+      // Tính toán lại tổng tiền đồ ăn từ tất cả orders
+      await recalculateFoodTotal(selectedSession.id);
 
-      showSnackbar(`Thêm món ăn thành công! Tổng tiền đồ ăn: ${newFoodTotal.toLocaleString('vi-VN')} đ`, 'success');
+      showSnackbar(`Thêm món ăn thành công!`, 'success');
       handleCloseFoodDialog();
       loadSessions(); // Reload để cập nhật tổng tiền
     } catch (error) {
@@ -353,7 +344,22 @@ export default function PlaytimePage() {
     }
   };
 
-  const getCategoryChip = (category: string) => {
+  // Local status color helper  
+  const getStatusColorLocal = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+    switch (status) {
+      case 'playing':
+        return 'success';
+      case 'finished':
+        return 'primary';
+      case 'cancelled':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
+  // Local category chip helper
+  const getCategoryChipLocal = (category: string) => {
     const getCategoryInfo = (cat: string) => {
       switch (cat) {
         case 'food':
@@ -388,7 +394,7 @@ export default function PlaytimePage() {
         await apiService.deleteOrder(orderId);
         
         // Tính toán lại tổng tiền đồ ăn sau khi xóa
-        const newTotal = await recalculateFoodTotal(sessionId);
+        await recalculateFoodTotal(sessionId);
         
         showSnackbar('Xóa món ăn thành công!', 'success');
         
@@ -447,146 +453,18 @@ export default function PlaytimePage() {
 
   // Hàm in hóa đơn
   const handlePrintInvoice = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const invoiceContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Hóa đơn - Session #${invoiceData.session?.id}</title>
-          <style>
-            @page {
-              size: 80mm auto; /* Chiều ngang 80mm, chiều dọc tự co */
-              margin: 0;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 15px;
-              margin: 0;
-              padding: 4px;
-              width: 80mm; /* khổ giấy */
-            }
-            .header {
-              text-align: center;
-              border-bottom: 1px dashed #000;
-              padding-bottom: 4px;
-              margin-bottom: 8px;
-            }
-            .header h1 {
-              font-size: 15px;
-              margin: 0;
-            }
-            .table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 6px 0;
-              font-size: 14px;
-            }
-            .table th, .table td {
-              border: 1px solid #000;
-              padding: 2px 4px;
-              text-align: left;
-              word-break: break-word;
-            }
-            .table th {
-              background-color: #f9f9f9;
-            }
-            .total {
-              font-weight: bold;
-              font-size: 15px;
-              margin-top: 6px;
-              padding: 4px 0;
-              border-top: 1px dashed #000;
-              text-right: right;
-            }
-            .footer {
-              margin-top: 10px;
-              text-align: center;
-              font-size: 11px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1 style="font-size:20px;">24H BILLIARDS & COFFEE</h1>
-            <p style="font-size:15px; margin: 3px 0;">Địa chỉ: <b>Cổng chào thôn văn hoá Eanur, Pơngđrang, Đăk Lăk</b></p>
-            <p style="font-size:15px; margin: 3px 0;">Hotline: <b>096 718 13 03</b></p>
-            <p style="font-size:14px; margin: 3px 0;">Giờ bắt đầu: <b>${invoiceData.session ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}</b></p>
-            <p style="font-size:14px; margin: 3px 0;">Giờ kết thúc: <b>${invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}</b></p>
-          </div>
-          
-          <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
-          <table class="table">
-            <tr>
-              <th>Bàn</th>
-              <th>Giá/giờ</th>
-              <th>Thời gian</th>
-              <th>Tiền bàn</th>
-            </tr>
-            <tr>
-              <td>${tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A'}</td>
-              <td>${parseInt(invoiceData?.session?.hour_price?.toString() || '0').toLocaleString('vi-VN')} đ</td>
-              <td>${invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}</td>
-              <td>${invoiceData.totalTableMoney.toLocaleString('vi-VN')} đ</td>
-            </tr>
-          </table>
-          
-          ${invoiceData.orders.length > 0 ? `
-          <h3 style="font-size:15px; margin:4px 0;">Thực đơn:</h3>
-          <table class="table">
-            <tr>
-              <th>Món</th>
-              <th>SL</th>
-              <th>Đơn giá</th>
-              <th>Thành tiền</th>
-            </tr>
-            ${invoiceData.orders.map(order => `
-              <tr>
-                <td>${menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
-                <td>${order.quantity}</td>
-                <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} đ</td>
-                <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} đ</td>
-              </tr>
-            `).join('')}
-          </table>
-          ` : ''}
-          
-          <div class="total">
-            <h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền bàn: ${parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ</h3>
-            ${invoiceData.orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền đồ ăn: ${invoiceData.totalFoodMoney.toLocaleString('vi-VN')} đ</h3>` : ''}
-            <h1 style="font-size:20px; margin:4px 0; text-align: right;">Tổng tiền: ${parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ</h1>
-          </div>
-          
-          <div class="footer">
-            <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách đã luôn ủng hộ <br/> 24h Billiards Coffee!</p>
-            <p style="font-size:15px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      printWindow.document.write(invoiceContent);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      // printWindow.close();
-    }
-  };
-
-  // Hàm tính thời gian chơi
-  const calculatePlayTime = (session: Session) => {
-    if (!session.end_time) return 'Đang chơi';
+    if (!invoiceData.session) return;
     
-    const startTime = new Date(session.start_time);
-    const endTime = new Date(session.end_time);
-    const diffTime = Math.abs(endTime.getTime() - startTime.getTime());
-    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-    const hours = Math.floor(diffMinutes / 60);
-    const minutes = diffMinutes % 60;
-    if (hours > 0) {
-      return `${hours} giờ ${minutes} phút`;
-    }
-    return `${minutes} phút`;
+    const content = generateInvoiceContent(
+      invoiceData.session,
+      invoiceData.orders,
+      tables,
+      menus,
+      invoiceData.totalTableMoney,
+      invoiceData.totalFoodMoney,
+      invoiceData.totalMoney
+    );
+    printInvoice(content);
   };
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info') => {
@@ -595,44 +473,6 @@ export default function PlaytimePage() {
       message,
       severity,
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'playing':
-        return 'primary';
-      case 'finished':
-        return 'success';
-      case 'canceled':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'playing':
-        return 'Đang chơi';
-      case 'finished':
-        return 'Đã kết thúc';
-      case 'canceled':
-        return 'Đã hủy';
-      default:
-        return status;
-    }
-  };
-
-  const formatDateTime = (dateTime: string) => {
-    return new Date(dateTime).toLocaleString('vi-VN');
-  };
-
-  const formatMoney = (amount: number | null) => {
-    if (amount === null) return '0 đ';
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
   };
 
   if (loading) {
@@ -669,56 +509,7 @@ export default function PlaytimePage() {
         </Box>
 
         {/* Statistics Cards */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Tổng số Session
-                </Typography>
-                <Typography variant="h4">
-                  {sessions.length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Đang chơi
-                </Typography>
-                <Typography variant="h4" color="primary">
-                  {sessions.filter(s => s.status === 'playing').length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Đã kết thúc
-                </Typography>
-                <Typography variant="h4" color="success.main">
-                  {sessions.filter(s => s.status === 'finished').length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Đã hủy
-                </Typography>
-                <Typography variant="h4" color="error.main">
-                  {sessions.filter(s => s.status === 'canceled').length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <StatisticsCards sessions={sessions} />
 
         {/* Sessions Table */}
         <Card>
@@ -770,7 +561,7 @@ export default function PlaytimePage() {
                         <TableCell>
                           <Chip
                             label={getStatusText(session.status)}
-                            color={getStatusColor(session.status) as any}
+                            color={getStatusColorLocal(session.status)}
                             size="small"
                           />
                         </TableCell>
@@ -936,11 +727,11 @@ export default function PlaytimePage() {
                 onChange={(e) => setFoodFormData({ ...foodFormData, menu_id: e.target.value as number })}
               >
                 {menus.map((menu) => (
-                  <MenuItem key={menu.id} value={menu.id}>
-                    {
-                      getCategoryChip(menu.category)
-                    }
-                    : {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
+                                    <MenuItem key={menu.id} value={menu.id}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {getCategoryChipLocal(menu.category)}
+                      <span>{menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ</span>
+                    </Box>
                   </MenuItem>
                 ))}
               </Select>
