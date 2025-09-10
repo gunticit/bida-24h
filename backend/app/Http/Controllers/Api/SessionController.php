@@ -27,6 +27,26 @@ class SessionController extends Controller
         }
     }
 
+    public function todayOrPlaying()
+    {
+        try {
+            $sessions = $this->service->getTodayOrPlaying();
+            return response()->json($sessions);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể tải danh sách sessions hôm nay hoặc đang chơi'], 500);
+        }
+    }
+
+    public function today()
+    {
+        try {
+            $sessions = $this->service->getToday();
+            return response()->json($sessions);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể tải danh sách sessions hôm nay'], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         try {
@@ -91,6 +111,51 @@ class SessionController extends Controller
             return response()->json(['message' => 'Session không tồn tại'], 404);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Không thể xóa session'], 500);
+        }
+    }
+
+    public function addOrder(Request $request, $sessionId)
+    {
+        try {
+            $validated = $request->validate([
+                'menu_id' => 'required|integer|exists:menus,id',
+                'quantity' => 'required|integer|min:1'
+            ]);
+
+            $order = $this->service->addOrderToSession($sessionId, $validated['menu_id'], $validated['quantity']);
+            return response()->json($order, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function removeOrder($orderId)
+    {
+        try {
+            $this->service->removeOrderFromSession($orderId);
+            return response()->json(['message' => 'Order đã được xóa thành công']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Order không tồn tại'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể xóa order'], 500);
+        }
+    }
+
+    public function updateOrderQuantity(Request $request, $orderId)
+    {
+        try {
+            $validated = $request->validate([
+                'quantity' => 'required|integer|min:1'
+            ]);
+
+            $order = $this->service->updateOrderQuantity($orderId, $validated['quantity']);
+            return response()->json($order);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 }

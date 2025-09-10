@@ -127,7 +127,7 @@ export default function PlaytimePage() {
 
   const loadSessions = async () => {
     try {
-      const sessionsData = await apiService.getSessions();
+      const sessionsData = await apiService.getSessionsTodayOrPlaying();
       setSessions(sessionsData);
     } catch (error) {
       console.error('Failed to load sessions:', error);
@@ -150,8 +150,8 @@ export default function PlaytimePage() {
 
   const loadMenus = async () => {
     try {
-      const menusData = await apiService.getMenus();
-      setMenus(menusData.filter(menu => menu.is_active));
+      const menusData = await apiService.getAvailableMenus();
+      setMenus(menusData);
       if (menusData.length > 0) {
         setFoodFormData(prev => ({ ...prev, menu_id: menusData[0].id }));
       }

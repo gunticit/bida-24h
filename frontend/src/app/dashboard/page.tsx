@@ -123,6 +123,7 @@ export default function DashboardPage() {
                 {user?.role === 'admin' && <Button
                   variant="outlined"
                   startIcon={<DashboardIcon />}
+                  onClick={() => router.push('/revenue')}
                 >
                   Xem thống kê
                 </Button>}

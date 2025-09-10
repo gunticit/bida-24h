@@ -70,6 +70,7 @@ export interface MenuItem {
   id: number;
   name: string;
   price: number;
+  quantity: number;
   category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
   created_at: string;
@@ -237,6 +238,14 @@ class ApiService {
     return this.request<Session[]>('/sessions');
   }
 
+  async getSessionsTodayOrPlaying(): Promise<Session[]> {
+    return this.request<Session[]>('/sessions/today-or-playing');
+  }
+
+  async getSessionsToday(): Promise<Session[]> {
+    return this.request<Session[]>('/sessions/today');
+  }
+
   async getSession(id: number): Promise<Session> {
     return this.request<Session>(`/sessions/${id}`);
   }
@@ -258,6 +267,26 @@ class ApiService {
   async deleteSession(id: number): Promise<{ message: string }> {
     return this.request<{ message: string }>(`/sessions/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async addOrderToSession(sessionId: number, menuId: number, quantity: number): Promise<Order> {
+    return this.request<Order>(`/sessions/${sessionId}/orders`, {
+      method: 'POST',
+      body: JSON.stringify({ menu_id: menuId, quantity }),
+    });
+  }
+
+  async removeOrderFromSession(orderId: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/orders/${orderId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateOrderQuantity(orderId: number, quantity: number): Promise<Order> {
+    return this.request<Order>(`/orders/${orderId}/quantity`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity }),
     });
   }
 
@@ -295,6 +324,10 @@ class ApiService {
     return this.request<MenuItem[]>('/menus');
   }
 
+  async getAvailableMenus(): Promise<MenuItem[]> {
+    return this.request<MenuItem[]>('/menus/available');
+  }
+
   async getMenu(id: number): Promise<MenuItem> {
     return this.request<MenuItem>(`/menus/${id}`);
   }
@@ -316,6 +349,27 @@ class ApiService {
   async deleteMenu(id: number): Promise<{ message: string }> {
     return this.request<{ message: string }>(`/menus/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async updateMenuQuantity(id: number, quantity: number): Promise<MenuItem> {
+    return this.request<MenuItem>(`/menus/${id}/quantity`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity }),
+    });
+  }
+
+  async decreaseMenuQuantity(id: number, amount: number): Promise<MenuItem> {
+    return this.request<MenuItem>(`/menus/${id}/decrease-quantity`, {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
+  async increaseMenuQuantity(id: number, amount: number): Promise<MenuItem> {
+    return this.request<MenuItem>(`/menus/${id}/increase-quantity`, {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
     });
   }
 
@@ -346,6 +400,46 @@ class ApiService {
     return this.request<{ message: string }>(`/orders/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  // Revenue statistics methods
+  async getDailyRevenue(date?: string): Promise<any> {
+    const params = date ? `?date=${date}` : '';
+    return this.request<any>(`/revenue/daily${params}`);
+  }
+
+  async getMonthlyRevenue(year?: number, month?: number): Promise<any> {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year.toString());
+    if (month) params.append('month', month.toString());
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return this.request<any>(`/revenue/monthly${queryString}`);
+  }
+
+  async getYearlyRevenue(year?: number): Promise<any> {
+    const params = year ? `?year=${year}` : '';
+    return this.request<any>(`/revenue/yearly${params}`);
+  }
+
+  async getRevenueSummary(period?: string): Promise<any> {
+    const params = period ? `?period=${period}` : '';
+    return this.request<any>(`/revenue/summary${params}`);
+  }
+
+  async getTopTables(limit?: number, period?: string): Promise<any> {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (period) params.append('period', period);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return this.request<any>(`/revenue/top-tables${queryString}`);
+  }
+
+  async getRevenueChart(period?: string, type?: string): Promise<any> {
+    const params = new URLSearchParams();
+    if (period) params.append('period', period);
+    if (type) params.append('type', type);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return this.request<any>(`/revenue/chart${queryString}`);
   }
 }
 

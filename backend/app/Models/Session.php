@@ -59,6 +59,19 @@ class Session extends Model
         return $query->where('status', 'canceled');
     }
 
+    public function scopeToday($query)
+    {
+        return $query->whereDate('start_time', today());
+    }
+
+    public function scopeTodayOrPlaying($query)
+    {
+        return $query->where(function($q) {
+            $q->whereDate('start_time', today())
+              ->orWhere('status', 'playing');
+        });
+    }
+
     // Methods
     public function calculateTotalTime()
     {

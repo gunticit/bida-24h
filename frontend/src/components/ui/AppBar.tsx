@@ -19,6 +19,7 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
+  BarChart as BarChartIcon,
 } from '@mui/icons-material';
 
 interface User {
@@ -80,6 +81,15 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
             </ListItemIcon>
             Dashboard
           </MenuItem>
+          {user?.role === 'admin' && <MenuItem onClick={() => {
+            handleMenuClose();
+            router.push('/revenue');
+          }}>
+            <ListItemIcon>
+              <BarChartIcon fontSize="small" />
+            </ListItemIcon>
+            Thống kê doanh thu
+          </MenuItem>}
           <MenuItem onClick={() => {
             handleMenuClose();
             router.push('/setting/profile');

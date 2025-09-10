@@ -12,12 +12,14 @@ class Menu extends Model
     protected $fillable = [
         'name',
         'price',
+        'quantity',
         'category',
         'is_active',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'quantity' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -51,5 +53,28 @@ class Menu extends Model
     public function scopeTakeaway($query)
     {
         return $query->where('category', 'takeaway');
+    }
+
+    // Methods
+    public function decreaseQuantity($amount = 1)
+    {
+        if ($this->quantity >= $amount) {
+            $this->quantity -= $amount;
+            $this->save();
+            return true;
+        }
+        return false;
+    }
+
+    public function increaseQuantity($amount = 1)
+    {
+        $this->quantity += $amount;
+        $this->save();
+        return true;
+    }
+
+    public function hasEnoughQuantity($amount = 1)
+    {
+        return $this->quantity >= $amount;
     }
 }

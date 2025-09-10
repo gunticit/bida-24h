@@ -53,6 +53,7 @@ interface MenuItem {
   id: number;
   name: string;
   price: number;
+  quantity: number;
   category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
   created_at: string;
@@ -62,6 +63,7 @@ interface MenuItem {
 interface MenuFormData {
   name: string;
   price: number;
+  quantity: number;
   category: 'food' | 'drink' | 'tobacco' | 'takeaway';
   is_active: boolean;
 }
@@ -104,6 +106,7 @@ export default function MenuSettingPage() {
   const [formData, setFormData] = useState<MenuFormData>({
     name: '',
     price: 0,
+    quantity: 0,
     category: 'food',
     is_active: true,
   });
@@ -185,6 +188,7 @@ export default function MenuSettingPage() {
       setFormData({
         name: menu.name,
         price: menu.price,
+        quantity: menu.quantity,
         category: menu.category,
         is_active: menu.is_active,
       });
@@ -193,6 +197,7 @@ export default function MenuSettingPage() {
       setFormData({
         name: '',
         price: 0,
+        quantity: 0,
         category: 'food',
         is_active: true,
       });
@@ -206,6 +211,7 @@ export default function MenuSettingPage() {
     setFormData({
       name: '',
       price: 0,
+      quantity: 0,
       category: 'food',
       is_active: true,
     });
@@ -220,8 +226,8 @@ export default function MenuSettingPage() {
 
   const handleSubmit = async () => {
     // Validation
-    if (!formData.name || formData.price <= 0) {
-      showSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc và giá phải lớn hơn 0', 'error');
+    if (!formData.name || formData.price <= 0 || formData.quantity < 0) {
+      showSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc, giá phải lớn hơn 0 và số lượng không được âm', 'error');
       return;
     }
 
@@ -431,6 +437,16 @@ export default function MenuSettingPage() {
               inputProps={{ min: 0, step: 1000 }}
             />
             
+            <TextField
+              label="Số lượng tồn kho"
+              type="number"
+              value={formData.quantity}
+              onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+              fullWidth
+              required
+              inputProps={{ min: 0 }}
+            />
+            
             <FormControl fullWidth>
               <InputLabel>Danh mục</InputLabel>
               <Select
@@ -465,7 +481,7 @@ export default function MenuSettingPage() {
             onClick={handleSubmit} 
             variant="contained" 
             startIcon={<SaveIcon />}
-            disabled={!formData.name || formData.price <= 0}
+            disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
           >
             {editingMenu ? 'Cập nhật' : 'Thêm mới'}
           </Button>
@@ -514,6 +530,7 @@ function MenuTable({
             <TableCell>Tên món</TableCell>
             <TableCell>Danh mục</TableCell>
             <TableCell>Giá (VNĐ)</TableCell>
+            <TableCell>Số lượng</TableCell>
             <TableCell>Trạng thái</TableCell>
             <TableCell>Ngày tạo</TableCell>
             <TableCell>Thao tác</TableCell>
@@ -522,7 +539,7 @@ function MenuTable({
         <TableBody>
           {menus.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} align="center">
+              <TableCell colSpan={8} align="center">
                 <Typography variant="body2" color="text.secondary">
                   Không có món ăn nào
                 </Typography>
@@ -535,6 +552,13 @@ function MenuTable({
                 <TableCell>{menu.name}</TableCell>
                 <TableCell>{getCategoryChip(menu.category)}</TableCell>
                 <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
+                <TableCell>
+                  <Chip 
+                    label={menu.quantity} 
+                    color={menu.quantity > 0 ? 'success' : 'error'}
+                    size="small"
+                  />
+                </TableCell>
                 <TableCell>{getStatusChip(menu.is_active)}</TableCell>
                 <TableCell>{new Date(menu.created_at).toLocaleDateString('vi-VN')}</TableCell>
                 <TableCell>
