@@ -34,19 +34,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     
     // Session management routes
-    Route::apiResource('sessions', SessionController::class);
     Route::get('/sessions/today-or-playing', [SessionController::class, 'todayOrPlaying']);
-    Route::get('/sessions/today', [SessionController::class, 'today']);
     Route::post('/sessions/{sessionId}/orders', [SessionController::class, 'addOrder']);
+    Route::get('/sessions/today', [SessionController::class, 'today']);
     Route::delete('/orders/{orderId}', [SessionController::class, 'removeOrder']);
     Route::put('/orders/{orderId}/quantity', [SessionController::class, 'updateOrderQuantity']);
+    Route::apiResource('sessions', SessionController::class);
     
     // Menu management routes
-    Route::apiResource('menus', MenuController::class);
     Route::get('/menus/available', [MenuController::class, 'available']);
     Route::put('/menus/{id}/quantity', [MenuController::class, 'updateQuantity']);
     Route::post('/menus/{id}/decrease-quantity', [MenuController::class, 'decreaseQuantity']);
     Route::post('/menus/{id}/increase-quantity', [MenuController::class, 'increaseQuantity']);
+    Route::apiResource('menus', MenuController::class);
     
     // Order management routes
     Route::apiResource('orders', OrderController::class);
