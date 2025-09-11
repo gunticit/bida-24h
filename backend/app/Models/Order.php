@@ -25,7 +25,7 @@ class Order extends Model
     // Relationships
     public function session()
     {
-        return $this->belongsTo(Session::class, 'session_id');
+        return $this->belongsTo(GameSession::class, 'session_id');
     }
 
     public function menu()

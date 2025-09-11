@@ -22,12 +22,12 @@ class Table extends Model
     // Relationships
     public function sessions()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(GameSession::class);
     }
 
     public function activeSession()
     {
-        return $this->hasOne(Session::class)->where('status', 'playing');
+        return $this->hasOne(GameSession::class)->where('status', 'playing');
     }
 
     // Scopes
