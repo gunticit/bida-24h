@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -12,49 +12,49 @@ import {
   Link,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import { apiService, LoginCredentials } from '@/lib/api';
+} from '@mui/material'
+import { apiService, LoginCredentials } from '@/lib/api'
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router = useRouter()
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    });
-  };
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     try {
-      const response = await apiService.login(formData);
-      apiService.setToken(response.token);
-      router.push('/dashboard');
+      const response = await apiService.login(formData)
+      apiService.setToken(response.token)
+      router.push('/dashboard')
     } catch (err) {
-      let message = 'Đăng nhập thất bại';
+      let message = 'Đăng nhập thất bại'
       if (
         err &&
         typeof err === 'object' &&
         'message' in err &&
         typeof (err as Record<string, unknown>).message === 'string'
       ) {
-        message = (err as { message: string }).message;
+        message = (err as { message: string }).message
       }
-      setError(message);
+      setError(message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -71,14 +71,14 @@ export default function LoginPage() {
           <Typography component="h1" variant="h4" align="center" gutterBottom>
             Đăng nhập
           </Typography>
-          
+
           {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
           )}
 
-            <Box
+          <Box
             component="form"
             onSubmit={handleSubmit}
             sx={{
@@ -87,7 +87,7 @@ export default function LoginPage() {
               flexDirection: 'column',
               gap: 2,
             }}
-            >
+          >
             <TextField
               required
               fullWidth
@@ -100,8 +100,8 @@ export default function LoginPage() {
               onChange={handleChange}
               type="email"
               sx={{
-              backgroundColor: 'background.paper',
-              borderRadius: 1,
+                backgroundColor: 'background.paper',
+                borderRadius: 1,
               }}
             />
             <TextField
@@ -115,8 +115,8 @@ export default function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               sx={{
-              backgroundColor: 'background.paper',
-              borderRadius: 1,
+                backgroundColor: 'background.paper',
+                borderRadius: 1,
               }}
             />
             <Button
@@ -125,22 +125,22 @@ export default function LoginPage() {
               variant="contained"
               disabled={loading}
               sx={{
-              mt: 3,
-              mb: 2,
-              paddingY: 1.5,
-              fontSize: '1rem',
+                mt: 3,
+                mb: 2,
+                paddingY: 1.5,
+                fontSize: '1rem',
               }}
             >
               {loading ? <CircularProgress size={24} /> : 'Đăng nhập'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link href="/register" variant="body2" underline="hover">
-              Chưa có tài khoản? Đăng ký ngay
+                Chưa có tài khoản? Đăng ký ngay
               </Link>
             </Box>
-            </Box>
+          </Box>
         </Paper>
       </Box>
     </Container>
-  );
+  )
 }

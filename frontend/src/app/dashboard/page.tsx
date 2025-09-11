@@ -1,77 +1,66 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  Box,
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-} from '@mui/material';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Box, Container, Typography, Card, CardContent, Grid, Button } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   CalendarToday as CalendarIcon,
-} from '@mui/icons-material';
-import { apiService, User } from '@/lib/api';
-import { AppBar } from '@/components/ui';
+} from '@mui/icons-material'
+import { apiService, User } from '@/lib/api'
+import { AppBar } from '@/components/ui'
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = apiService.getToken();
+    const token = apiService.getToken()
     if (!token) {
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
-    loadUser();
-  }, [router]);
+    loadUser()
+  }, [router])
 
   const loadUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
-      router.push('/login');
+      console.error('Failed to load user:', error)
+      router.push('/login')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      router.push('/');
+      await apiService.logout()
+      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <Typography>Đang tải...</Typography>
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar 
-        title="Dashboard"
-        user={user}
-        onLogout={handleLogout}
-        icon={<DashboardIcon />}
-      />
+      <AppBar title="Dashboard" user={user} onLogout={handleLogout} icon={<DashboardIcon />} />
 
       {/* Main Content */}
       <Container
@@ -90,7 +79,6 @@ export default function DashboardPage() {
         </Typography>
 
         <Grid container spacing={3}>
-
           {/* System Status */}
           <Card sx={{ flexGrow: 1, mb: 3 }}>
             <CardContent>
@@ -110,8 +98,7 @@ export default function DashboardPage() {
               </Grid>
             </CardContent>
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="h6" gutterBottom>
-              </Typography>
+              <Typography variant="h6" gutterBottom></Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Button
                   variant="contained"
@@ -120,25 +107,29 @@ export default function DashboardPage() {
                 >
                   Quản lý Giờ chơi
                 </Button>
-                {user?.role === 'admin' && <Button
-                  variant="outlined"
-                  startIcon={<DashboardIcon />}
-                  onClick={() => router.push('/revenue')}
-                >
-                  Xem thống kê
-                </Button>}
-                {user?.role === 'admin' && <Button
-                  variant="outlined"
-                  startIcon={<SettingsIcon />}
-                  onClick={() => router.push('/setting')}
-                >
-                  Cài đặt hệ thống
-                </Button>}
+                {user?.role === 'admin' && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => router.push('/revenue')}
+                  >
+                    Xem thống kê
+                  </Button>
+                )}
+                {user?.role === 'admin' && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<SettingsIcon />}
+                    onClick={() => router.push('/setting')}
+                  >
+                    Cài đặt hệ thống
+                  </Button>
+                )}
               </Box>
             </CardContent>
           </Card>
         </Grid>
       </Container>
     </Box>
-  );
+  )
 }

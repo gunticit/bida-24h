@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -13,45 +13,45 @@ import {
   ListItemIcon,
   Divider,
   Box,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
   BarChart as BarChartIcon,
-} from '@mui/icons-material';
+} from '@mui/icons-material'
 
 interface User {
-  id: number;
-  name: string;
-  role?: string;
-  email: string;
+  id: number
+  name: string
+  role?: string
+  email: string
 }
 
 interface AppBarProps {
-  title: string;
-  user: User | null;
-  onLogout: () => void;
-  icon?: React.ReactNode;
+  title: string
+  user: User | null
+  onLogout: () => void
+  icon?: React.ReactNode
 }
 
 export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const router = useRouter()
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
   const handleLogout = () => {
-    handleMenuClose();
-    onLogout();
-  };
+    handleMenuClose()
+    onLogout()
+  }
 
   return (
     <MuiAppBar position="static">
@@ -60,51 +60,48 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        <IconButton
-          size="large"
-          edge="end"
-          color="inherit"
-          onClick={handleMenuOpen}
-        >
-          <Avatar sx={{ width: 32, height: 32 }}>
-            {user?.name?.charAt(0) || 'U'}
-          </Avatar>
+        <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
+          <Avatar sx={{ width: 32, height: 32 }}>{user?.name?.charAt(0) || 'U'}</Avatar>
         </IconButton>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem onClick={() => router.push('/dashboard')}>
             <ListItemIcon>
               <DashboardIcon fontSize="small" />
             </ListItemIcon>
             Dashboard
           </MenuItem>
-          {user?.role === 'admin' && <MenuItem onClick={() => {
-            handleMenuClose();
-            router.push('/revenue');
-          }}>
-            <ListItemIcon>
-              <BarChartIcon fontSize="small" />
-            </ListItemIcon>
-            Thống kê doanh thu
-          </MenuItem>}
-          <MenuItem onClick={() => {
-            handleMenuClose();
-            router.push('/setting/profile');
-          }}>
+          {user?.role === 'admin' && (
+            <MenuItem
+              onClick={() => {
+                handleMenuClose()
+                router.push('/revenue')
+              }}
+            >
+              <ListItemIcon>
+                <BarChartIcon fontSize="small" />
+              </ListItemIcon>
+              Thống kê doanh thu
+            </MenuItem>
+          )}
+          <MenuItem
+            onClick={() => {
+              handleMenuClose()
+              router.push('/setting/profile')
+            }}
+          >
             <ListItemIcon>
               <PersonIcon fontSize="small" />
             </ListItemIcon>
             Hồ sơ
           </MenuItem>
-          {user?.role === 'admin' && <MenuItem onClick={() => router.push('/setting')}>
-            <ListItemIcon>
-              <SettingsIcon fontSize="small" />
-            </ListItemIcon>
-            Cài đặt
-          </MenuItem>}
+          {user?.role === 'admin' && (
+            <MenuItem onClick={() => router.push('/setting')}>
+              <ListItemIcon>
+                <SettingsIcon fontSize="small" />
+              </ListItemIcon>
+              Cài đặt
+            </MenuItem>
+          )}
           <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
@@ -115,5 +112,5 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
         </Menu>
       </Toolbar>
     </MuiAppBar>
-  );
+  )
 }

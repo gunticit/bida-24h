@@ -1,35 +1,35 @@
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";       
-import timezone from "dayjs/plugin/timezone"; 
-import { formatMoney, calculatePlayTime } from './formatters';
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import { formatMoney, calculatePlayTime } from './formatters'
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 interface InvoiceSession {
-  id: number;
-  start_time: string;
-  end_time?: string | null;
-  hour_price: number;
-  table_id: number;
+  id: number
+  start_time: string
+  end_time?: string | null
+  hour_price: number
+  table_id: number
 }
 
 interface InvoiceOrder {
-  id: number;
-  menu_id: number;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
+  id: number
+  menu_id: number
+  quantity: number
+  unit_price: number
+  total_price: number
 }
 
 interface InvoiceTable {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 interface InvoiceMenu {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 export const generateInvoiceContent = (
@@ -39,7 +39,7 @@ export const generateInvoiceContent = (
   menus: InvoiceMenu[],
   totalTableMoney: number,
   totalFoodMoney: number,
-  totalMoney: number
+  totalMoney: number,
 ) => {
   return `
     <!DOCTYPE html>
@@ -116,14 +116,16 @@ export const generateInvoiceContent = (
           <th>Tiền bàn</th>
         </tr>
         <tr>
-          <td>${tables.find(t => t.id === session.table_id)?.name || 'N/A'}</td>
+          <td>${tables.find((t) => t.id === session.table_id)?.name || 'N/A'}</td>
           <td>${parseInt(session.hour_price.toString()).toLocaleString('vi-VN')} đ</td>
           <td>${calculatePlayTime(session)}</td>
           <td>${totalTableMoney.toLocaleString('vi-VN')} đ</td>
         </tr>
       </table>
       
-      ${orders.length > 0 ? `
+      ${
+        orders.length > 0
+          ? `
       <h3 style="font-size:15px; margin:4px 0;">Thực đơn:</h3>
       <table class="table">
         <tr>
@@ -132,16 +134,22 @@ export const generateInvoiceContent = (
           <th>Đơn giá</th>
           <th>Thành tiền</th>
         </tr>
-        ${orders.map(order => `
+        ${orders
+          .map(
+            (order) => `
           <tr>
-            <td>${menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
+            <td>${menus.find((menu) => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
             <td>${order.quantity}</td>
             <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} đ</td>
             <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} đ</td>
           </tr>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </table>
-      ` : ''}
+      `
+          : ''
+      }
       
       <div class="total">
         <h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền bàn: ${parseInt(totalTableMoney.toString()).toLocaleString('vi-VN')} đ</h3>
@@ -155,15 +163,15 @@ export const generateInvoiceContent = (
       </div>
     </body>
     </html>
-  `;
-};
+  `
+}
 
 export const printInvoice = (invoiceContent: string) => {
-  const printWindow = window.open('', '_blank');
+  const printWindow = window.open('', '_blank')
   if (printWindow) {
-    printWindow.document.write(invoiceContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+    printWindow.document.write(invoiceContent)
+    printWindow.document.close()
+    printWindow.focus()
+    printWindow.print()
   }
-};
+}

@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -31,7 +31,7 @@ import {
   IconButton as MuiIconButton,
   Tooltip,
   Chip,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Person as PersonIcon,
   Add as AddIcon,
@@ -43,157 +43,157 @@ import {
   Person as StaffIcon,
   Visibility as ViewIcon,
   VisibilityOff as HideIcon,
-} from '@mui/icons-material';
-import { apiService, User } from '@/lib/api';
-import { AppBar } from '@/components/ui';
+} from '@mui/icons-material'
+import { apiService, User } from '@/lib/api'
+import { AppBar } from '@/components/ui'
 
 interface UserFormData {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-  role: 'admin' | 'staff';
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+  role: 'admin' | 'staff'
 }
 
 interface ExtendedUser extends User {
-  role?: 'admin' | 'staff';
+  role?: 'admin' | 'staff'
 }
 
 export default function UserSettingPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<ExtendedUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [users, setUsers] = useState<ExtendedUser[]>([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter()
+  const [user, setUser] = useState<ExtendedUser | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [users, setUsers] = useState<ExtendedUser[]>([])
+  const [openDialog, setOpenDialog] = useState(false)
+  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState<UserFormData>({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
     role: 'staff',
-  });
+  })
   const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
+    open: boolean
+    message: string
+    severity: 'success' | 'error' | 'info' | 'warning'
   }>({
     open: false,
     message: '',
     severity: 'info',
-  });
+  })
 
   useEffect(() => {
-    const token = apiService.getToken();
+    const token = apiService.getToken()
     if (!token) {
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
-    loadUser();
-    loadUsers();
-  }, [router]);
+    loadUser()
+    loadUsers()
+  }, [router])
 
   const loadUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
-      router.push('/login');
+      console.error('Failed to load user:', error)
+      router.push('/login')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadUsers = async () => {
     try {
-      const usersData = await apiService.getUsers();
-      setUsers(usersData.data || []);
+      const usersData = await apiService.getUsers()
+      setUsers(usersData.data || [])
     } catch (error) {
-      console.error('Failed to load users:', error);
-      showSnackbar('Không thể tải danh sách người dùng', 'error');
+      console.error('Failed to load users:', error)
+      showSnackbar('Không thể tải danh sách người dùng', 'error')
     }
-  };
+  }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      router.push('/');
+      await apiService.logout()
+      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   const handleOpenDialog = (user?: ExtendedUser) => {
     if (user) {
-      setEditingUser(user);
+      setEditingUser(user)
       setFormData({
         name: user.name,
         email: user.email,
         password: '',
         password_confirmation: '',
         role: user.role || 'staff',
-      });
+      })
     } else {
-      setEditingUser(null);
+      setEditingUser(null)
       setFormData({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         role: 'staff',
-      });
+      })
     }
-    setOpenDialog(true);
-    setShowPassword(false);
-  };
+    setOpenDialog(true)
+    setShowPassword(false)
+  }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditingUser(null);
+    setOpenDialog(false)
+    setEditingUser(null)
     setFormData({
       name: '',
       email: '',
       password: '',
       password_confirmation: '',
       role: 'staff',
-    });
-    setShowPassword(false);
-  };
+    })
+    setShowPassword(false)
+  }
 
   const handleInputChange = (field: keyof UserFormData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async () => {
     // Validation
     if (!formData.name || !formData.email) {
-      showSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
-      return;
+      showSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc', 'error')
+      return
     }
 
     if (!editingUser && !formData.password) {
-      showSnackbar('Vui lòng nhập mật khẩu cho người dùng mới', 'error');
-      return;
+      showSnackbar('Vui lòng nhập mật khẩu cho người dùng mới', 'error')
+      return
     }
 
     if (formData.password && formData.password !== formData.password_confirmation) {
-      showSnackbar('Mật khẩu xác nhận không khớp', 'error');
-      return;
+      showSnackbar('Mật khẩu xác nhận không khớp', 'error')
+      return
     }
 
     try {
@@ -203,14 +203,14 @@ export default function UserSettingPage() {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-        };
-        
-        if (formData.password) {
-          updateData.password = formData.password;
         }
 
-        await apiService.updateUser(editingUser.id, updateData);
-        showSnackbar('Cập nhật người dùng thành công!', 'success');
+        if (formData.password) {
+          updateData.password = formData.password
+        }
+
+        await apiService.updateUser(editingUser.id, updateData)
+        showSnackbar('Cập nhật người dùng thành công!', 'success')
       } else {
         // Create new user
         await apiService.createUser({
@@ -218,50 +218,50 @@ export default function UserSettingPage() {
           email: formData.email,
           password: formData.password,
           password_confirmation: formData.password_confirmation,
-        });
-        showSnackbar('Thêm người dùng mới thành công!', 'success');
+        })
+        showSnackbar('Thêm người dùng mới thành công!', 'success')
       }
-      
-      handleCloseDialog();
-      loadUsers();
+
+      handleCloseDialog()
+      loadUsers()
     } catch (error) {
-      console.error('Failed to save user:', error);
-      showSnackbar('Có lỗi xảy ra khi lưu người dùng', 'error');
+      console.error('Failed to save user:', error)
+      showSnackbar('Có lỗi xảy ra khi lưu người dùng', 'error')
     }
-  };
+  }
 
   const handleDeleteUser = async (userId: number) => {
     if (userId === user?.id) {
-      showSnackbar('Không thể xóa tài khoản của chính mình', 'warning');
-      return;
+      showSnackbar('Không thể xóa tài khoản của chính mình', 'warning')
+      return
     }
 
     if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
       try {
-        await apiService.deleteUser(userId);
-        showSnackbar('Xóa người dùng thành công!', 'success');
-        loadUsers();
+        await apiService.deleteUser(userId)
+        showSnackbar('Xóa người dùng thành công!', 'success')
+        loadUsers()
       } catch (error) {
-        console.error('Failed to delete user:', error);
-        showSnackbar('Có lỗi xảy ra khi xóa người dùng', 'error');
+        console.error('Failed to delete user:', error)
+        showSnackbar('Có lỗi xảy ra khi xóa người dùng', 'error')
       }
     }
-  };
+  }
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
     setSnackbar({
       open: true,
       message,
       severity,
-    });
-  };
+    })
+  }
 
   const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
+    setSnackbar((prev) => ({ ...prev, open: false }))
+  }
 
   const getRoleChip = (role: string) => {
-    const isAdmin = role === 'admin';
+    const isAdmin = role === 'admin'
     return (
       <Chip
         icon={isAdmin ? <AdminIcon /> : <StaffIcon />}
@@ -270,21 +270,23 @@ export default function UserSettingPage() {
         variant="outlined"
         size="small"
       />
-    );
-  };
+    )
+  }
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <Typography>Đang tải...</Typography>
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar 
+      <AppBar
         title="Quản lý người dùng"
         user={user}
         onLogout={handleLogout}
@@ -294,14 +296,8 @@ export default function UserSettingPage() {
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4">
-            Quản lý người dùng
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
+          <Typography variant="h4">Quản lý người dùng</Typography>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
             Thêm người dùng mới
           </Button>
         </Box>
@@ -326,10 +322,10 @@ export default function UserSettingPage() {
                       <TableCell>{userItem.id}</TableCell>
                       <TableCell>{userItem.name}</TableCell>
                       <TableCell>{userItem.email}</TableCell>
+                      <TableCell>{getRoleChip(userItem.role || 'staff')}</TableCell>
                       <TableCell>
-                        {getRoleChip(userItem.role || 'staff')}
+                        {new Date(userItem.created_at).toLocaleDateString('vi-VN')}
                       </TableCell>
-                      <TableCell>{new Date(userItem.created_at).toLocaleDateString('vi-VN')}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="Sửa người dùng">
@@ -364,9 +360,7 @@ export default function UserSettingPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingUser ? 'Sửa người dùng' : 'Thêm người dùng mới'}
-        </DialogTitle>
+        <DialogTitle>{editingUser ? 'Sửa người dùng' : 'Thêm người dùng mới'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
@@ -376,7 +370,7 @@ export default function UserSettingPage() {
               fullWidth
               required
             />
-            
+
             <TextField
               label="Email"
               type="email"
@@ -385,7 +379,7 @@ export default function UserSettingPage() {
               fullWidth
               required
             />
-            
+
             <FormControl fullWidth>
               <InputLabel>Vai trò</InputLabel>
               <Select
@@ -397,7 +391,7 @@ export default function UserSettingPage() {
                 <MenuItem value="admin">Quản trị viên</MenuItem>
               </Select>
             </FormControl>
-            
+
             {!editingUser && (
               <>
                 <TextField
@@ -409,16 +403,13 @@ export default function UserSettingPage() {
                   required
                   InputProps={{
                     endAdornment: (
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                         {showPassword ? <HideIcon /> : <ViewIcon />}
                       </IconButton>
                     ),
                   }}
                 />
-                
+
                 <TextField
                   label="Xác nhận mật khẩu"
                   type={showPassword ? 'text' : 'password'}
@@ -429,7 +420,7 @@ export default function UserSettingPage() {
                 />
               </>
             )}
-            
+
             {editingUser && (
               <TextField
                 label="Mật khẩu mới (để trống nếu không thay đổi)"
@@ -439,10 +430,7 @@ export default function UserSettingPage() {
                 fullWidth
                 InputProps={{
                   endAdornment: (
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                       {showPassword ? <HideIcon /> : <ViewIcon />}
                     </IconButton>
                   ),
@@ -455,9 +443,9 @@ export default function UserSettingPage() {
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
             Hủy
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            variant="contained" 
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
             startIcon={<SaveIcon />}
             disabled={!formData.name || !formData.email}
           >
@@ -473,14 +461,10 @@ export default function UserSettingPage() {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
-  );
+  )
 }

@@ -11,7 +11,8 @@
     "setup": "npm run install:all && cd backend && php artisan migrate && php artisan key:generate",
     "test": "cd backend && php artisan test && cd ../frontend && npm run test",
     "clean": "cd frontend && npm run clean && cd ../backend && php artisan config:clear && php artisan cache:clear",
-    "fix": "cd frontend && npm run lint -- --fix"
+    "fix": "cd frontend && npm run lint -- --fix",
+    "format": "cd frontend && npx prettier --write ."
   },
   "keywords": [
     "laravel",
@@ -24,7 +25,8 @@
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.6.2"
   },
   "dependencies": {
     "dayjs": "^1.11.13"

@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -12,48 +12,48 @@ import {
   Link,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import { apiService, RegisterData } from '@/lib/api';
+} from '@mui/material'
+import { apiService, RegisterData } from '@/lib/api'
 
 export default function RegisterPage() {
-  const router = useRouter();
+  const router = useRouter()
   const [formData, setFormData] = useState<RegisterData>({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    });
-  };
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     if (formData.password !== formData.password_confirmation) {
-      setError('Mật khẩu xác nhận không khớp');
-      setLoading(false);
-      return;
+      setError('Mật khẩu xác nhận không khớp')
+      setLoading(false)
+      return
     }
 
     try {
-      const response = await apiService.register(formData);
-      apiService.setToken(response.token);
-      router.push('/dashboard');
+      const response = await apiService.register(formData)
+      apiService.setToken(response.token)
+      router.push('/dashboard')
     } catch (err: any) {
-      setError(err.message || 'Đăng ký thất bại');
+      setError(err.message || 'Đăng ký thất bại')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -69,7 +69,7 @@ export default function RegisterPage() {
           <Typography component="h1" variant="h4" align="center" gutterBottom>
             Đăng ký
           </Typography>
-          
+
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -143,5 +143,5 @@ export default function RegisterPage() {
         </Paper>
       </Box>
     </Container>
-  );
+  )
 }

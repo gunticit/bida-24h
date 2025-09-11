@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -34,7 +34,7 @@ import {
   FormControlLabel,
   Tabs,
   Tab,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -45,37 +45,37 @@ import {
   LocalBar as DrinkIcon,
   SmokingRooms as TobaccoIcon,
   TakeoutDining as TakeawayIcon,
-} from '@mui/icons-material';
-import { apiService, User } from '@/lib/api';
-import { AppBar } from '@/components/ui';
+} from '@mui/icons-material'
+import { apiService, User } from '@/lib/api'
+import { AppBar } from '@/components/ui'
 
 interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  category: 'food' | 'drink' | 'tobacco' | 'takeaway';
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  id: number
+  name: string
+  price: number
+  quantity: number
+  category: 'food' | 'drink' | 'tobacco' | 'takeaway'
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 interface MenuFormData {
-  name: string;
-  price: number;
-  quantity: number;
-  category: 'food' | 'drink' | 'tobacco' | 'takeaway';
-  is_active: boolean;
+  name: string
+  price: number
+  quantity: number
+  category: 'food' | 'drink' | 'tobacco' | 'takeaway'
+  is_active: boolean
 }
 
 interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+  children?: React.ReactNode
+  index: number
+  value: number
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -85,205 +85,207 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`menu-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 export default function MenuSettingPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [menus, setMenus] = useState<MenuItem[]>([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null);
-  const [tabValue, setTabValue] = useState(0);
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [menus, setMenus] = useState<MenuItem[]>([])
+  const [openDialog, setOpenDialog] = useState(false)
+  const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
+  const [tabValue, setTabValue] = useState(0)
   const [formData, setFormData] = useState<MenuFormData>({
     name: '',
     price: 0,
     quantity: 0,
     category: 'food',
     is_active: true,
-  });
+  })
   const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
+    open: boolean
+    message: string
+    severity: 'success' | 'error' | 'info' | 'warning'
   }>({
     open: false,
     message: '',
     severity: 'info',
-  });
+  })
 
-  const showSnackbar = useCallback((message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  }, []);
+  const showSnackbar = useCallback(
+    (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
+      setSnackbar({
+        open: true,
+        message,
+        severity,
+      })
+    },
+    [],
+  )
 
   const loadUser = useCallback(async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
-      router.push('/login');
+      console.error('Failed to load user:', error)
+      router.push('/login')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [router]);
+  }, [router])
 
   const loadMenus = useCallback(async () => {
     try {
-      const menusData = await apiService.getMenus();
-      setMenus(menusData);
+      const menusData = await apiService.getMenus()
+      setMenus(menusData)
     } catch (error) {
-      console.error('Failed to load menus:', error);
-      showSnackbar('Không thể tải danh sách thực đơn', 'error');
+      console.error('Failed to load menus:', error)
+      showSnackbar('Không thể tải danh sách thực đơn', 'error')
     }
-  }, [showSnackbar]);
+  }, [showSnackbar])
 
   useEffect(() => {
-    const token = apiService.getToken();
+    const token = apiService.getToken()
     if (!token) {
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
-    loadUser();
-    loadMenus();
-  }, [router, loadUser, loadMenus]);
+    loadUser()
+    loadMenus()
+  }, [router, loadUser, loadMenus])
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      router.push('/');
+      await apiService.logout()
+      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+    setTabValue(newValue)
+  }
 
   const handleOpenDialog = (menu?: MenuItem) => {
     if (menu) {
-      setEditingMenu(menu);
+      setEditingMenu(menu)
       setFormData({
         name: menu.name,
         price: menu.price,
         quantity: menu.quantity,
         category: menu.category,
         is_active: menu.is_active,
-      });
+      })
     } else {
-      setEditingMenu(null);
+      setEditingMenu(null)
       setFormData({
         name: '',
         price: 0,
         quantity: 0,
         category: 'food',
         is_active: true,
-      });
+      })
     }
-    setOpenDialog(true);
-  };
+    setOpenDialog(true)
+  }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditingMenu(null);
+    setOpenDialog(false)
+    setEditingMenu(null)
     setFormData({
       name: '',
       price: 0,
       quantity: 0,
       category: 'food',
       is_active: true,
-    });
-  };
+    })
+  }
 
   const handleInputChange = (field: keyof MenuFormData, value: string | number | boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async () => {
     // Validation
     if (!formData.name || formData.price <= 0 || formData.quantity < 0) {
-      showSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc, giá phải lớn hơn 0 và số lượng không được âm', 'error');
-      return;
+      showSnackbar(
+        'Vui lòng điền đầy đủ thông tin bắt buộc, giá phải lớn hơn 0 và số lượng không được âm',
+        'error',
+      )
+      return
     }
 
     try {
       if (editingMenu) {
         // Update existing menu
-        await apiService.updateMenu(editingMenu.id, formData);
-        showSnackbar('Cập nhật món ăn thành công!', 'success');
+        await apiService.updateMenu(editingMenu.id, formData)
+        showSnackbar('Cập nhật món ăn thành công!', 'success')
       } else {
         // Create new menu
-        await apiService.createMenu(formData);
-        showSnackbar('Thêm món ăn mới thành công!', 'success');
+        await apiService.createMenu(formData)
+        showSnackbar('Thêm món ăn mới thành công!', 'success')
       }
-      
-      handleCloseDialog();
-      loadMenus();
+
+      handleCloseDialog()
+      loadMenus()
     } catch (error) {
-      console.error('Failed to save menu:', error);
-      showSnackbar('Có lỗi xảy ra khi lưu món ăn', 'error');
+      console.error('Failed to save menu:', error)
+      showSnackbar('Có lỗi xảy ra khi lưu món ăn', 'error')
     }
-  };
+  }
 
   const handleDeleteMenu = async (menuId: number) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
       try {
-        await apiService.deleteMenu(menuId);
-        showSnackbar('Xóa món ăn thành công!', 'success');
-        loadMenus();
+        await apiService.deleteMenu(menuId)
+        showSnackbar('Xóa món ăn thành công!', 'success')
+        loadMenus()
       } catch (error) {
-        console.error('Failed to delete menu:', error);
-        showSnackbar('Có lỗi xảy ra khi xóa món ăn', 'error');
+        console.error('Failed to delete menu:', error)
+        showSnackbar('Có lỗi xảy ra khi xóa món ăn', 'error')
       }
     }
-  };
+  }
 
   const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
+    setSnackbar((prev) => ({ ...prev, open: false }))
+  }
 
   const getCategoryChip = (category: string) => {
     const getCategoryInfo = (cat: string) => {
       switch (cat) {
         case 'food':
-          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const };
+          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const }
         case 'drink':
-          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const };
+          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const }
         case 'tobacco':
-          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const };
+          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const }
         case 'takeaway':
-          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const };
+          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const }
         default:
-          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const };
+          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const }
       }
-    };
+    }
 
-    const categoryInfo = getCategoryInfo(category);
+    const categoryInfo = getCategoryInfo(category)
     return (
       <Chip
         icon={categoryInfo.icon}
@@ -292,8 +294,8 @@ export default function MenuSettingPage() {
         variant="outlined"
         size="small"
       />
-    );
-  };
+    )
+  }
 
   const getStatusChip = (isActive: boolean) => {
     return (
@@ -303,29 +305,31 @@ export default function MenuSettingPage() {
         variant="outlined"
         size="small"
       />
-    );
-  };
+    )
+  }
 
-  const filteredMenus = menus.filter(menu => {
-    if (tabValue === 0) return menu.category === 'food';
-    if (tabValue === 1) return menu.category === 'drink';
-    if (tabValue === 2) return menu.category === 'tobacco';
-    if (tabValue === 3) return menu.category === 'takeaway';
-    return true;
-  });
+  const filteredMenus = menus.filter((menu) => {
+    if (tabValue === 0) return menu.category === 'food'
+    if (tabValue === 1) return menu.category === 'drink'
+    if (tabValue === 2) return menu.category === 'tobacco'
+    if (tabValue === 3) return menu.category === 'takeaway'
+    return true
+  })
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <Typography>Đang tải...</Typography>
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar 
+      <AppBar
         title="Thiết lập thực đơn"
         user={user}
         onLogout={handleLogout}
@@ -335,14 +339,8 @@ export default function MenuSettingPage() {
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6">
-            Thiết lập thực đơn
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
+          <Typography variant="h6">Thiết lập thực đơn</Typography>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
             Thêm món mới
           </Button>
         </Box>
@@ -360,50 +358,50 @@ export default function MenuSettingPage() {
             </Box>
 
             <TabPanel value={tabValue} index={0}>
-              <MenuTable 
-                menus={filteredMenus} 
-                onEdit={handleOpenDialog} 
-                onDelete={handleDeleteMenu} 
+              <MenuTable
+                menus={filteredMenus}
+                onEdit={handleOpenDialog}
+                onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
               />
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
-              <MenuTable 
-                menus={filteredMenus} 
-                onEdit={handleOpenDialog} 
-                onDelete={handleDeleteMenu} 
+              <MenuTable
+                menus={filteredMenus}
+                onEdit={handleOpenDialog}
+                onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
               />
             </TabPanel>
 
             <TabPanel value={tabValue} index={2}>
-              <MenuTable 
-                menus={filteredMenus} 
-                onEdit={handleOpenDialog} 
-                onDelete={handleDeleteMenu} 
+              <MenuTable
+                menus={filteredMenus}
+                onEdit={handleOpenDialog}
+                onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
               />
             </TabPanel>
 
             <TabPanel value={tabValue} index={3}>
-              <MenuTable 
-                menus={filteredMenus} 
-                onEdit={handleOpenDialog} 
-                onDelete={handleDeleteMenu} 
+              <MenuTable
+                menus={filteredMenus}
+                onEdit={handleOpenDialog}
+                onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
               />
             </TabPanel>
 
             <TabPanel value={tabValue} index={4}>
-              <MenuTable 
-                menus={menus} 
-                onEdit={handleOpenDialog} 
-                onDelete={handleDeleteMenu} 
+              <MenuTable
+                menus={menus}
+                onEdit={handleOpenDialog}
+                onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
               />
@@ -414,9 +412,7 @@ export default function MenuSettingPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingMenu ? 'Sửa món ăn' : 'Thêm món mới'}
-        </DialogTitle>
+        <DialogTitle>{editingMenu ? 'Sửa món ăn' : 'Thêm món mới'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
@@ -426,7 +422,7 @@ export default function MenuSettingPage() {
               fullWidth
               required
             />
-            
+
             <TextField
               label="Giá (VNĐ)"
               type="number"
@@ -436,7 +432,7 @@ export default function MenuSettingPage() {
               required
               inputProps={{ min: 0, step: 1000 }}
             />
-            
+
             <TextField
               label="Số lượng tồn kho"
               type="number"
@@ -446,7 +442,7 @@ export default function MenuSettingPage() {
               required
               inputProps={{ min: 0 }}
             />
-            
+
             <FormControl fullWidth>
               <InputLabel>Danh mục</InputLabel>
               <Select
@@ -460,7 +456,7 @@ export default function MenuSettingPage() {
                 <MenuItem value="takeaway">Mang về</MenuItem>
               </Select>
             </FormControl>
-            
+
             <FormControlLabel
               control={
                 <Switch
@@ -477,9 +473,9 @@ export default function MenuSettingPage() {
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
             Hủy
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            variant="contained" 
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
             startIcon={<SaveIcon />}
             disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
           >
@@ -495,31 +491,27 @@ export default function MenuSettingPage() {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
-  );
+  )
 }
 
 // Menu Table Component
-function MenuTable({ 
-  menus, 
-  onEdit, 
-  onDelete, 
-  getCategoryChip, 
-  getStatusChip 
+function MenuTable({
+  menus,
+  onEdit,
+  onDelete,
+  getCategoryChip,
+  getStatusChip,
 }: {
-  menus: MenuItem[];
-  onEdit: (menu: MenuItem) => void;
-  onDelete: (id: number) => void;
-  getCategoryChip: (category: string) => React.ReactNode;
-  getStatusChip: (isActive: boolean) => React.ReactNode;
+  menus: MenuItem[]
+  onEdit: (menu: MenuItem) => void
+  onDelete: (id: number) => void
+  getCategoryChip: (category: string) => React.ReactNode
+  getStatusChip: (isActive: boolean) => React.ReactNode
 }) {
   return (
     <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
@@ -553,8 +545,8 @@ function MenuTable({
                 <TableCell>{getCategoryChip(menu.category)}</TableCell>
                 <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
                 <TableCell>
-                  <Chip 
-                    label={menu.quantity} 
+                  <Chip
+                    label={menu.quantity}
                     color={menu.quantity > 0 ? 'success' : 'error'}
                     size="small"
                   />
@@ -564,20 +556,12 @@ function MenuTable({
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Sửa món ăn">
-                      <MuiIconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => onEdit(menu)}
-                      >
+                      <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
                         <EditIcon />
                       </MuiIconButton>
                     </Tooltip>
                     <Tooltip title="Xóa món ăn">
-                      <MuiIconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDelete(menu.id)}
-                      >
+                      <MuiIconButton size="small" color="error" onClick={() => onDelete(menu.id)}>
                         <DeleteIcon />
                       </MuiIconButton>
                     </Tooltip>
@@ -589,5 +573,5 @@ function MenuTable({
         </TableBody>
       </Table>
     </TableContainer>
-  );
+  )
 }

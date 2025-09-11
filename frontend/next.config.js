@@ -7,8 +7,8 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, 'src'),
-    };
-    return config;
+    }
+    return config
   },
   // Tắt strict mode trong development để tránh double rendering
   reactStrictMode: false,
@@ -22,6 +22,6 @@ const nextConfig = {
     // Bỏ chặn build khi có lỗi TypeScript (tạm thời để deploy). Nên sửa mã nguồn sớm.
     ignoreBuildErrors: true,
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

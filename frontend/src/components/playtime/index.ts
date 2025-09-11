@@ -1,1 +1,1 @@
-export { StatisticsCards } from './StatisticsCards';
+export { StatisticsCards } from './StatisticsCards'

@@ -1,12 +1,11 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
   Tabs,
   Tab,
   FormControl,
@@ -25,40 +24,36 @@ import {
   Alert,
   Button,
   TextField,
-} from '@mui/material';
-import {
-  TrendingUp,
-  Restaurant,
-  AccessTime,
-  AttachMoney,
-  CalendarToday,
-  BarChart,
-} from '@mui/icons-material';
-import { apiService, User } from '@/lib/api';
-import { AppBar } from '@/components/ui';
+} from '@mui/material'
+import { Restaurant, AccessTime, AttachMoney, BarChart, ShoppingBag } from '@mui/icons-material'
+import { apiService, User } from '@/lib/api'
+import { AppBar } from '@/components/ui'
+import { RevenueCard } from '@/components/items/RevenueCard'
+import { formatCurrency } from '@/utils/formatters'
 
 interface RevenueData {
-  total_revenue: number;
-  table_revenue: number;
-  food_revenue: number;
-  session_count: number;
-  date?: string;
-  year?: number;
-  month?: number;
-  month_name?: string;
-  daily_breakdown?: any[];
-  monthly_breakdown?: any[];
-  sessions?: any[];
+  total_revenue: number
+  table_revenue: number
+  food_revenue: number
+  takeaway_revenue: number
+  session_count: number
+  date?: string
+  year?: number
+  month?: number
+  month_name?: string
+  daily_breakdown?: any[]
+  monthly_breakdown?: any[]
+  sessions?: any[]
 }
 
 interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+  children?: React.ReactNode
+  index: number
+  value: number
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -70,146 +65,119 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 export default function RevenuePage() {
-  const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  
-  // Daily data
-  const [dailyData, setDailyData] = useState<RevenueData | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  
-  // Monthly data
-  const [monthlyData, setMonthlyData] = useState<RevenueData | null>(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  
-  // Yearly data
-  const [yearlyData, setYearlyData] = useState<RevenueData | null>(null);
-  const [selectedYearForYearly, setSelectedYearForYearly] = useState(new Date().getFullYear());
-  
-  // Top tables
-  const [topTables, setTopTables] = useState<any[]>([]);
+  const [tabValue, setTabValue] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
-  };
+  // Daily data
+  const [dailyData, setDailyData] = useState<RevenueData | null>(null)
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+
+  // Monthly data
+  const [monthlyData, setMonthlyData] = useState<RevenueData | null>(null)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+
+  // Yearly data
+  const [yearlyData, setYearlyData] = useState<RevenueData | null>(null)
+  const [selectedYearForYearly, setSelectedYearForYearly] = useState(new Date().getFullYear())
+
+  // Top tables
+  const [topTables, setTopTables] = useState<any[]>([])
 
   const loadDailyRevenue = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const data = await apiService.getDailyRevenue(selectedDate);
-      setDailyData(data);
+      const data = await apiService.getDailyRevenue(selectedDate)
+      setDailyData(data)
     } catch (err) {
-      setError('Không thể tải doanh thu ngày');
-      console.error('Error loading daily revenue:', err);
+      setError('Không thể tải doanh thu ngày')
+      console.error('Error loading daily revenue:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadMonthlyRevenue = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const data = await apiService.getMonthlyRevenue(selectedYear, selectedMonth);
-      setMonthlyData(data);
+      const data = await apiService.getMonthlyRevenue(selectedYear, selectedMonth)
+      setMonthlyData(data)
     } catch (err) {
-      setError('Không thể tải doanh thu tháng');
-      console.error('Error loading monthly revenue:', err);
+      setError('Không thể tải doanh thu tháng')
+      console.error('Error loading monthly revenue:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadYearlyRevenue = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const data = await apiService.getYearlyRevenue(selectedYearForYearly);
-      setYearlyData(data);
+      const data = await apiService.getYearlyRevenue(selectedYearForYearly)
+      setYearlyData(data)
     } catch (err) {
-      setError('Không thể tải doanh thu năm');
-      console.error('Error loading yearly revenue:', err);
+      setError('Không thể tải doanh thu năm')
+      console.error('Error loading yearly revenue:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadTopTables = async () => {
     try {
-      const data = await apiService.getTopTables(5, 'this_month');
-      setTopTables(data);
+      const data = await apiService.getTopTables(5, 'this_month')
+      setTopTables(data)
     } catch (err) {
-      console.error('Error loading top tables:', err);
+      console.error('Error loading top tables:', err)
     }
-  };
+  }
 
   useEffect(() => {
-    loadUser();
-    loadDailyRevenue();
-    loadTopTables();
-  }, []);
+    loadUser()
+    loadDailyRevenue()
+    loadTopTables()
+  }, [])
 
   const loadUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
+      console.error('Failed to load user:', error)
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      window.location.href = '/';
+      await apiService.logout()
+      window.location.href = '/'
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   useEffect(() => {
     if (tabValue === 0) {
-      loadDailyRevenue();
+      loadDailyRevenue()
     } else if (tabValue === 1) {
-      loadMonthlyRevenue();
+      loadMonthlyRevenue()
     } else if (tabValue === 2) {
-      loadYearlyRevenue();
+      loadYearlyRevenue()
     }
-  }, [tabValue, selectedDate, selectedYear, selectedMonth, selectedYearForYearly]);
+  }, [tabValue, selectedDate, selectedYear, selectedMonth, selectedYearForYearly])
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  const RevenueCard = ({ title, value, icon, color = 'primary', isMoney = false }: any) => (
-    <Card>
-      <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box>
-            <Typography color="textSecondary" gutterBottom variant="h6">
-              {title}
-            </Typography>
-            <Typography variant="h4" component="h2" color={color}>
-              {isMoney ? formatCurrency(value) : value}
-            </Typography>
-          </Box>
-          <Box color={`${color}.main`}>
-            {icon}
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
-  );
+    setTabValue(newValue)
+  }
 
   const renderDailyTab = () => (
     <Box>
@@ -222,9 +190,9 @@ export default function RevenuePage() {
           InputLabelProps={{ shrink: true }}
           sx={{ height: 56 }}
         />
-        <Button 
-          variant="contained" 
-          onClick={loadDailyRevenue} 
+        <Button
+          variant="contained"
+          onClick={loadDailyRevenue}
           disabled={loading}
           sx={{ height: 56 }}
         >
@@ -234,7 +202,14 @@ export default function RevenuePage() {
 
       {dailyData && (
         <>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
             <RevenueCard
               title="Tổng doanh thu"
               value={dailyData.total_revenue}
@@ -257,11 +232,11 @@ export default function RevenuePage() {
               isMoney={true}
             />
             <RevenueCard
-              title="Số lần đặt bàn"
-              value={dailyData.session_count}
-              icon={<BarChart sx={{ fontSize: 40 }} />}
-              color="info"
-              isMoney={false}
+              title="Tổng tiền mang về"
+              value={dailyData.takeaway_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              color="error"
+              isMoney={true}
             />
           </Box>
           {dailyData.sessions && dailyData.sessions.length > 0 && (
@@ -310,7 +285,7 @@ export default function RevenuePage() {
         </>
       )}
     </Box>
-  );
+  )
 
   const renderMonthlyTab = () => (
     <Box>
@@ -323,8 +298,10 @@ export default function RevenuePage() {
             onChange={(e) => setSelectedYear(Number(e.target.value))}
             sx={{ height: 56 }}
           >
-            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-              <MenuItem key={year} value={year}>{year}</MenuItem>
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -336,16 +313,16 @@ export default function RevenuePage() {
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
             sx={{ height: 56 }}
           >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
               <MenuItem key={month} value={month}>
                 Tháng {month}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-        <Button 
-          variant="contained" 
-          onClick={loadMonthlyRevenue} 
+        <Button
+          variant="contained"
+          onClick={loadMonthlyRevenue}
           disabled={loading}
           sx={{ height: 56 }}
         >
@@ -355,7 +332,14 @@ export default function RevenuePage() {
 
       {monthlyData && (
         <>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
             <RevenueCard
               title="Tổng doanh thu"
               value={monthlyData.total_revenue}
@@ -378,52 +362,52 @@ export default function RevenuePage() {
               isMoney={true}
             />
             <RevenueCard
-              title="Số lần đặt bàn"
-              value={monthlyData.session_count}
-              icon={<BarChart sx={{ fontSize: 40 }} />}
-              isMoney={false}
-              color="info"
+              title="Tổng tiền mang về"
+              value={monthlyData.takeaway_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              color="error"
+              isMoney={true}
             />
           </Box>
 
-      {/* Top Tables Section */}
-      {topTables.length > 0 && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Top 5 bàn có doanh thu cao nhất tháng này
-            </Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Bàn</TableCell>
-                    <TableCell>Tổng doanh thu</TableCell>
-                    <TableCell>Doanh thu bàn</TableCell>
-                    <TableCell>Doanh thu thức ăn</TableCell>
-                    <TableCell>Số lần đặt bàn</TableCell>
-                    <TableCell>Doanh thu TB/session</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {topTables.map((table: any) => (
-                    <TableRow key={table.table_id}>
-                      <TableCell>
-                        <Chip label={table.table_name} color="primary" />
-                      </TableCell>
-                      <TableCell>{formatCurrency(table.total_revenue)}</TableCell>
-                      <TableCell>{formatCurrency(table.table_revenue)}</TableCell>
-                      <TableCell>{formatCurrency(table.food_revenue)}</TableCell>
-                      <TableCell>{table.session_count}</TableCell>
-                      <TableCell>{formatCurrency(table.avg_revenue_per_session)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      )}
+          {/* Top Tables Section */}
+          {topTables.length > 0 && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Top 5 bàn có doanh thu cao nhất tháng này
+                </Typography>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Bàn</TableCell>
+                        <TableCell>Tổng doanh thu</TableCell>
+                        <TableCell>Doanh thu bàn</TableCell>
+                        <TableCell>Doanh thu thức ăn</TableCell>
+                        <TableCell>Số lần đặt bàn</TableCell>
+                        <TableCell>Doanh thu TB/session</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {topTables.map((table: any) => (
+                        <TableRow key={table.table_id}>
+                          <TableCell>
+                            <Chip label={table.table_name} color="primary" />
+                          </TableCell>
+                          <TableCell>{formatCurrency(table.total_revenue)}</TableCell>
+                          <TableCell>{formatCurrency(table.table_revenue)}</TableCell>
+                          <TableCell>{formatCurrency(table.food_revenue)}</TableCell>
+                          <TableCell>{table.session_count}</TableCell>
+                          <TableCell>{formatCurrency(table.avg_revenue_per_session)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          )}
           {monthlyData.daily_breakdown && monthlyData.daily_breakdown.length > 0 && (
             <Card>
               <CardContent>
@@ -460,7 +444,7 @@ export default function RevenuePage() {
         </>
       )}
     </Box>
-  );
+  )
 
   const renderYearlyTab = () => (
     <Box>
@@ -473,14 +457,16 @@ export default function RevenuePage() {
             onChange={(e) => setSelectedYearForYearly(Number(e.target.value))}
             sx={{ height: 56 }}
           >
-            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-              <MenuItem key={year} value={year}>{year}</MenuItem>
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
-        <Button 
-          variant="contained" 
-          onClick={loadYearlyRevenue} 
+        <Button
+          variant="contained"
+          onClick={loadYearlyRevenue}
           disabled={loading}
           sx={{ height: 56 }}
         >
@@ -490,7 +476,14 @@ export default function RevenuePage() {
 
       {yearlyData && (
         <>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
             <RevenueCard
               title="Tổng doanh thu"
               value={yearlyData.total_revenue}
@@ -513,11 +506,11 @@ export default function RevenuePage() {
               isMoney={true}
             />
             <RevenueCard
-              title="Số lần đặt bàn"
-              value={yearlyData.session_count}
-              icon={<BarChart sx={{ fontSize: 40 }} />}
-              isMoney={false}
-              color="info"
+              title="Tổng tiền mang về"
+              value={yearlyData.takeaway_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              color="error"
+              isMoney={true}
             />
           </Box>
 
@@ -557,63 +550,57 @@ export default function RevenuePage() {
         </>
       )}
     </Box>
-  );
+  )
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar 
-        title="Thống kê doanh thu"
-        user={user}
-        onLogout={handleLogout}
-        icon={<BarChart />}
-      />
-      
+      <AppBar title="Thống kê doanh thu" user={user} onLogout={handleLogout} icon={<BarChart />} />
+
       <Box sx={{ p: 3 }}>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="revenue tabs">
-          <Tab label="Doanh thu ngày" />
-          <Tab label="Doanh thu tháng" />
-          <Tab label="Doanh thu năm" />
-        </Tabs>
-      </Box>
-
-      <TabPanel value={tabValue} index={0}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          renderDailyTab()
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
         )}
-      </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          renderMonthlyTab()
-        )}
-      </TabPanel>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="revenue tabs">
+            <Tab label="Doanh thu ngày" />
+            <Tab label="Doanh thu tháng" />
+            <Tab label="Doanh thu năm" />
+          </Tabs>
+        </Box>
 
-      <TabPanel value={tabValue} index={2}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          renderYearlyTab()
-        )}
-      </TabPanel>
+        <TabPanel value={tabValue} index={0}>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            renderDailyTab()
+          )}
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={1}>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            renderMonthlyTab()
+          )}
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={2}>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            renderYearlyTab()
+          )}
+        </TabPanel>
       </Box>
     </Box>
-  );
+  )
 }

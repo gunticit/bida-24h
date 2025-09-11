@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -29,7 +29,7 @@ import {
   IconButton as MuiIconButton,
   Alert,
   Snackbar,
-} from '@mui/material';
+} from '@mui/material'
 import {
   CalendarToday as CalendarIcon,
   Add as AddIcon,
@@ -43,239 +43,251 @@ import {
   LocalBar as DrinkIcon,
   SmokingRooms as TobaccoIcon,
   TakeoutDining as TakeawayIcon,
-} from '@mui/icons-material';
-import { apiService, User, Session, CreateSessionData, UpdateSessionData, Table, MenuItem as MenuItemType, Order } from '@/lib/api';
-import { AppBar } from '@/components/ui';
-import { StatisticsCards } from '@/components/playtime';
-import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters';
-import { getStatusText } from '@/utils/sessionHelpers';
-import { generateInvoiceContent, printInvoice } from '@/utils/invoiceUtils';
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";       
-import timezone from "dayjs/plugin/timezone"; 
+} from '@mui/icons-material'
+import {
+  apiService,
+  User,
+  Session,
+  CreateSessionData,
+  UpdateSessionData,
+  Table,
+  MenuItem as MenuItemType,
+  Order,
+} from '@/lib/api'
+import { AppBar } from '@/components/ui'
+import { StatisticsCards } from '@/components/playtime'
+import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
+import { getStatusText } from '@/utils/sessionHelpers'
+import { generateInvoiceContent, printInvoice } from '@/utils/invoiceUtils'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export default function PlaytimePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [tables, setTables] = useState<Table[]>([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [tables, setTables] = useState<Table[]>([])
+  const [openDialog, setOpenDialog] = useState(false)
+  const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [formData, setFormData] = useState<CreateSessionData>({
     table_id: 1,
     start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
     hour_price: 50000,
-  });
-  const [menus, setMenus] = useState<MenuItemType[]>([]);
-  const [openFoodDialog, setOpenFoodDialog] = useState(false);
-  const [openFoodListDialog, setOpenFoodListDialog] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  })
+  const [menus, setMenus] = useState<MenuItemType[]>([])
+  const [openFoodDialog, setOpenFoodDialog] = useState(false)
+  const [openFoodListDialog, setOpenFoodListDialog] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [foodFormData, setFoodFormData] = useState({
     menu_id: 0,
     quantity: 1,
-  });
-  const [sessionOrders, setSessionOrders] = useState<Order[]>([]);
-  const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false);
+  })
+  const [sessionOrders, setSessionOrders] = useState<Order[]>([])
+  const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false)
   const [invoiceData, setInvoiceData] = useState<{
-    session: Session | null;
-    orders: Order[];
-    totalFoodMoney: number;
-    totalTableMoney: number;
-    totalMoney: number;
+    session: Session | null
+    orders: Order[]
+    totalFoodMoney: number
+    totalTableMoney: number
+    totalMoney: number
   }>({
     session: null,
     orders: [],
     totalFoodMoney: 0,
     totalTableMoney: 0,
     totalMoney: 0,
-  });
+  })
   const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info';
+    open: boolean
+    message: string
+    severity: 'success' | 'error' | 'info'
   }>({
     open: false,
     message: '',
     severity: 'info',
-  });
+  })
 
   useEffect(() => {
-    const token = apiService.getToken();
+    const token = apiService.getToken()
     if (!token) {
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
-    loadUser();
-    loadSessions();
-    loadTables();
-    loadMenus();
-  }, [router]);
+    loadUser()
+    loadSessions()
+    loadTables()
+    loadMenus()
+  }, [router])
 
   const loadUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
-      router.push('/login');
+      console.error('Failed to load user:', error)
+      router.push('/login')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadSessions = async () => {
     try {
-      const sessionsData = await apiService.getSessionsTodayOrPlaying();
-      setSessions(sessionsData);
+      const sessionsData = await apiService.getSessionsTodayOrPlaying()
+      setSessions(sessionsData)
     } catch (error) {
-      console.error('Failed to load sessions:', error);
-      showSnackbar('Không thể tải danh sách session', 'error');
+      console.error('Failed to load sessions:', error)
+      showSnackbar('Không thể tải danh sách session', 'error')
     }
-  };
+  }
 
   const loadTables = async () => {
     try {
-      const tablesData = await apiService.getTables();
-      setTables(tablesData);
+      const tablesData = await apiService.getTables()
+      setTables(tablesData)
       if (tablesData.length > 0) {
-        setFormData(prev => ({ ...prev, table_id: tablesData[0].id }));
+        setFormData((prev) => ({ ...prev, table_id: tablesData[0].id }))
       }
     } catch (error) {
-      console.error('Failed to load tables:', error);
-      showSnackbar('Không thể tải danh sách bàn', 'error');
+      console.error('Failed to load tables:', error)
+      showSnackbar('Không thể tải danh sách bàn', 'error')
     }
-  };
+  }
 
   const loadMenus = async () => {
     try {
-      const menusData = await apiService.getAvailableMenus();
-      setMenus(menusData);
+      const menusData = await apiService.getAvailableMenus()
+      setMenus(menusData)
       if (menusData.length > 0) {
-        setFoodFormData(prev => ({ ...prev, menu_id: menusData[0].id }));
+        setFoodFormData((prev) => ({ ...prev, menu_id: menusData[0].id }))
       }
     } catch (error) {
-      console.error('Failed to load menus:', error);
-      showSnackbar('Không thể tải danh sách thực đơn', 'error');
+      console.error('Failed to load menus:', error)
+      showSnackbar('Không thể tải danh sách thực đơn', 'error')
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      router.push('/');
+      await apiService.logout()
+      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   const handleOpenDialog = (session?: Session) => {
     if (session) {
-      setEditingSession(session);
+      setEditingSession(session)
       setFormData({
         table_id: session.table_id,
         start_time: dayjs(session.start_time).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
         hour_price: session.hour_price,
-      });
+      })
     } else {
-      setEditingSession(null);
+      setEditingSession(null)
       setFormData({
         table_id: tables.length > 0 ? tables[0].id : 1,
         start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
         hour_price: tables.length > 0 ? tables[0].price_per_hour : 50000,
-      });
+      })
     }
-    setOpenDialog(true);
-  };
+    setOpenDialog(true)
+  }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditingSession(null);
+    setOpenDialog(false)
+    setEditingSession(null)
     setFormData({
       table_id: tables.length > 0 ? tables[0].id : 1,
       start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
       hour_price: tables.length > 0 ? tables[0].price_per_hour : 50000,
-    });
-  };
+    })
+  }
 
   const handleSubmit = async () => {
     try {
       if (editingSession) {
-        await apiService.updateSession(editingSession.id, formData);
-        showSnackbar('Cập nhật session thành công', 'success');
+        await apiService.updateSession(editingSession.id, formData)
+        showSnackbar('Cập nhật session thành công', 'success')
       } else {
-        await apiService.createSession(formData);
-        showSnackbar('Tạo session mới thành công', 'success');
+        await apiService.createSession(formData)
+        showSnackbar('Tạo session mới thành công', 'success')
       }
-      handleCloseDialog();
-      loadSessions();
+      handleCloseDialog()
+      loadSessions()
     } catch (error) {
-      console.error('Failed to save session:', error);
-      showSnackbar('Không thể lưu session', 'error');
+      console.error('Failed to save session:', error)
+      showSnackbar('Không thể lưu session', 'error')
     }
-  };
+  }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa session này?')) {
       try {
-        await apiService.deleteSession(id);
-        showSnackbar('Xóa session thành công', 'success');
-        loadSessions();
+        await apiService.deleteSession(id)
+        showSnackbar('Xóa session thành công', 'success')
+        loadSessions()
       } catch (error) {
-        console.error('Failed to delete session:', error);
-        showSnackbar('Không thể xóa session', 'error');
+        console.error('Failed to delete session:', error)
+        showSnackbar('Không thể xóa session', 'error')
       }
     }
-  };
+  }
 
-  const handleStatusChange = async (session: Session, newStatus: 'playing' | 'finished' | 'canceled') => {
+  const handleStatusChange = async (
+    session: Session,
+    newStatus: 'playing' | 'finished' | 'canceled',
+  ) => {
     try {
-      const updateData: UpdateSessionData = { status: newStatus };
+      const updateData: UpdateSessionData = { status: newStatus }
       if (newStatus === 'finished' && !session.end_time) {
-        updateData.end_time = dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm');
+        updateData.end_time = dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm')
       }
-      await apiService.updateSession(session.id, updateData);
-      showSnackbar('Cập nhật trạng thái thành công', 'success');
-      loadSessions();
+      await apiService.updateSession(session.id, updateData)
+      showSnackbar('Cập nhật trạng thái thành công', 'success')
+      loadSessions()
     } catch (error) {
-      console.error('Failed to update status:', error);
-      showSnackbar('Không thể cập nhật trạng thái', 'error');
+      console.error('Failed to update status:', error)
+      showSnackbar('Không thể cập nhật trạng thái', 'error')
     }
-  };
+  }
 
   const handleOpenFoodDialog = (session: Session) => {
-    setSelectedSession(session);
+    setSelectedSession(session)
     setFoodFormData({
       menu_id: menus.length > 0 ? menus[0].id : 0,
       quantity: 1,
-    });
-    setOpenFoodDialog(true);
-  };
+    })
+    setOpenFoodDialog(true)
+  }
 
   const handleCloseFoodDialog = () => {
-    setOpenFoodDialog(false);
-    setSelectedSession(null);
+    setOpenFoodDialog(false)
+    setSelectedSession(null)
     setFoodFormData({
       menu_id: 0,
       quantity: 1,
-    });
-  };
+    })
+  }
 
   const handleAddFood = async () => {
     if (!selectedSession || foodFormData.menu_id === 0 || foodFormData.quantity <= 0) {
-      showSnackbar('Vui lòng chọn món ăn và số lượng', 'error');
-      return;
+      showSnackbar('Vui lòng chọn món ăn và số lượng', 'error')
+      return
     }
 
     try {
-      const selectedMenu = menus.find(menu => menu.id === foodFormData.menu_id);
+      const selectedMenu = menus.find((menu) => menu.id === foodFormData.menu_id)
       if (!selectedMenu) {
-        showSnackbar('Không tìm thấy món ăn', 'error');
-        return;
+        showSnackbar('Không tìm thấy món ăn', 'error')
+        return
       }
 
       // Tạo order mới
@@ -285,97 +297,102 @@ export default function PlaytimePage() {
         quantity: foodFormData.quantity,
         unit_price: selectedMenu.price,
         total_price: selectedMenu.price * foodFormData.quantity,
-      });
+      })
 
       // Tính toán lại tổng tiền đồ ăn từ tất cả orders
-      await recalculateFoodTotal(selectedSession.id);
+      await recalculateFoodTotal(selectedSession.id)
 
-      showSnackbar(`Thêm món ăn thành công!`, 'success');
-      handleCloseFoodDialog();
-      loadSessions(); // Reload để cập nhật tổng tiền
+      showSnackbar(`Thêm món ăn thành công!`, 'success')
+      handleCloseFoodDialog()
+      loadSessions() // Reload để cập nhật tổng tiền
     } catch (error) {
-      console.error('Failed to add food:', error);
-      showSnackbar('Không thể thêm món ăn', 'error');
+      console.error('Failed to add food:', error)
+      showSnackbar('Không thể thêm món ăn', 'error')
     }
-  };
+  }
 
   const handleViewFoodList = async (session: Session) => {
     try {
-      setSelectedSession(session);
+      setSelectedSession(session)
       // Lấy danh sách orders của session này
-      const orders = await apiService.getOrders();
-      const sessionOrders = orders.filter(order => order.session_id === session.id);
-      setSessionOrders(sessionOrders);
-      setOpenFoodListDialog(true);
+      const orders = await apiService.getOrders()
+      const sessionOrders = orders.filter((order) => order.session_id === session.id)
+      setSessionOrders(sessionOrders)
+      setOpenFoodListDialog(true)
     } catch (error) {
-      console.error('Failed to load food list:', error);
-      showSnackbar('Không thể tải danh sách món ăn', 'error');
+      console.error('Failed to load food list:', error)
+      showSnackbar('Không thể tải danh sách món ăn', 'error')
     }
-  };
+  }
 
   const handleCloseFoodListDialog = () => {
-    setOpenFoodListDialog(false);
-    setSelectedSession(null);
-    setSessionOrders([]);
-  };
+    setOpenFoodListDialog(false)
+    setSelectedSession(null)
+    setSessionOrders([])
+  }
 
   // Hàm tính toán lại tổng tiền đồ ăn từ orders
   const recalculateFoodTotal = async (sessionId: number) => {
     try {
-      const orders = await apiService.getOrders();
-      const sessionOrders = orders.filter(order => order.session_id === sessionId);
-      const totalFoodMoney = sessionOrders.reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0);
-      
+      const orders = await apiService.getOrders()
+      const sessionOrders = orders.filter((order) => order.session_id === sessionId)
+      const totalFoodMoney = sessionOrders.reduce(
+        (sum, order) => sum + parseFloat(order.total_price.toString()),
+        0,
+      )
+
       // Cập nhật session với tổng tiền đồ ăn mới
-      const session = sessions.find(s => s.id === sessionId);
+      const session = sessions.find((s) => s.id === sessionId)
       if (session) {
-        const currentTableMoney = parseFloat(session?.total_money_table?.toString() || '0');
-        const newTotalMoney = currentTableMoney + totalFoodMoney;
+        const currentTableMoney = parseFloat(session?.total_money_table?.toString() || '0')
+        const newTotalMoney = currentTableMoney + totalFoodMoney
         await apiService.updateSession(sessionId, {
           total_money_food: totalFoodMoney,
           total_money: newTotalMoney,
-        });
+        })
       }
-      
-      return totalFoodMoney;
-    } catch (error) {
-      console.error('Failed to recalculate food total:', error);
-      return 0;
-    }
-  };
 
-  // Local status color helper  
-  const getStatusColorLocal = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+      return totalFoodMoney
+    } catch (error) {
+      console.error('Failed to recalculate food total:', error)
+      return 0
+    }
+  }
+
+  // Local status color helper
+  const getStatusColorLocal = (
+    status: string,
+  ): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
     switch (status) {
       case 'playing':
-        return 'success';
+        return 'success'
       case 'finished':
-        return 'primary';
+        return 'primary'
       case 'cancelled':
-        return 'error';
+        return 'error'
       default:
-        return 'default';
+        return 'default'
     }
-  };
+  }
 
   // Local category chip helper
   const getCategoryChipLocal = (category: string) => {
     const getCategoryInfo = (cat: string) => {
       switch (cat) {
         case 'food':
-          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const };
+          return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const }
         case 'drink':
-          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const };
+          return { icon: <DrinkIcon />, label: 'Đồ uống', color: 'secondary' as const }
         case 'tobacco':
-          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const };
+          return { icon: <TobaccoIcon />, label: 'Thuốc lá', color: 'warning' as const }
         case 'takeaway':
-          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const };
+          return { icon: <TakeawayIcon />, label: 'Mang về', color: 'info' as const }
         default:
-          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const };
+          return { icon: <FoodIcon />, label: 'Không xác định', color: 'default' as const }
       }
-    };
+    }
 
-    const categoryInfo = getCategoryInfo(category);
+    const categoryInfo = getCategoryInfo(category)
     return (
       <Chip
         icon={categoryInfo.icon}
@@ -384,77 +401,80 @@ export default function PlaytimePage() {
         variant="outlined"
         size="small"
       />
-    );
-  };
+    )
+  }
 
   // Hàm xóa món ăn và cập nhật tổng tiền
   const handleDeleteFood = async (orderId: number, sessionId: number) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
       try {
-        await apiService.deleteOrder(orderId);
-        
+        await apiService.deleteOrder(orderId)
+
         // Tính toán lại tổng tiền đồ ăn sau khi xóa
-        await recalculateFoodTotal(sessionId);
-        
-        showSnackbar('Xóa món ăn thành công!', 'success');
-        
+        await recalculateFoodTotal(sessionId)
+
+        showSnackbar('Xóa món ăn thành công!', 'success')
+
         // Reload dữ liệu
-        loadSessions();
+        loadSessions()
         if (selectedSession && selectedSession.id === sessionId) {
-          const orders = await apiService.getOrders();
-          const sessionOrders = orders.filter(order => order.session_id === sessionId);
-          setSessionOrders(sessionOrders);
+          const orders = await apiService.getOrders()
+          const sessionOrders = orders.filter((order) => order.session_id === sessionId)
+          setSessionOrders(sessionOrders)
         }
       } catch (error) {
-        console.error('Failed to delete food:', error);
-        showSnackbar('Không thể xóa món ăn', 'error');
+        console.error('Failed to delete food:', error)
+        showSnackbar('Không thể xóa món ăn', 'error')
       }
     }
-  };
+  }
 
   // Hàm mở dialog in hóa đơn
   const handleOpenInvoiceDialog = async (session: Session) => {
     try {
       // Lấy danh sách orders của session này
-      const orders = await apiService.getOrders();
-      const sessionOrders = orders.filter(order => order.session_id === session.id);
-      
+      const orders = await apiService.getOrders()
+      const sessionOrders = orders.filter((order) => order.session_id === session.id)
+
       // Tính toán tổng tiền
-      const totalFoodMoney = sessionOrders.reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0);
-      const totalTableMoney = parseFloat(session?.total_money_table?.toString() || '0');
-      const totalMoney = totalTableMoney + totalFoodMoney;
-      
+      const totalFoodMoney = sessionOrders.reduce(
+        (sum, order) => sum + parseFloat(order.total_price.toString()),
+        0,
+      )
+      const totalTableMoney = parseFloat(session?.total_money_table?.toString() || '0')
+      const totalMoney = totalTableMoney + totalFoodMoney
+
       setInvoiceData({
         session,
         orders: sessionOrders,
         totalFoodMoney,
         totalTableMoney,
         totalMoney,
-      });
-      
-      setOpenInvoiceDialog(true);
+      })
+
+      setOpenInvoiceDialog(true)
     } catch (error) {
-      console.error('Failed to load invoice data:', error);
-      showSnackbar('Không thể tải dữ liệu hóa đơn', 'error');
+      console.error('Failed to load invoice data:', error)
+      showSnackbar('Không thể tải dữ liệu hóa đơn', 'error')
     }
-  };
+  }
 
   // Hàm đóng dialog in hóa đơn
   const handleCloseInvoiceDialog = () => {
-    setOpenInvoiceDialog(false);
+    setOpenInvoiceDialog(false)
     setInvoiceData({
       session: null,
       orders: [],
       totalFoodMoney: 0,
       totalTableMoney: 0,
       totalMoney: 0,
-    });
-  };
+    })
+  }
 
   // Hàm in hóa đơn
   const handlePrintInvoice = () => {
-    if (!invoiceData.session) return;
-    
+    if (!invoiceData.session) return
+
     const content = generateInvoiceContent(
       invoiceData.session,
       invoiceData.orders,
@@ -462,31 +482,37 @@ export default function PlaytimePage() {
       menus,
       invoiceData.totalTableMoney,
       invoiceData.totalFoodMoney,
-      invoiceData.totalMoney
-    );
-    printInvoice(content);
-  };
+      invoiceData.totalMoney,
+    )
+    printInvoice(content)
+  }
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info') => {
     setSnackbar({
       open: true,
       message,
       severity,
-    });
-  };
+    })
+  }
+
+  const handleRedirectTakeAway = () => {
+    router.push('/takeaway')
+  }
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <Typography>Đang tải...</Typography>
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar 
+      <AppBar
         title="Quản lý Giờ chơi"
         user={user}
         onLogout={handleLogout}
@@ -499,13 +525,18 @@ export default function PlaytimePage() {
           <Typography variant="h6" gutterBottom>
             Quản lý Giờ chơi
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
-            Tạo giờ chơi mới
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => handleRedirectTakeAway()}
+            >
+              Đặt đồ ăn mang về
+            </Button>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+              Tạo giờ chơi mới
+            </Button>
+          </Box>
         </Box>
 
         {/* Statistics Cards */}
@@ -544,15 +575,15 @@ export default function PlaytimePage() {
                     sessions.map((session) => (
                       <TableRow key={session.id}>
                         <TableCell>{session.id}</TableCell>
-                        <TableCell>
-                          {session.table?.name || `Bàn ${session.table_id}`}
-                        </TableCell>
+                        <TableCell>{session.table?.name || `Bàn ${session.table_id}`}</TableCell>
                         <TableCell>{formatDateTime(session.start_time)}</TableCell>
                         <TableCell>
                           {session.end_time ? formatDateTime(session.end_time) : '-'}
                         </TableCell>
                         <TableCell>
-                          {session.total_time ? `${Math.floor(session.total_time / 60)}h ${session.total_time % 60}p` : '-'}
+                          {session.total_time
+                            ? `${Math.floor(session.total_time / 60)}h ${session.total_time % 60}p`
+                            : '-'}
                         </TableCell>
                         <TableCell>{formatMoney(session.hour_price)}</TableCell>
                         <TableCell>{formatMoney(session.total_money_table)}</TableCell>
@@ -583,14 +614,16 @@ export default function PlaytimePage() {
                             >
                               <EditIcon />
                             </MuiIconButton>
-                            {user?.role === 'admin' && <MuiIconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDelete(session.id)}
-                              title="Xóa"
-                            >
-                              <DeleteIcon />
-                            </MuiIconButton>}
+                            {user?.role === 'admin' && (
+                              <MuiIconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDelete(session.id)}
+                                title="Xóa"
+                              >
+                                <DeleteIcon />
+                              </MuiIconButton>
+                            )}
                             {session.status === 'playing' && (
                               <>
                                 <MuiIconButton
@@ -641,68 +674,70 @@ export default function PlaytimePage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingSession ? 'Chỉnh sửa giờ chơi' : 'Thêm giờ chơi mới'}
-        </DialogTitle>
+        <DialogTitle>{editingSession ? 'Chỉnh sửa giờ chơi' : 'Thêm giờ chơi mới'}</DialogTitle>
         <DialogContent>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-              <FormControl fullWidth>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <FormControl fullWidth>
               <InputLabel>Chọn bàn</InputLabel>
               <Select
                 value={formData.table_id}
                 label="Chọn bàn"
                 onChange={(e) => {
-                const tableId = e.target.value as number;
-                const selectedTable = tables.find(t => t.id === tableId);
-                setFormData({ 
-                  ...formData, 
-                  table_id: tableId,
-                  hour_price: selectedTable?.price_per_hour || formData.hour_price
-                });
+                  const tableId = e.target.value as number
+                  const selectedTable = tables.find((t) => t.id === tableId)
+                  setFormData({
+                    ...formData,
+                    table_id: tableId,
+                    hour_price: selectedTable?.price_per_hour || formData.hour_price,
+                  })
                 }}
               >
                 {tables.map((table) => (
-                <MenuItem key={table.id} value={table.id}>
-                  {table.name} - {table.status === 'available' ? 'Sẵn sàng' : 
-                  table.status === 'playing' ? 'Đang chơi' : 'Bảo trì'}
-                </MenuItem>
+                  <MenuItem key={table.id} value={table.id}>
+                    {table.name} -{' '}
+                    {table.status === 'available'
+                      ? 'Sẵn sàng'
+                      : table.status === 'playing'
+                        ? 'Đang chơi'
+                        : 'Bảo trì'}
+                  </MenuItem>
                 ))}
               </Select>
-              </FormControl>
-              <TextField
-              label={"Thời gian bắt đầu (GMT+7)" + formData.start_time}
+            </FormControl>
+            <TextField
+              label={'Thời gian bắt đầu (GMT+7)' + formData.start_time}
               type="datetime-local"
               value={
                 formData.start_time
-                ? (() => {
-                  // Nếu là dạng ISO, chuyển sang yyyy-MM-ddTHH:mm
-                  const d = new Date(formData.start_time);
-                  const year = d.getFullYear();
-                  const month = String(d.getMonth() + 1).padStart(2, '0');
-                  const day = String(d.getDate()).padStart(2, '0');
-                  const hour = String(d.getHours()).padStart(2, '0');
-                  const minute = String(d.getMinutes()).padStart(2, '0');
-                  return `${year}-${month}-${day}T${hour}:${minute}`;
-                  })()
-                : ''
+                  ? (() => {
+                      // Nếu là dạng ISO, chuyển sang yyyy-MM-ddTHH:mm
+                      const d = new Date(formData.start_time)
+                      const year = d.getFullYear()
+                      const month = String(d.getMonth() + 1).padStart(2, '0')
+                      const day = String(d.getDate()).padStart(2, '0')
+                      const hour = String(d.getHours()).padStart(2, '0')
+                      const minute = String(d.getMinutes()).padStart(2, '0')
+                      return `${year}-${month}-${day}T${hour}:${minute}`
+                    })()
+                  : ''
               }
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({
-                ...formData,
-                start_time: e.target.value,
+                  ...formData,
+                  start_time: e.target.value,
                 })
               }
               fullWidth
               InputLabelProps={{ shrink: true }}
-              />
-              <TextField
+            />
+            <TextField
               label="Giá/giờ (đ)"
               type="number"
               value={parseInt(formData.hour_price.toString()).toLocaleString('vi-VN')}
               onChange={(e) => setFormData({ ...formData, hour_price: parseInt(e.target.value) })}
               fullWidth
-              />
-            </Box>
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Hủy</Button>
@@ -714,9 +749,7 @@ export default function PlaytimePage() {
 
       {/* Add Food Dialog */}
       <Dialog open={openFoodDialog} onClose={handleCloseFoodDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Thêm món ăn cho Session #{selectedSession?.id}
-        </DialogTitle>
+        <DialogTitle>Thêm món ăn cho Session #{selectedSession?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <FormControl fullWidth>
@@ -724,33 +757,42 @@ export default function PlaytimePage() {
               <Select
                 value={foodFormData.menu_id}
                 label="Chọn món ăn"
-                onChange={(e) => setFoodFormData({ ...foodFormData, menu_id: e.target.value as number })}
+                onChange={(e) =>
+                  setFoodFormData({ ...foodFormData, menu_id: e.target.value as number })
+                }
               >
                 {menus.map((menu) => (
-                                    <MenuItem key={menu.id} value={menu.id}>
+                  <MenuItem key={menu.id} value={menu.id}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {getCategoryChipLocal(menu.category)}
-                      <span>{menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ</span>
+                      <span>
+                        {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
+                      </span>
                     </Box>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            
+
             <TextField
               label="Số lượng"
               type="number"
               value={foodFormData.quantity}
-              onChange={(e) => setFoodFormData({ ...foodFormData, quantity: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                setFoodFormData({ ...foodFormData, quantity: parseInt(e.target.value) || 1 })
+              }
               fullWidth
               inputProps={{ min: 1 }}
             />
-            
+
             {foodFormData.menu_id > 0 && (
               <Typography variant="body2" color="text.secondary">
-                Tổng tiền: {(() => {
-                  const selectedMenu = menus.find(menu => menu.id === foodFormData.menu_id);
-                  return selectedMenu ? (selectedMenu.price * foodFormData.quantity).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                Tổng tiền:{' '}
+                {(() => {
+                  const selectedMenu = menus.find((menu) => menu.id === foodFormData.menu_id)
+                  return selectedMenu
+                    ? (selectedMenu.price * foodFormData.quantity).toLocaleString('vi-VN') + ' đ'
+                    : '0 đ'
                 })()}
               </Typography>
             )}
@@ -758,8 +800,8 @@ export default function PlaytimePage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseFoodDialog}>Hủy</Button>
-          <Button 
-            onClick={handleAddFood} 
+          <Button
+            onClick={handleAddFood}
             variant="contained"
             disabled={foodFormData.menu_id === 0 || foodFormData.quantity <= 0}
           >
@@ -770,9 +812,7 @@ export default function PlaytimePage() {
 
       {/* Food List Dialog */}
       <Dialog open={openFoodListDialog} onClose={handleCloseFoodListDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          Danh sách món ăn - Session #{selectedSession?.id}
-        </DialogTitle>
+        <DialogTitle>Danh sách món ăn - Session #{selectedSession?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             {sessionOrders.length === 0 ? (
@@ -780,9 +820,9 @@ export default function PlaytimePage() {
                 Chưa có món ăn nào được đặt
               </Typography>
             ) : (
-                <TableContainer component={Paper}>
-                  <MuiTable>
-                                      <TableHead>
+              <TableContainer component={Paper}>
+                <MuiTable>
+                  <TableHead>
                     <TableRow>
                       <TableCell>Món ăn</TableCell>
                       <TableCell>Số lượng</TableCell>
@@ -792,40 +832,51 @@ export default function PlaytimePage() {
                       <TableCell>Thao tác</TableCell>
                     </TableRow>
                   </TableHead>
-                    <TableBody>
-                      {sessionOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell>
-                            {menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}
-                          </TableCell>
-                          <TableCell>{order.quantity}</TableCell>
-                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
-                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
-                          <TableCell>{new Date(order.created_at).toLocaleString('vi-VN')}</TableCell>
-                          <TableCell>
-                            <MuiIconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteFood(order.id, order.session_id)}
-                              title="Xóa món ăn"
-                            >
-                              <DeleteIcon />
-                            </MuiIconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </MuiTable>
-                </TableContainer>
+                  <TableBody>
+                    {sessionOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          {menus.find((menu) => menu.id === order.menu_id)?.name ||
+                            `Món ${order.menu_id}`}
+                        </TableCell>
+                        <TableCell>{order.quantity}</TableCell>
+                        <TableCell>
+                          {parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ
+                        </TableCell>
+                        <TableCell>
+                          {parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ
+                        </TableCell>
+                        <TableCell>{new Date(order.created_at).toLocaleString('vi-VN')}</TableCell>
+                        <TableCell>
+                          <MuiIconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteFood(order.id, order.session_id)}
+                            title="Xóa món ăn"
+                          >
+                            <DeleteIcon />
+                          </MuiIconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </MuiTable>
+              </TableContainer>
             )}
-            
+
             {sessionOrders.length > 0 && (
               <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
                 <Typography variant="h6" gutterBottom>
                   Tổng kết
                 </Typography>
                 <Typography variant="body1">
-                  Tổng tiền đồ ăn: <strong>{sessionOrders.reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0).toLocaleString('vi-VN')} đ</strong>
+                  Tổng tiền đồ ăn:{' '}
+                  <strong>
+                    {sessionOrders
+                      .reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0)
+                      .toLocaleString('vi-VN')}{' '}
+                    đ
+                  </strong>
                 </Typography>
                 <Typography variant="body1">
                   Số món đã đặt: <strong>{sessionOrders.length}</strong>
@@ -835,12 +886,15 @@ export default function PlaytimePage() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button 
+          <Button
             onClick={async () => {
               if (selectedSession) {
-                const newTotal = await recalculateFoodTotal(selectedSession.id);
-                showSnackbar(`Đã tính lại tổng tiền đồ ăn: ${parseFloat(newTotal.toString()).toLocaleString('vi-VN')} đ`, 'success');
-                loadSessions(); // Reload để cập nhật dữ liệu
+                const newTotal = await recalculateFoodTotal(selectedSession.id)
+                showSnackbar(
+                  `Đã tính lại tổng tiền đồ ăn: ${parseFloat(newTotal.toString()).toLocaleString('vi-VN')} đ`,
+                  'success',
+                )
+                loadSessions() // Reload để cập nhật dữ liệu
               }
             }}
             variant="outlined"
@@ -854,9 +908,7 @@ export default function PlaytimePage() {
 
       {/* Invoice Dialog */}
       <Dialog open={openInvoiceDialog} onClose={handleCloseInvoiceDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          Hóa đơn - Session #{invoiceData.session?.id}
-        </DialogTitle>
+        <DialogTitle>Hóa đơn - Session #{invoiceData.session?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -864,22 +916,35 @@ export default function PlaytimePage() {
             </Typography>
             <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
               <Typography variant="body1">
-                <strong>Bàn:</strong> {tables.find(t => t.id === invoiceData.session?.table_id)?.name || 'N/A'}
+                <strong>Bàn:</strong>{' '}
+                {tables.find((t) => t.id === invoiceData.session?.table_id)?.name || 'N/A'}
               </Typography>
               <Typography variant="body1">
-                <strong>Thời gian bắt đầu:</strong> {invoiceData.session?.start_time ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN') : 'N/A'}
+                <strong>Thời gian bắt đầu:</strong>{' '}
+                {invoiceData.session?.start_time
+                  ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN')
+                  : 'N/A'}
               </Typography>
               <Typography variant="body1">
-                <strong>Thời gian kết thúc:</strong> {invoiceData.session?.end_time ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN') : 'Đang chơi'}
+                <strong>Thời gian kết thúc:</strong>{' '}
+                {invoiceData.session?.end_time
+                  ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN')
+                  : 'Đang chơi'}
               </Typography>
               <Typography variant="body1">
-                <strong>Giá/giờ:</strong> {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString('vi-VN')} đ
+                <strong>Giá/giờ:</strong>{' '}
+                {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString(
+                  'vi-VN',
+                )}{' '}
+                đ
               </Typography>
               <Typography variant="body1">
-                <strong>Thời gian chơi:</strong> {invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}
+                <strong>Thời gian chơi:</strong>{' '}
+                {invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}
               </Typography>
               <Typography variant="body1">
-                <strong>Tiền bàn:</strong> {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
+                <strong>Tiền bàn:</strong>{' '}
+                {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
               </Typography>
             </Box>
 
@@ -902,11 +967,16 @@ export default function PlaytimePage() {
                       {invoiceData.orders.map((order) => (
                         <TableRow key={order.id}>
                           <TableCell>
-                            {menus.find(menu => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}
+                            {menus.find((menu) => menu.id === order.menu_id)?.name ||
+                              `Món ${order.menu_id}`}
                           </TableCell>
                           <TableCell>{order.quantity}</TableCell>
-                          <TableCell>{parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
-                          <TableCell>{parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ</TableCell>
+                          <TableCell>
+                            {parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ
+                          </TableCell>
+                          <TableCell>
+                            {parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -920,15 +990,24 @@ export default function PlaytimePage() {
                 Tổng kết
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                Tiền bàn: <strong>{parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ</strong>
+                Tiền bàn:{' '}
+                <strong>
+                  {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
+                </strong>
               </Typography>
               {invoiceData.orders.length > 0 && (
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  Tiền đồ ăn: <strong>{parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ</strong>
+                  Tiền đồ ăn:{' '}
+                  <strong>
+                    {parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ
+                  </strong>
                 </Typography>
               )}
               <Typography variant="h6" sx={{ color: 'primary.main' }}>
-                TỔNG CỘNG: <strong>{parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ</strong>
+                TỔNG CỘNG:{' '}
+                <strong>
+                  {parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ
+                </strong>
               </Typography>
             </Box>
           </Box>
@@ -956,5 +1035,5 @@ export default function PlaytimePage() {
         </Alert>
       </Snackbar>
     </Box>
-  );
+  )
 }

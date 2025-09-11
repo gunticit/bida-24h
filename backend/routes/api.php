@@ -49,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('menus', MenuController::class);
     
     // Order management routes
+    Route::get('/orders/takeaway', [OrderController::class, 'getTakeawayOrders']);
+    Route::post('/orders/takeaway', [OrderController::class, 'createTakeawayOrder']);
     Route::apiResource('orders', OrderController::class);
     
     // Table management routes

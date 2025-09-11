@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
 import {
   Box,
   Container,
@@ -15,23 +15,23 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   Login as LoginIcon,
   PersonAdd as PersonAddIcon,
-} from '@mui/icons-material';
-import { useRouter } from 'next/navigation';
+} from '@mui/icons-material'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const router = useRouter()
 
   const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+    setDrawerOpen(!drawerOpen)
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -131,7 +131,9 @@ export default function Home() {
           }}
         >
           {/* Hero Section */}
-            <Box sx={{ textAlign: 'center', padding: '30px', background: '#fff', borderRadius: '5px' }}>
+          <Box
+            sx={{ textAlign: 'center', padding: '30px', background: '#fff', borderRadius: '5px' }}
+          >
             <Typography variant="h5" component="h5" gutterBottom>
               Chào mừng đến với
             </Typography>
@@ -142,13 +144,18 @@ export default function Home() {
               Quản lý giờ chơi, bàn, món ăn, đồ uống và tính toán tổng tiền
             </Typography>
             <Box sx={{ mt: 3 }}>
-              <Button onClick={() => router.push('/playtime')} variant="contained" size="large" sx={{ mr: 2 }}>
-          Bắt đầu
+              <Button
+                onClick={() => router.push('/playtime')}
+                variant="contained"
+                size="large"
+                sx={{ mr: 2 }}
+              >
+                Bắt đầu
               </Button>
             </Box>
           </Box>
         </Container>
       </>
     </Box>
-  );
+  )
 }

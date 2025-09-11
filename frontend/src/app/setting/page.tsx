@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
@@ -12,67 +12,69 @@ import {
   Button,
   List,
   ListItemButton,
-  ListItemText
-} from '@mui/material';
-import MuiListItemIcon from '@mui/material/ListItemIcon';
+  ListItemText,
+} from '@mui/material'
+import MuiListItemIcon from '@mui/material/ListItemIcon'
 import {
   Settings as SettingsIcon,
   Person as PersonIcon,
   TableRestaurant as TableIcon,
   Restaurant as MenuIcon,
   Dashboard as DashboardIcon,
-} from '@mui/icons-material';
-import { apiService, User } from '@/lib/api';
-import { AppBar } from '@/components/ui';
+} from '@mui/icons-material'
+import { apiService, User } from '@/lib/api'
+import { AppBar } from '@/components/ui'
 
 export default function SettingPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = apiService.getToken();
+    const token = apiService.getToken()
     if (!token) {
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
-    loadUser();
-  }, [router]);
+    loadUser()
+  }, [router])
 
   const loadUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
-      setUser(userData);
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
     } catch (error) {
-      console.error('Failed to load user:', error);
-      router.push('/login');
+      console.error('Failed to load user:', error)
+      router.push('/login')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      await apiService.logout();
-      router.push('/');
+      await apiService.logout()
+      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     }
-  };
+  }
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <Typography>Đang tải...</Typography>
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar 
+      <AppBar
         title="Cài đặt hệ thống"
         user={user}
         onLogout={handleLogout}
@@ -82,7 +84,7 @@ export default function SettingPage() {
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
-         CÀI ĐẶT HỆ THỐNG
+          CÀI ĐẶT HỆ THỐNG
         </Typography>
 
         <Grid container spacing={3}>
@@ -93,74 +95,74 @@ export default function SettingPage() {
                   Cài đặt chung
                 </Typography>
                 <List>
-                  <ListItemButton 
+                  <ListItemButton
                     onClick={() => router.push('/setting/table')}
-                    sx={{ 
-                      border: '1px solid #e0e0e0', 
-                      borderRadius: 1, 
+                    sx={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 1,
                       mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' }
+                      '&:hover': { backgroundColor: '#f5f5f5' },
                     }}
                   >
                     <MuiListItemIcon>
                       <TableIcon color="primary" />
                     </MuiListItemIcon>
-                    <ListItemText 
-                      primary="Quản lý bàn" 
+                    <ListItemText
+                      primary="Quản lý bàn"
                       secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
                     />
                   </ListItemButton>
-                  
-                  <ListItemButton 
+
+                  <ListItemButton
                     onClick={() => router.push('/setting/user')}
-                    sx={{ 
-                      border: '1px solid #e0e0e0', 
-                      borderRadius: 1, 
+                    sx={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 1,
                       mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' }
+                      '&:hover': { backgroundColor: '#f5f5f5' },
                     }}
                   >
                     <MuiListItemIcon>
                       <PersonIcon color="primary" />
                     </MuiListItemIcon>
-                    <ListItemText 
-                      primary="Cài đặt người dùng" 
+                    <ListItemText
+                      primary="Cài đặt người dùng"
                       secondary="Quản lý vai trò và quyền hạn người dùng"
                     />
                   </ListItemButton>
-                  
+
                   <ListItemButton
                     onClick={() => router.push('/setting/menus')}
-                    sx={{ 
-                      border: '1px solid #e0e0e0', 
-                      borderRadius: 1, 
+                    sx={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 1,
                       mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' }
+                      '&:hover': { backgroundColor: '#f5f5f5' },
                     }}
                   >
                     <MuiListItemIcon>
                       <MenuIcon color="primary" />
                     </MuiListItemIcon>
-                    <ListItemText 
-                      primary="Thiết lập thực đơn" 
+                    <ListItemText
+                      primary="Thiết lập thực đơn"
                       secondary="Quản lý món ăn và đồ uống"
                     />
                   </ListItemButton>
-                  
+
                   <ListItemButton
-                    sx={{ 
-                      border: '1px solid #e0e0e0', 
-                      borderRadius: 1, 
+                    sx={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 1,
                       mb: 1,
                       opacity: 0.6,
-                      '&:hover': { backgroundColor: '#f5f5f5' }
+                      '&:hover': { backgroundColor: '#f5f5f5' },
                     }}
                   >
                     <MuiListItemIcon>
                       <SettingsIcon color="disabled" />
                     </MuiListItemIcon>
-                    <ListItemText 
-                      primary="Cài đặt hệ thống" 
+                    <ListItemText
+                      primary="Cài đặt hệ thống"
                       secondary="Cấu hình chung của hệ thống"
                     />
                   </ListItemButton>
@@ -195,5 +197,5 @@ export default function SettingPage() {
         </Grid>
       </Container>
     </Box>
-  );
+  )
 }

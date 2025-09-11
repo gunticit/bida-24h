@@ -6,52 +6,47 @@ Component AppBar dùng chung cho toàn bộ ứng dụng với menu người dù
 
 ### Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `title` | `string` | ✅ | Tiêu đề hiển thị trên AppBar |
-| `user` | `User \| null` | ✅ | Thông tin người dùng hiện tại |
-| `onLogout` | `() => void` | ✅ | Function xử lý đăng xuất |
-| `icon` | `React.ReactNode` | ❌ | Icon hiển thị bên cạnh tiêu đề |
+| Prop       | Type              | Required | Description                    |
+| ---------- | ----------------- | -------- | ------------------------------ |
+| `title`    | `string`          | ✅       | Tiêu đề hiển thị trên AppBar   |
+| `user`     | `User \| null`    | ✅       | Thông tin người dùng hiện tại  |
+| `onLogout` | `() => void`      | ✅       | Function xử lý đăng xuất       |
+| `icon`     | `React.ReactNode` | ❌       | Icon hiển thị bên cạnh tiêu đề |
 
 ### User Interface
 
 ```typescript
 interface User {
-  id: number;
-  name: string;
-  role?: string;
-  email: string;
+  id: number
+  name: string
+  role?: string
+  email: string
 }
 ```
 
 ### Cách sử dụng
 
 ```tsx
-import { AppBar } from '@/components/ui';
-import { CalendarToday as CalendarIcon } from '@mui/icons-material';
+import { AppBar } from '@/components/ui'
+import { CalendarToday as CalendarIcon } from '@mui/icons-material'
 
 function MyPage() {
   const user = {
     id: 1,
     name: 'Nguyễn Văn A',
     role: 'Admin',
-    email: 'admin@example.com'
-  };
+    email: 'admin@example.com',
+  }
 
   const handleLogout = async () => {
     // Xử lý đăng xuất
-    await apiService.logout();
-    router.push('/');
-  };
+    await apiService.logout()
+    router.push('/')
+  }
 
   return (
-    <AppBar 
-      title="Quản lý Giờ chơi"
-      user={user}
-      onLogout={handleLogout}
-      icon={<CalendarIcon />}
-    />
-  );
+    <AppBar title="Quản lý Giờ chơi" user={user} onLogout={handleLogout} icon={<CalendarIcon />} />
+  )
 }
 ```
 
@@ -70,6 +65,7 @@ function MyPage() {
 ### Menu Items
 
 Menu dropdown bao gồm:
+
 - **Dashboard**: Chuyển đến trang dashboard
 - **Hồ sơ**: Xem thông tin cá nhân (chưa implement)
 - **Cài đặt**: Chuyển đến trang cài đặt
@@ -78,5 +74,6 @@ Menu dropdown bao gồm:
 ### Styling
 
 Component sử dụng Material-UI theme và có thể tùy chỉnh thông qua:
+
 - `sx` prop cho styling tùy chỉnh
 - Theme provider cho styling toàn cục
