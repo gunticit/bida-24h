@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\TakeawayOrderController;
 use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\RevenueController;
 use Illuminate\Support\Facades\Route;
@@ -48,10 +49,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/menus/{id}/increase-quantity', [MenuController::class, 'increaseQuantity']);
     Route::apiResource('menus', MenuController::class);
     
-    // Order management routes
+    // Order management routes (old - for session orders)
     Route::get('/orders/takeaway', [OrderController::class, 'getTakeawayOrders']);
     Route::post('/orders/takeaway', [OrderController::class, 'createTakeawayOrder']);
     Route::apiResource('orders', OrderController::class);
+    
+    // Takeaway Order management routes (new dedicated system)
+    Route::get('/takeaway-orders/today', [TakeawayOrderController::class, 'todayOrders']);
+    Route::apiResource('takeaway-orders', TakeawayOrderController::class);
     
     // Table management routes
     Route::apiResource('tables', TableController::class);

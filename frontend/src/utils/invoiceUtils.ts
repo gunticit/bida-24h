@@ -1,7 +1,9 @@
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { formatMoney, calculatePlayTime } from './formatters'
+import { calculatePlayTime } from './formatters'
+import { generateVietinBankQR } from './qrGenerate';
+import { formatMoney } from './formatters'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -32,7 +34,7 @@ interface InvoiceMenu {
   name: string
 }
 
-export const generateInvoiceContent = (
+export const generateInvoiceContent = async (
   session: InvoiceSession,
   orders: InvoiceOrder[],
   tables: InvoiceTable[],
@@ -41,6 +43,8 @@ export const generateInvoiceContent = (
   totalFoodMoney: number,
   totalMoney: number,
 ) => {
+  // Tạo mã QR thanh toán
+  const qrCodeDataURL = await generateVietinBankQR(totalMoney, session.id.toString(), 'DHMV')
   return `
     <!DOCTYPE html>
     <html>
@@ -92,7 +96,7 @@ export const generateInvoiceContent = (
           text-right: right;
         }
         .footer {
-          margin-top: 10px;
+          margin-top: 5px;
           text-align: center;
           font-size: 11px;
         }
@@ -140,8 +144,8 @@ export const generateInvoiceContent = (
           <tr>
             <td>${menus.find((menu) => menu.id === order.menu_id)?.name || `Món ${order.menu_id}`}</td>
             <td>${order.quantity}</td>
-            <td>${parseInt(order.unit_price.toString()).toLocaleString('vi-VN')} đ</td>
-            <td>${parseInt(order.total_price.toString()).toLocaleString('vi-VN')} đ</td>
+            <td>${formatMoney(order.unit_price)}</td>
+            <td>${formatMoney(order.total_price)}</td>
           </tr>
         `,
           )
@@ -150,28 +154,28 @@ export const generateInvoiceContent = (
       `
           : ''
       }
-      
       <div class="total">
-        <h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền bàn: ${parseInt(totalTableMoney.toString()).toLocaleString('vi-VN')} đ</h3>
-        ${orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền đồ ăn: ${totalFoodMoney.toLocaleString('vi-VN')} đ</h3>` : ''}
-        <h1 style="font-size:20px; margin:4px 0; text-align: right;">Tổng tiền: ${parseInt(totalMoney.toString()).toLocaleString('vi-VN')} đ</h1>
+        <h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền bàn: ${formatMoney(totalTableMoney)}</h3>
+        ${orders.length > 0 ? `<h3 style="font-size:15px; margin:4px 0; text-align: right;">Tiền đồ ăn: ${formatMoney(totalFoodMoney)}</h3>` : ''}
+        <h1 style="font-size:20px; margin:4px 0; text-align: right;">Tổng tiền: ${formatMoney(totalMoney)}</h1>
       </div>
       
       <div class="footer">
-        <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách đã luôn ủng hộ <br/> 24h Billiards Coffee!</p>
-        <p style="font-size:15px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
+        <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách và hẹn gặp lại!</p>
+         ${qrCodeDataURL ? `
+            <div style="text-align: center; margin: 10px 0; border: 1px dashed #000; padding: 8px;">
+                <p style="font-size:13px; margin: 5px 0; font-weight: bold;">THANH TOÁN CHUYỂN KHOẢN</p>
+                <img src="${qrCodeDataURL}" style="width: 80px; height: 80px; display: block; margin: 5px auto;" alt="QR Code"/>
+                <p style="font-size:12px; margin: 2px 0; font-weight: bold;">VietinBank</p>
+                <p style="font-size:12px; margin: 2px 0;">STK: 104884214711</p>
+                <p style="font-size:12px; margin: 2px 0;">Chủ TK: TRUONG THI THANH HIEU</p>
+                <p style="font-size:12px; margin: 2px 0; font-weight: bold;">Số tiền: ${formatMoney(totalMoney)}</p>
+                <p style="font-size:11px; margin: 2px 0;">ND: DHMV${session.id.toString()}</p>
+            </div>
+        ` : ''}
+        <p style="font-size:12px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
       </div>
     </body>
     </html>
   `
-}
-
-export const printInvoice = (invoiceContent: string) => {
-  const printWindow = window.open('', '_blank')
-  if (printWindow) {
-    printWindow.document.write(invoiceContent)
-    printWindow.document.close()
-    printWindow.focus()
-    printWindow.print()
-  }
 }

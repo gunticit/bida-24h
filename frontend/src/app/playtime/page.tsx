@@ -47,7 +47,7 @@ import {
 import {
   apiService,
   User,
-  Session,
+  GameSession,
   CreateSessionData,
   UpdateSessionData,
   Table,
@@ -58,7 +58,8 @@ import { AppBar } from '@/components/ui'
 import { StatisticsCards } from '@/components/playtime'
 import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
-import { generateInvoiceContent, printInvoice } from '@/utils/invoiceUtils'
+import { generateInvoiceContent } from '@/utils/invoiceUtils'
+import { printInvoice } from '@/utils/printHelpers'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -70,10 +71,10 @@ export default function PlaytimePage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [sessions, setSessions] = useState<Session[]>([])
+  const [sessions, setSessions] = useState<GameSession[]>([])
   const [tables, setTables] = useState<Table[]>([])
   const [openDialog, setOpenDialog] = useState(false)
-  const [editingSession, setEditingSession] = useState<Session | null>(null)
+  const [editingSession, setEditingSession] = useState<GameSession | null>(null)
   const [formData, setFormData] = useState<CreateSessionData>({
     table_id: 1,
     start_time: dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
@@ -82,7 +83,7 @@ export default function PlaytimePage() {
   const [menus, setMenus] = useState<MenuItemType[]>([])
   const [openFoodDialog, setOpenFoodDialog] = useState(false)
   const [openFoodListDialog, setOpenFoodListDialog] = useState(false)
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  const [selectedSession, setSelectedSession] = useState<GameSession | null>(null)
   const [foodFormData, setFoodFormData] = useState({
     menu_id: 0,
     quantity: 1,
@@ -90,7 +91,7 @@ export default function PlaytimePage() {
   const [sessionOrders, setSessionOrders] = useState<Order[]>([])
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState(false)
   const [invoiceData, setInvoiceData] = useState<{
-    session: Session | null
+    session: GameSession | null
     orders: Order[]
     totalFoodMoney: number
     totalTableMoney: number
@@ -182,7 +183,7 @@ export default function PlaytimePage() {
     }
   }
 
-  const handleOpenDialog = (session?: Session) => {
+  const handleOpenDialog = (session?: GameSession) => {
     if (session) {
       setEditingSession(session)
       setFormData({
@@ -242,7 +243,7 @@ export default function PlaytimePage() {
   }
 
   const handleStatusChange = async (
-    session: Session,
+    session: GameSession,
     newStatus: 'playing' | 'finished' | 'canceled',
   ) => {
     try {
@@ -259,7 +260,7 @@ export default function PlaytimePage() {
     }
   }
 
-  const handleOpenFoodDialog = (session: Session) => {
+  const handleOpenFoodDialog = (session: GameSession) => {
     setSelectedSession(session)
     setFoodFormData({
       menu_id: menus.length > 0 ? menus[0].id : 0,
@@ -311,7 +312,7 @@ export default function PlaytimePage() {
     }
   }
 
-  const handleViewFoodList = async (session: Session) => {
+  const handleViewFoodList = async (session: GameSession) => {
     try {
       setSelectedSession(session)
       // Lấy danh sách orders của session này
@@ -430,7 +431,7 @@ export default function PlaytimePage() {
   }
 
   // Hàm mở dialog in hóa đơn
-  const handleOpenInvoiceDialog = async (session: Session) => {
+  const handleOpenInvoiceDialog = async (session: GameSession) => {
     try {
       // Lấy danh sách orders của session này
       const orders = await apiService.getOrders()
@@ -472,19 +473,24 @@ export default function PlaytimePage() {
   }
 
   // Hàm in hóa đơn
-  const handlePrintInvoice = () => {
+  const handlePrintInvoice = async () => {
     if (!invoiceData.session) return
 
-    const content = generateInvoiceContent(
-      invoiceData.session,
-      invoiceData.orders,
-      tables,
-      menus,
-      invoiceData.totalTableMoney,
-      invoiceData.totalFoodMoney,
-      invoiceData.totalMoney,
-    )
-    printInvoice(content)
+    try {
+      const content = await generateInvoiceContent(
+        invoiceData.session,
+        invoiceData.orders,
+        tables,
+        menus,
+        invoiceData.totalTableMoney,
+        invoiceData.totalFoodMoney,
+        invoiceData.totalMoney,
+      )
+      printInvoice(content)
+    } catch (error) {
+      console.error('Lỗi tạo hóa đơn:', error)
+      showSnackbar('Không thể tạo hóa đơn', 'error')
+    }
   }
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info') => {
@@ -749,7 +755,7 @@ export default function PlaytimePage() {
 
       {/* Add Food Dialog */}
       <Dialog open={openFoodDialog} onClose={handleCloseFoodDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Thêm món ăn cho Session #{selectedSession?.id}</DialogTitle>
+        <DialogTitle>Thêm món ăn cho giờ chơi #{selectedSession?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <FormControl fullWidth>
@@ -812,7 +818,7 @@ export default function PlaytimePage() {
 
       {/* Food List Dialog */}
       <Dialog open={openFoodListDialog} onClose={handleCloseFoodListDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Danh sách món ăn - Session #{selectedSession?.id}</DialogTitle>
+        <DialogTitle>Danh sách món ăn - Giờ chơi #{selectedSession?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             {sessionOrders.length === 0 ? (
@@ -908,7 +914,7 @@ export default function PlaytimePage() {
 
       {/* Invoice Dialog */}
       <Dialog open={openInvoiceDialog} onClose={handleCloseInvoiceDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Hóa đơn - Session #{invoiceData.session?.id}</DialogTitle>
+        <DialogTitle>Hóa đơn - Giờ chơi #{invoiceData.session?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>

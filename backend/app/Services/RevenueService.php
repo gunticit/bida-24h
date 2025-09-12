@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\GameSession;
+use App\Models\Order;
+use App\Models\TakeawayOrder;
 use Carbon\Carbon;
 
 class RevenueService
@@ -17,7 +19,13 @@ class RevenueService
 
         $totalTableRevenue = $sessions->sum('total_money_table') ?? 0;
         $totalFoodRevenue = $sessions->sum('total_money_food') ?? 0;
-        $totalRevenue = $sessions->sum('total_money') ?? 0;
+        
+        // Tính takeaway revenue từ bảng takeaway_orders mới
+        $takeawayRevenue = TakeawayOrder::whereDate('order_date', $date)
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+            
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
         $sessionCount = $sessions->count();
 
         return [
@@ -25,6 +33,7 @@ class RevenueService
             'total_revenue' => $totalRevenue,
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
+            'takeaway_revenue' => $takeawayRevenue,
             'session_count' => $sessionCount,
             'sessions' => $sessions->map(function ($session) {
                 return [
@@ -53,18 +62,33 @@ class RevenueService
 
         $totalTableRevenue = $sessions->sum('total_money_table') ?? 0;
         $totalFoodRevenue = $sessions->sum('total_money_food') ?? 0;
-        $totalRevenue = $sessions->sum('total_money') ?? 0;
+        
+        // Tính takeaway revenue cho tháng từ bảng takeaway_orders
+        $takeawayRevenue = TakeawayOrder::whereYear('order_date', $year)
+            ->whereMonth('order_date', $month)
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+            
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
         $sessionCount = $sessions->count();
 
         // Tính doanh thu theo ngày trong tháng
         $dailyBreakdown = $sessions->groupBy(function ($session) {
             return $session->start_time->format('Y-m-d');
         })->map(function ($daySessions) {
+            $date = $daySessions->first()->start_time->format('Y-m-d');
+            
+            // Tính takeaway cho ngày này từ bảng takeaway_orders
+            $dayTakeaway = TakeawayOrder::whereDate('order_date', $date)
+                ->whereIn('status', ['completed'])
+                ->sum('total_amount') ?? 0;
+            
             return [
-                'date' => $daySessions->first()->start_time->format('Y-m-d'),
-                'total_revenue' => $daySessions->sum('total_money') ?? 0,
+                'date' => $date,
+                'total_revenue' => ($daySessions->sum('total_money') ?? 0) + $dayTakeaway,
                 'table_revenue' => $daySessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $daySessions->sum('total_money_food') ?? 0,
+                'takeaway_revenue' => $dayTakeaway,
                 'session_count' => $daySessions->count(),
             ];
         })->values();
@@ -76,6 +100,7 @@ class RevenueService
             'total_revenue' => $totalRevenue,
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
+            'takeaway_revenue' => $takeawayRevenue,
             'session_count' => $sessionCount,
             'daily_breakdown' => $dailyBreakdown,
         ];
@@ -91,7 +116,13 @@ class RevenueService
 
         $totalTableRevenue = $sessions->sum('total_money_table') ?? 0;
         $totalFoodRevenue = $sessions->sum('total_money_food') ?? 0;
-        $totalRevenue = $sessions->sum('total_money') ?? 0;
+        
+        // Tính takeaway revenue cho năm từ bảng takeaway_orders
+        $takeawayRevenue = TakeawayOrder::whereYear('order_date', $year)
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+            
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
         $sessionCount = $sessions->count();
 
         // Tính doanh thu theo tháng trong năm
@@ -99,13 +130,23 @@ class RevenueService
             return $session->start_time->format('Y-m');
         })->map(function ($monthSessions) {
             $firstSession = $monthSessions->first();
+            $year = $firstSession->start_time->year;
+            $month = $firstSession->start_time->month;
+            
+            // Tính takeaway cho tháng này từ bảng takeaway_orders
+            $monthTakeaway = TakeawayOrder::whereYear('order_date', $year)
+                ->whereMonth('order_date', $month)
+                ->whereIn('status', ['completed'])
+                ->sum('total_amount') ?? 0;
+            
             return [
-                'year' => $firstSession->start_time->year,
-                'month' => $firstSession->start_time->month,
+                'year' => $year,
+                'month' => $month,
                 'month_name' => $firstSession->start_time->format('F Y'),
-                'total_revenue' => $monthSessions->sum('total_money') ?? 0,
+                'total_revenue' => ($monthSessions->sum('total_money') ?? 0) + $monthTakeaway,
                 'table_revenue' => $monthSessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $monthSessions->sum('total_money_food') ?? 0,
+                'takeaway_revenue' => $monthTakeaway,
                 'session_count' => $monthSessions->count(),
             ];
         })->values();
@@ -115,6 +156,7 @@ class RevenueService
             'total_revenue' => $totalRevenue,
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
+            'takeaway_revenue' => $takeawayRevenue,
             'session_count' => $sessionCount,
             'monthly_breakdown' => $monthlyBreakdown,
         ];

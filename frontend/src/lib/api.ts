@@ -39,7 +39,7 @@ export interface AuthResponse {
   token: string
 }
 
-export interface Session {
+export interface GameSession {
   id: number
   table_id: number
   start_time: string
@@ -76,6 +76,41 @@ export interface MenuItem {
   is_active: boolean
   created_at: string
   updated_at: string
+}
+
+export interface TakeawayOrder {
+  id: number
+  customer_name: string
+  customer_phone: string
+  notes?: string
+  total_amount: number
+  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
+  order_date: string
+  created_at: string
+  updated_at: string
+  items: TakeawayOrderItem[]
+}
+
+export interface TakeawayOrderItem {
+  id: number
+  takeaway_order_id: number
+  menu_id: number
+  quantity: number
+  price: number
+  total: number
+  created_at: string
+  updated_at: string
+  menu?: MenuItem
+}
+
+export interface CreateTakeawayOrderData {
+  customer_name?: string
+  customer_phone?: string
+  notes?: string
+  items: {
+    menu_id: number
+    quantity: number
+  }[]
 }
 
 export interface Order {
@@ -232,31 +267,31 @@ class ApiService {
   }
 
   // Session management methods
-  async getSessions(): Promise<Session[]> {
-    return this.request<Session[]>('/sessions')
+  async getSessions(): Promise<GameSession[]> {
+    return this.request<GameSession[]>('/sessions')
   }
 
-  async getSessionsTodayOrPlaying(): Promise<Session[]> {
-    return this.request<Session[]>('/sessions/today-or-playing')
+  async getSessionsTodayOrPlaying(): Promise<GameSession[]> {
+    return this.request<GameSession[]>('/sessions/today-or-playing')
   }
 
-  async getSessionsToday(): Promise<Session[]> {
-    return this.request<Session[]>('/sessions/today')
+  async getSessionsToday(): Promise<GameSession[]> {
+    return this.request<GameSession[]>('/sessions/today')
   }
 
-  async getSession(id: number): Promise<Session> {
-    return this.request<Session>(`/sessions/${id}`)
+  async getSession(id: number): Promise<GameSession> {
+    return this.request<GameSession>(`/sessions/${id}`)
   }
 
-  async createSession(data: CreateSessionData): Promise<Session> {
-    return this.request<Session>('/sessions', {
+  async createSession(data: CreateSessionData): Promise<GameSession> {
+    return this.request<GameSession>('/sessions', {
       method: 'POST',
       body: JSON.stringify(data),
     })
   }
 
-  async updateSession(id: number, data: UpdateSessionData): Promise<Session> {
-    return this.request<Session>(`/sessions/${id}`, {
+  async updateSession(id: number, data: UpdateSessionData): Promise<GameSession> {
+    return this.request<GameSession>(`/sessions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
@@ -446,12 +481,48 @@ class ApiService {
     return this.request<any>(`/revenue/chart${queryString}`)
   }
 
-  // Takeaway order methods
-  async getTakeawayOrders(): Promise<Order[]> {
+  // Takeaway order methods (new system)
+  async getTakeawayOrders(): Promise<TakeawayOrder[]> {
+    return this.request<TakeawayOrder[]>('/takeaway-orders')
+  }
+
+  async getTodayTakeawayOrders(): Promise<TakeawayOrder[]> {
+    return this.request<TakeawayOrder[]>('/takeaway-orders/today')
+  }
+
+  async getTakeawayOrder(id: number): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>(`/takeaway-orders/${id}`)
+  }
+
+  async createTakeawayOrder(data: CreateTakeawayOrderData): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>('/takeaway-orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateTakeawayOrderStatus(
+    id: number,
+    status: TakeawayOrder['status'],
+  ): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>(`/takeaway-orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    })
+  }
+
+  async deleteTakeawayOrder(id: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/takeaway-orders/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Legacy takeaway methods (will be deprecated)
+  async getLegacyTakeawayOrders(): Promise<Order[]> {
     return this.request<Order[]>('/orders/takeaway')
   }
 
-  async createTakeawayOrder(data: {
+  async createLegacyTakeawayOrder(data: {
     menu_id: number
     quantity: number
     unit_price: number
@@ -461,7 +532,7 @@ class ApiService {
   }): Promise<Order> {
     return this.request<Order>('/orders/takeaway', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
   }
 }

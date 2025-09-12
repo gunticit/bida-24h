@@ -20,30 +20,30 @@ class SessionController extends Controller
     public function index()
     {
         try {
-            $sessions = $this->service->getAll();
-            return response()->json($sessions);
+            $gameSessions = $this->service->getAll();
+            return response()->json($gameSessions);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể tải danh sách sessions'], 500);
+            return response()->json(['message' => 'Không thể tải danh sách giờ chơi'], 500);
         }
     }
 
     public function todayOrPlaying()
     {
         try {
-            $sessions = $this->service->getTodayOrPlaying();
-            return response()->json($sessions);
+            $gameSessions = $this->service->getTodayOrPlaying();
+            return response()->json($gameSessions);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể tải danh sách sessions hôm nay hoặc đang chơi'], 500);
+            return response()->json(['message' => 'Không thể tải danh sách giờ chơi hôm nay hoặc đang chơi'], 500);
         }
     }
 
     public function today()
     {
         try {
-            $sessions = $this->service->getToday();
-            return response()->json($sessions);
+            $gameSessions = $this->service->getToday();
+            return response()->json($gameSessions);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể tải danh sách sessions hôm nay'], 500);
+            return response()->json(['message' => 'Không thể tải danh sách giờ chơi hôm nay'], 500);
         }
     }
 
@@ -59,24 +59,24 @@ class SessionController extends Controller
 
             $validated['status'] = $validated['status'] ?? 'playing';
             
-            $session = $this->service->create($validated);
-            return response()->json($session, 201);
+            $gameSessions = $this->service->create($validated);
+            return response()->json($gameSessions, 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể tạo session'], 500);
+            return response()->json(['message' => 'Không thể tạo giờ chơi'], 500);
         }
     }
 
     public function show($id)
     {
         try {
-            $session = $this->service->getById($id);
-            return response()->json($session);
+            $gameSession = $this->service->getById($id);
+            return response()->json($gameSession);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Session không tồn tại'], 404);
+            return response()->json(['message' => 'Giờ chơi không tồn tại'], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể tải thông tin session'], 500);
+            return response()->json(['message' => 'Không thể tải thông tin giờ chơi'], 500);
         }
     }
 
@@ -94,14 +94,14 @@ class SessionController extends Controller
                 'total_money_table' => 'sometimes|numeric|min:0',
             ]);
 
-            $session = $this->service->update($id, $validated);
-            return response()->json($session);
+            $gameSession = $this->service->update($id, $validated);
+            return response()->json($gameSession);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Session không tồn tại'], 404);
+            return response()->json(['message' => 'Giờ chơi không tồn tại'], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể cập nhật session'], 500);
+            return response()->json(['message' => 'Không thể cập nhật giờ chơi'], 500);
         }
     }
 
@@ -109,11 +109,11 @@ class SessionController extends Controller
     {
         try {
             $this->service->delete($id);
-            return response()->json(['message' => 'Session đã được xóa thành công']);
+            return response()->json(['message' => 'Giờ chơi đã được xóa thành công']);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Session không tồn tại'], 404);
+            return response()->json(['message' => 'Giờ chơi không tồn tại'], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể xóa session'], 500);
+            return response()->json(['message' => 'Không thể xóa giờ chơi'], 500);
         }
     }
 
