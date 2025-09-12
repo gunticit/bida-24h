@@ -327,15 +327,8 @@ export default function TakeawayPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       <AppBar title="Đặt hàng mang về" user={user} onLogout={handleLogout} />
 
-      <Box sx={{ p: 3, mt: 8 }}>
+      <Box sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}
-          >
-            <TakeawayIcon sx={{ mr: 2, fontSize: 40 }} />
-            Đặt hàng mang về
-          </Typography>
           <Button
             variant="outlined"
             startIcon={<ReplyIcon />}

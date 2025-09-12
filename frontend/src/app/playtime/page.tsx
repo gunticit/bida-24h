@@ -29,6 +29,7 @@ import {
   IconButton as MuiIconButton,
   Alert,
   Snackbar,
+  Autocomplete,
 } from '@mui/material'
 import {
   CalendarToday as CalendarIcon,
@@ -56,7 +57,7 @@ import {
 } from '@/lib/api'
 import { AppBar } from '@/components/ui'
 import { StatisticsCards } from '@/components/playtime'
-import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
+import { formatDateTime, formatMoney, calculatePlayTime, formatCurrency } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
 import { generateInvoiceContent } from '@/utils/invoiceUtils'
 import { printInvoice } from '@/utils/printHelpers'
@@ -758,27 +759,51 @@ export default function PlaytimePage() {
         <DialogTitle>Thêm món ăn cho giờ chơi #{selectedSession?.id}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Chọn món ăn</InputLabel>
-              <Select
-                value={foodFormData.menu_id}
-                label="Chọn món ăn"
-                onChange={(e) =>
-                  setFoodFormData({ ...foodFormData, menu_id: e.target.value as number })
-                }
-              >
-                {menus.map((menu) => (
-                  <MenuItem key={menu.id} value={menu.id}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {getCategoryChipLocal(menu.category)}
-                      <span>
-                        {menu.name} - {parseInt(menu?.price?.toString()).toLocaleString('vi-VN')} đ
-                      </span>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={menus}
+              getOptionLabel={(option) => 
+                `${option.name} - ${parseInt(option?.price?.toString()).toLocaleString('vi-VN')} đ`
+              }
+              value={menus.find(menu => menu.id === foodFormData.menu_id) || null}
+              onChange={(_, newValue) => {
+                setFoodFormData({ 
+                  ...foodFormData, 
+                  menu_id: newValue ? newValue.id : 0 
+                })
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Chọn món ăn"
+                  placeholder="Tìm kiếm món ăn..."
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                    {getCategoryChipLocal(option.category)}
+                    <span style={{ flex: 1 }}>
+                      {option.name} - {formatCurrency(option?.price)}
+                    </span>
+                    {option.quantity <= 5 && (
+                      <Chip 
+                        label={`Còn ${option.quantity}`}
+                        size="small"
+                        color={option.quantity === 0 ? "error" : "warning"}
+                      />
+                    )}
+                  </Box>
+                </Box>
+              )}
+              filterOptions={(options, { inputValue }) => {
+                return options.filter(option =>
+                  option.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+                  option.category.toLowerCase().includes(inputValue.toLowerCase())
+                )
+              }}
+              noOptionsText="Không tìm thấy món ăn"
+              fullWidth
+            />
 
             <TextField
               label="Số lượng"
