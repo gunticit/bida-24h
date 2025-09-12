@@ -72,6 +72,14 @@ class GameSession extends Model
         });
     }
 
+    public function scopePlayingOrLast7Days($query)
+    {
+        return $query->where(function($q) {
+            $q->where('status', 'playing')
+              ->orWhere('start_time', '>=', today()->subDays(7));
+        });
+    }
+
     // Methods
     public function calculateTotalTime()
     {

@@ -275,6 +275,10 @@ class ApiService {
     return this.request<GameSession[]>('/sessions/today-or-playing')
   }
 
+  async getSessionsPlayingOrLast7Days(): Promise<GameSession[]> {
+    return this.request<GameSession[]>('/sessions/playing-or-last7days')
+  }
+
   async getSessionsToday(): Promise<GameSession[]> {
     return this.request<GameSession[]>('/sessions/today')
   }

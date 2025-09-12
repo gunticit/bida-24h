@@ -37,6 +37,16 @@ class SessionController extends Controller
         }
     }
 
+    public function playingOrLast7Days()
+    {
+        try {
+            $gameSessions = $this->service->getPlayingOrLast7Days();
+            return response()->json($gameSessions);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể tải danh sách giờ chơi đang chơi hoặc 7 ngày qua'], 500);
+        }
+    }
+
     public function today()
     {
         try {

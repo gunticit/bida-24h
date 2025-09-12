@@ -113,6 +113,7 @@ export default function PlaytimePage() {
     message: '',
     severity: 'info',
   })
+  const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>('playingOrLast7Days')
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -139,9 +140,17 @@ export default function PlaytimePage() {
     }
   }
 
-  const loadSessions = async () => {
+  const loadSessions = async (mode?: 'todayOrPlaying' | 'playingOrLast7Days') => {
     try {
-      const sessionsData = await apiService.getSessionsTodayOrPlaying()
+      const currentMode = mode || viewMode
+      let sessionsData
+      
+      if (currentMode === 'todayOrPlaying') {
+        sessionsData = await apiService.getSessionsTodayOrPlaying()
+      } else {
+        sessionsData = await apiService.getSessionsPlayingOrLast7Days()
+      }
+      
       setSessions(sessionsData)
     } catch (error) {
       console.error('Failed to load sessions:', error)
@@ -544,6 +553,30 @@ export default function PlaytimePage() {
               Tạo giờ chơi mới
             </Button>
           </Box>
+        </Box>
+
+        {/* View Mode Toggle */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+          <Button
+            variant={viewMode === 'todayOrPlaying' ? 'contained' : 'outlined'}
+            onClick={() => {
+              setViewMode('todayOrPlaying')
+              loadSessions('todayOrPlaying')
+            }}
+            size="small"
+          >
+            Hôm nay + Đang chơi
+          </Button>
+          <Button
+            variant={viewMode === 'playingOrLast7Days' ? 'contained' : 'outlined'}
+            onClick={() => {
+              setViewMode('playingOrLast7Days')
+              loadSessions('playingOrLast7Days')
+            }}
+            size="small"
+          >
+            Đang chơi + 7 ngày qua
+          </Button>
         </Box>
 
         {/* Statistics Cards */}

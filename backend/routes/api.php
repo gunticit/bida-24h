@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Session management routes
     Route::get('/sessions/today-or-playing', [SessionController::class, 'todayOrPlaying']);
+    Route::get('/sessions/playing-or-last7days', [SessionController::class, 'playingOrLast7Days']);
     Route::post('/sessions/{sessionId}/orders', [SessionController::class, 'addOrder']);
     Route::get('/sessions/today', [SessionController::class, 'today']);
     Route::delete('/orders/{orderId}', [SessionController::class, 'removeOrder']);

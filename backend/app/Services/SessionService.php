@@ -25,6 +25,15 @@ class SessionService
             ->get();
     }
 
+    public function getPlayingOrLast7Days()
+    {
+        return GameSession::with('table')
+            ->playingOrLast7Days()
+            ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
+            ->orderBy('start_time', 'desc')
+            ->get();
+    }
+
     public function getToday()
     {
         return GameSession::with('table')
