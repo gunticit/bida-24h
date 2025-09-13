@@ -44,17 +44,20 @@ import {
   LocalBar as DrinkIcon,
   SmokingRooms as TobaccoIcon,
   TakeoutDining as TakeawayIcon,
+  RestaurantMenu as RestaurantIcon,
 } from '@mui/icons-material'
 import {
   apiService,
   User,
   GameSession,
-  CreateSessionData,
-  UpdateSessionData,
   Table,
   MenuItem as MenuItemType,
   Order,
 } from '@/lib/api'
+import type {
+  CreateSessionData,
+  UpdateSessionData,
+} from '@/types/api'
 import { AppBar } from '@/components/ui'
 import { StatisticsCards } from '@/components/playtime'
 import { formatDateTime, formatMoney, calculatePlayTime, formatCurrency } from '@/utils/formatters'
@@ -522,6 +525,10 @@ export default function PlaytimePage() {
     router.push('/takeaway')
   }
 
+  const handleRedirectDineIn = () => {
+    router.push('/dine-in')
+  }
+
   if (loading) {
     return (
       <Box
@@ -551,7 +558,14 @@ export default function PlaytimePage() {
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="outlined"
-              startIcon={<AddIcon />}
+              startIcon={<RestaurantIcon />}
+              onClick={() => handleRedirectDineIn()}
+            >
+              Đặt đồ ăn tại chỗ
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<TakeawayIcon />}
               onClick={() => handleRedirectTakeAway()}
             >
               Đặt đồ ăn mang về

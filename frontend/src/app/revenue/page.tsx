@@ -40,6 +40,7 @@ interface RevenueData {
   total_cost_of_goods_sold?: number
   total_profit?: number
   session_count: number
+  dinein_revenue?: number
   date?: string
   year?: number
   month?: number
@@ -234,13 +235,6 @@ export default function RevenuePage() {
             }}
           >
             <RevenueCard
-              title="Tổng doanh thu"
-              value={dailyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 35 }} />}
-              color="primary"
-              isMoney={true}
-            />
-            <RevenueCard
               title="Doanh thu bàn"
               value={dailyData.table_revenue}
               icon={<AccessTime sx={{ fontSize: 35 }} />}
@@ -251,14 +245,21 @@ export default function RevenuePage() {
               title="Doanh thu thức ăn"
               value={dailyData.food_revenue}
               icon={<Restaurant sx={{ fontSize: 35 }} />}
-              color="warning"
+              color="info"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={dailyData.takeaway_revenue}
               icon={<ShoppingBag sx={{ fontSize: 35 }} />}
-              color="error"
+              color="info"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Tổng tiền tại chỗ"
+              value={dailyData.dinein_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
+              color="info"
               isMoney={true}
             />
           </Box>
@@ -270,6 +271,22 @@ export default function RevenuePage() {
               mb: 3,
             }}
           >
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={dailyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
+              color="success"
+              isMoney={true}
+            />
+            {dailyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={dailyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={dailyData.total_profit >= 0 ? "success" : "error"}
+                isMoney={true}
+              />
+            )}
             {dailyData.total_cost_of_goods_sold !== undefined && (
               <RevenueCard
                 title="C/phí nguồn hàng"
@@ -285,15 +302,6 @@ export default function RevenuePage() {
                 value={dailyData.total_expenses}
                 icon={<BarChart sx={{ fontSize: 35 }} />}
                 color="secondary"
-                isMoney={true}
-              />
-            )}
-            {dailyData.total_profit !== undefined && (
-              <RevenueCard
-                title="Lợi nhuận"
-                value={dailyData.total_profit}
-                icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={dailyData.total_profit >= 0 ? "success" : "error"}
                 isMoney={true}
               />
             )}
@@ -400,13 +408,6 @@ export default function RevenuePage() {
             }}
           >
             <RevenueCard
-              title="Tổng doanh thu"
-              value={monthlyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 35 }} />}
-              color="primary"
-              isMoney={true}
-            />
-            <RevenueCard
               title="Doanh thu bàn"
               value={monthlyData.table_revenue}
               icon={<AccessTime sx={{ fontSize: 35 }} />}
@@ -417,14 +418,21 @@ export default function RevenuePage() {
               title="Doanh thu thức ăn"
               value={monthlyData.food_revenue}
               icon={<Restaurant sx={{ fontSize: 35 }} />}
-              color="warning"
+              color="info"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={monthlyData.takeaway_revenue}
               icon={<ShoppingBag sx={{ fontSize: 35 }} />}
-              color="error"
+              color="info"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Tổng tiền tại chỗ"
+              value={monthlyData.dinein_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
+              color="info"
               isMoney={true}
             />
           </Box>
@@ -436,6 +444,22 @@ export default function RevenuePage() {
               mb: 3,
             }}
           >
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={monthlyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
+              color="success"
+              isMoney={true}
+            />
+              {monthlyData.total_profit !== undefined && (
+                <RevenueCard
+                  title="Lợi nhuận"
+                  value={monthlyData.total_profit}
+                  icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                  color={monthlyData.total_profit >= 0 ? "success" : "error"}
+                  isMoney={true}
+                />
+              )}
               {monthlyData.total_cost_of_goods_sold !== undefined && (
                 <RevenueCard
                   title="C/phí nguồn hàng"
@@ -451,15 +475,6 @@ export default function RevenuePage() {
                   value={monthlyData.total_expenses}
                   icon={<BarChart sx={{ fontSize: 35 }} />}
                   color="secondary"
-                  isMoney={true}
-                />
-              )}
-              {monthlyData.total_profit !== undefined && (
-                <RevenueCard
-                  title="Lợi nhuận"
-                  value={monthlyData.total_profit}
-                  icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                  color={monthlyData.total_profit >= 0 ? "success" : "error"}
                   isMoney={true}
                 />
               )}
@@ -590,13 +605,6 @@ export default function RevenuePage() {
             }}
           >
             <RevenueCard
-              title="Tổng doanh thu"
-              value={yearlyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 35 }} />}
-              color="primary"
-              isMoney={true}
-            />
-            <RevenueCard
               title="Doanh thu bàn"
               value={yearlyData.table_revenue}
               icon={<AccessTime sx={{ fontSize: 35 }} />}
@@ -607,14 +615,21 @@ export default function RevenuePage() {
               title="Doanh thu thức ăn"
               value={yearlyData.food_revenue}
               icon={<Restaurant sx={{ fontSize: 35 }} />}
-              color="warning"
+              color="info"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={yearlyData.takeaway_revenue}
               icon={<ShoppingBag sx={{ fontSize: 35 }} />}
-              color="error"
+              color="info"
+              isMoney={true}
+            />
+            <RevenueCard
+              title="Tổng tiền tại chỗ"
+              value={yearlyData.dinein_revenue}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
+              color="info"
               isMoney={true}
             />
           </Box>
@@ -626,6 +641,22 @@ export default function RevenuePage() {
               mb: 3,
             }}
           >
+            <RevenueCard
+              title="Tổng doanh thu"
+              value={yearlyData.total_revenue}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
+              color="success"
+              isMoney={true}
+            />
+            {yearlyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={yearlyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={yearlyData.total_profit >= 0 ? "success" : "error"}
+                isMoney={true}
+              />
+            )}
             {yearlyData.total_cost_of_goods_sold !== undefined && (
               <RevenueCard
                 title="C/phí nguồn hàng"
@@ -641,15 +672,6 @@ export default function RevenuePage() {
                 value={yearlyData.total_expenses}
                 icon={<BarChart sx={{ fontSize: 35 }} />}
                 color="secondary"
-                isMoney={true}
-              />
-            )}
-            {yearlyData.total_profit !== undefined && (
-              <RevenueCard
-                title="Lợi nhuận"
-                value={yearlyData.total_profit}
-                icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={yearlyData.total_profit >= 0 ? "success" : "error"}
                 isMoney={true}
               />
             )}

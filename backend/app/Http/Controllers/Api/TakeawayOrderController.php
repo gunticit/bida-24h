@@ -18,6 +18,7 @@ class TakeawayOrderController extends Controller
     public function index()
     {
         $orders = TakeawayOrder::with(['items.menu'])
+            ->where('type', 'takeaway')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -53,6 +54,7 @@ class TakeawayOrderController extends Controller
                 'total_amount' => 0, // Sẽ update sau
                 'order_date' => now(),
                 'status' => $request->status ?? 'pending', // Mặc định là 'pending' nếu không có giá trị nào được gửi lên
+                'type' => 'takeaway', // Đánh dấu là đơn hàng mang về
             ]);
 
             $totalAmount = 0;
@@ -110,7 +112,9 @@ class TakeawayOrderController extends Controller
      */
     public function show(string $id)
     {
-        $order = TakeawayOrder::with(['items.menu'])->findOrFail($id);
+        $order = TakeawayOrder::with(['items.menu'])
+            ->where('type', 'takeaway')
+            ->findOrFail($id);
         return response()->json($order);
     }
 
@@ -119,7 +123,7 @@ class TakeawayOrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $order = TakeawayOrder::with(['items.menu'])->findOrFail($id);
+        $order = TakeawayOrder::where('type', 'takeaway')->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'status' => 'sometimes|in:pending,preparing,ready,completed,cancelled',
@@ -158,7 +162,9 @@ class TakeawayOrderController extends Controller
      */
     public function destroy(string $id)
     {
-        $order = TakeawayOrder::with(['items.menu'])->findOrFail($id);
+        $order = TakeawayOrder::with(['items.menu'])
+            ->where('type', 'takeaway')
+            ->findOrFail($id);
         
         // Chỉ cho phép xóa nếu status là pending hoặc cancelled
         if (!in_array($order->status, ['pending', 'cancelled'])) {
@@ -193,6 +199,7 @@ class TakeawayOrderController extends Controller
     public function todayOrders()
     {
         $orders = TakeawayOrder::with(['items.menu'])
+            ->where('type', 'takeaway')
             ->whereDate('order_date', today())
             ->orderBy('created_at', 'desc')
             ->get();

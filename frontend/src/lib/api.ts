@@ -248,6 +248,11 @@ class ApiService {
     return this.request<MenuItem[]>('/menus/available')
   }
 
+  async getDineInMenus(): Promise<MenuItem[]> {
+    const menus = await this.getAvailableMenus()
+    return menus.filter((menu) => menu.category !== 'takeaway')
+  }
+
   async getMenu(id: number): Promise<MenuItem> {
     return this.request<MenuItem>(`/menus/${id}`)
   }
@@ -374,6 +379,38 @@ class ApiService {
 
   async deleteTakeawayOrder(id: number): Promise<{ message: string }> {
     return this.request<{ message: string }>(`/takeaway-orders/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Dine-in order methods
+  async getTodayDineInOrders(): Promise<TakeawayOrder[]> {
+    return this.request<TakeawayOrder[]>('/dine-in-orders/today')
+  }
+
+  async getDineInOrder(id: number): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>(`/dine-in-orders/${id}`)
+  }
+
+  async createDineInOrder(data: CreateTakeawayOrderData): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>('/dine-in-orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateDineInOrderStatus(
+    id: number,
+    status: TakeawayOrder['status'],
+  ): Promise<TakeawayOrder> {
+    return this.request<TakeawayOrder>(`/dine-in-orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    })
+  }
+
+  async deleteDineInOrder(id: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/dine-in-orders/${id}`, {
       method: 'DELETE',
     })
   }

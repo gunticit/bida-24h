@@ -14,6 +14,7 @@ class TakeawayOrder extends Model
         'total_amount',
         'status',
         'order_date',
+        'type',
     ];
 
     protected $casts = [

@@ -23,6 +23,13 @@ class RevenueService
         
         // Tính takeaway revenue từ bảng takeaway_orders mới
         $takeawayRevenue = TakeawayOrder::whereDate('order_date', $date)
+            ->where('type', 'takeaway')
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+
+        // Tính dine-in revenue từ bảng takeaway_orders mới
+        $dineinRevenue = TakeawayOrder::whereDate('order_date', $date)
+            ->where('type', 'dine-in')
             ->whereIn('status', ['completed'])
             ->sum('total_amount') ?? 0;
             
@@ -33,7 +40,7 @@ class RevenueService
         $dateStr = $date->format('Y-m-d');
         $totalCogs = $this->calculateCostOfGoodsSold($dateStr, $dateStr);
         
-        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue + $dineinRevenue;
         $profit = $totalRevenue - $totalCogs - $totalExpenses;
         $sessionCount = $sessions->count();
 
@@ -47,6 +54,7 @@ class RevenueService
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
             'takeaway_revenue' => $takeawayRevenue,
+            'dinein_revenue' => $dineinRevenue ?? 0,
             'session_count' => $sessionCount,
             'sessions' => $sessions->map(function ($session) {
                 return [
@@ -122,10 +130,18 @@ class RevenueService
         // Tính takeaway revenue cho tháng từ bảng takeaway_orders
         $takeawayRevenue = TakeawayOrder::whereYear('order_date', $year)
             ->whereMonth('order_date', $month)
+            ->where('type', 'takeaway')
             ->whereIn('status', ['completed'])
             ->sum('total_amount') ?? 0;
-            
-        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
+
+        // Tính dine-in revenue cho tháng từ bảng takeaway_orders
+        $dineinRevenue = TakeawayOrder::whereYear('order_date', $year)
+            ->whereMonth('order_date', $month)
+            ->where('type', 'dine-in')
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue + $dineinRevenue;
         $sessionCount = $sessions->count();
 
         // Tính tổng chi phí theo tháng
@@ -148,6 +164,13 @@ class RevenueService
             
             // Tính takeaway cho ngày này từ bảng takeaway_orders
             $dayTakeaway = TakeawayOrder::whereDate('order_date', $date)
+                ->where('type', 'takeaway')
+                ->whereIn('status', ['completed'])
+                ->sum('total_amount') ?? 0;
+
+            // Tính dine-in cho ngày này từ bảng takeaway_orders
+            $dayDinein = TakeawayOrder::whereDate('order_date', $date)
+                ->where('type', 'dine-in')
                 ->whereIn('status', ['completed'])
                 ->sum('total_amount') ?? 0;
 
@@ -157,15 +180,16 @@ class RevenueService
             
             // Tính chi phí nguồn hàng theo ngày
             $dayCogs = $this->calculateCostOfGoodsSold($date, $date, 'monthly');
-            
-            $dayRevenue = ($daySessions->sum('total_money') ?? 0) + $dayTakeaway;
-            
+
+            $dayRevenue = ($daySessions->sum('total_money') ?? 0) + $dayTakeaway + $dayDinein;
+
             return [
                 'date' => $date,
                 'total_revenue' => $dayRevenue,
                 'table_revenue' => $daySessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $daySessions->sum('total_money_food') ?? 0,
                 'takeaway_revenue' => $dayTakeaway,
+                'dinein_revenue' => $dayDinein ?? 0,
                 'total_expenses' => $dayExpenses,
                 'total_cost_of_goods_sold' => $dayCogs,
                 'total_profit' => $dayRevenue - $dayCogs - $dayExpenses,
@@ -181,6 +205,7 @@ class RevenueService
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
             'takeaway_revenue' => $takeawayRevenue,
+            'dinein_revenue' => $dineinRevenue ?? 0,
             'total_expenses' => $totalExpenses,
             'total_cost_of_goods_sold' => $totalCogs,
             'total_profit' => $profit,
@@ -202,10 +227,17 @@ class RevenueService
         
         // Tính takeaway revenue cho năm từ bảng takeaway_orders
         $takeawayRevenue = TakeawayOrder::whereYear('order_date', $year)
+            ->where('type', 'takeaway')
             ->whereIn('status', ['completed'])
             ->sum('total_amount') ?? 0;
-            
-        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue;
+
+        // Tính dine-in revenue cho năm từ bảng takeaway_orders
+        $dineinRevenue = TakeawayOrder::whereYear('order_date', $year)
+            ->where('type', 'dine-in')
+            ->whereIn('status', ['completed'])
+            ->sum('total_amount') ?? 0;
+
+        $totalRevenue = ($sessions->sum('total_money') ?? 0) + $takeawayRevenue + $dineinRevenue;
         $sessionCount = $sessions->count();
         
         // Tính tổng chi phí theo năm
@@ -228,6 +260,14 @@ class RevenueService
             // Tính takeaway cho tháng này từ bảng takeaway_orders
             $monthTakeaway = TakeawayOrder::whereYear('order_date', $year)
                 ->whereMonth('order_date', $month)
+                ->where('type', 'takeaway')
+                ->whereIn('status', ['completed'])
+                ->sum('total_amount') ?? 0;
+
+            // Tính dine-in cho tháng này từ bảng takeaway_orders
+            $monthDinein = TakeawayOrder::whereYear('order_date', $year)
+                ->whereMonth('order_date', $month)
+                ->where('type', 'dine-in')
                 ->whereIn('status', ['completed'])
                 ->sum('total_amount') ?? 0;
 
@@ -249,6 +289,7 @@ class RevenueService
                 'table_revenue' => $monthSessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $monthSessions->sum('total_money_food') ?? 0,
                 'takeaway_revenue' => $monthTakeaway,
+                'dinein_revenue' => $monthDinein ?? 0,
                 'total_expenses' => $monthExpenses,
                 'total_cost_of_goods_sold' => $monthCogs,
                 'total_profit' => $monthRevenue - $monthCogs - $monthExpenses,
@@ -262,6 +303,7 @@ class RevenueService
             'table_revenue' => $totalTableRevenue,
             'food_revenue' => $totalFoodRevenue,
             'takeaway_revenue' => $takeawayRevenue,
+            'dinein_revenue' => $dineinRevenue ?? 0,
             'total_expenses' => $totalExpenses,
             'total_cost_of_goods_sold' => $totalCogs,
             'total_profit' => $profit,
