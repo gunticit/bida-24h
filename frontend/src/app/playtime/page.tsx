@@ -811,23 +811,26 @@ export default function PlaytimePage() {
                   placeholder="Tìm kiếm món ăn..."
                 />
               )}
-              renderOption={(props, option) => (
-                <Box component="li" {...props}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    {getCategoryChipLocal(option.category)}
-                    <span style={{ flex: 1 }}>
-                      {option.name} - {formatCurrency(option?.price)}
-                    </span>
-                    {option.quantity <= 5 && (
-                      <Chip 
-                        label={`Còn ${option.quantity}`}
-                        size="small"
-                        color={option.quantity === 0 ? "error" : "warning"}
-                      />
-                    )}
+              renderOption={(props, option) => {
+                const { key, ...otherProps } = props;
+                return (
+                  <Box component="li" key={key} {...otherProps}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                      {getCategoryChipLocal(option.category)}
+                      <span style={{ flex: 1 }}>
+                        {option.name} - {formatCurrency(option?.price)}
+                      </span>
+                      {option.quantity <= 5 && (
+                        <Chip 
+                          label={`Còn ${option.quantity}`}
+                          size="small"
+                          color={option.quantity === 0 ? "error" : "warning"}
+                        />
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                );
+              }}
               filterOptions={(options, { inputValue }) => {
                 return options.filter(option =>
                   option.name.toLowerCase().includes(inputValue.toLowerCase()) ||

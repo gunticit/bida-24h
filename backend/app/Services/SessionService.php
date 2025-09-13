@@ -21,7 +21,9 @@ class SessionService
         return GameSession::with('table')
             ->todayOrPlaying()
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
+            ->orderBy('end_time', 'desc')
             ->orderBy('start_time', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 
@@ -30,7 +32,9 @@ class SessionService
         return GameSession::with('table')
             ->playingOrLast7Days()
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
+            ->orderBy('end_time', 'desc')
             ->orderBy('start_time', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

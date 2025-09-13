@@ -626,10 +626,10 @@ export default function RevenuePage() {
               mb: 3,
             }}
           >
-            {yearlyData.total_expenses !== undefined && (
+            {yearlyData.total_cost_of_goods_sold !== undefined && (
               <RevenueCard
                 title="C/phí nguồn hàng"
-                value={yearlyData.total_expenses}
+                value={yearlyData.total_cost_of_goods_sold}
                 icon={<BarChart sx={{ fontSize: 35 }} />}
                 color="secondary"
                 isMoney={true}

@@ -134,9 +134,9 @@ class RevenueService
             ->sum('amount') ?? 0;
         
         // Tính chi phí nguồn hàng cho tháng
-        $startOfMonth = Carbon::create($year, $month, 1)->format('Y-m-d');
-        $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
-        $totalCogs = $this->calculateCostOfGoodsSold($startOfMonth, $endOfMonth);
+        $startOfMonth = Carbon::create($year, $month, 1)->format('Y-m');
+        $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m');
+        $totalCogs = $this->calculateCostOfGoodsSold($startOfMonth, $endOfMonth, 'monthly');
         
         $profit = $totalRevenue - $totalCogs - $totalExpenses;
 
@@ -156,7 +156,7 @@ class RevenueService
                 ->sum('amount') ?? 0;
             
             // Tính chi phí nguồn hàng theo ngày
-            $dayCogs = $this->calculateCostOfGoodsSold($date, $date);
+            $dayCogs = $this->calculateCostOfGoodsSold($date, $date, 'monthly');
             
             $dayRevenue = ($daySessions->sum('total_money') ?? 0) + $dayTakeaway;
             
@@ -213,10 +213,8 @@ class RevenueService
             ->sum('amount') ?? 0;
         
         // Tính chi phí nguồn hàng cho năm
-        $startOfYear = Carbon::create($year, 1, 1)->format('Y-m-d');
-        $endOfYear = Carbon::create($year, 12, 31)->format('Y-m-d');
-        $totalCogs = $this->calculateCostOfGoodsSold($startOfYear, $endOfYear);
-        
+        $totalCogs = $this->calculateCostOfGoodsSold($year, $year, 'yearly');
+
         $profit = $totalRevenue - $totalCogs - $totalExpenses;
 
         // Tính doanh thu theo tháng trong năm
@@ -239,9 +237,7 @@ class RevenueService
                 ->sum('amount') ?? 0;
             
             // Tính chi phí nguồn hàng cho tháng
-            $startOfMonth = Carbon::create($year, $month, 1)->format('Y-m-d');
-            $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
-            $monthCogs = $this->calculateCostOfGoodsSold($startOfMonth, $endOfMonth);
+            $monthCogs = $this->calculateCostOfGoodsSold($year, $year, 'yearly');
                 
             $monthRevenue = ($monthSessions->sum('total_money') ?? 0) + $monthTakeaway;
             
@@ -317,7 +313,7 @@ class RevenueService
     /**
      * Tính chi phí nguồn hàng từ sản phẩm bán ra
      */
-    public function calculateCostOfGoodsSold($startDate = null, $endDate = null)
+    public function calculateCostOfGoodsSold($startDate = null, $endDate = null, $type = 'date')
     {
         $query = "
             SELECT SUM(cost_amount) as total_cost
@@ -333,14 +329,26 @@ class RevenueService
 
         $params = [];
         
-        if ($startDate) {
+        if ($startDate && $type === 'date') {
             $query .= " AND DATE(o.created_at) >= ?";
             $params[] = $startDate;
         }
         
-        if ($endDate) {
+        if ($endDate && $type === 'date') {
             $query .= " AND DATE(o.created_at) <= ?";
             $params[] = $endDate;
+        }
+
+        if ($startDate && $type === 'monthly') {
+            $query .= " AND YEAR(o.created_at) = ? AND MONTH(o.created_at) = ?";
+            $dateParts = explode('-', $startDate);
+            $params[] = $dateParts[0];
+            $params[] = $dateParts[1];
+        }
+
+        if($startDate && $type === 'yearly') {
+            $query .= " AND YEAR(o.created_at) = ?";
+            $params[] = $startDate;
         }
 
         $query .= "
@@ -354,14 +362,26 @@ class RevenueService
                 WHERE to_table.status = 'completed'
         ";
 
-        if ($startDate) {
+        if ($startDate && $type === 'date') {
             $query .= " AND DATE(to_table.order_date) >= ?";
             $params[] = $startDate;
         }
         
-        if ($endDate) {
+        if ($endDate && $type === 'date') {
             $query .= " AND DATE(to_table.order_date) <= ?";
             $params[] = $endDate;
+        }
+
+        if ($startDate && $type === 'monthly') {
+            $query .= " AND YEAR(to_table.order_date) = ? AND MONTH(to_table.order_date) = ?";
+            $dateParts = explode('-', $startDate);
+            $params[] = $dateParts[0];
+            $params[] = $dateParts[1];
+        }
+
+        if($startDate && $type === 'yearly') {
+            $query .= " AND YEAR(to_table.order_date) = ?";
+            $params[] = $startDate;
         }
 
         $query .= ") as cost_calculation";
