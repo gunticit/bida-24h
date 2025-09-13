@@ -95,7 +95,7 @@ export default function SettingPage() {
                   Cài đặt chung
                 </Typography>
                 <List>
-                  <ListItemButton
+                  {user && user.role === 'admin' && <ListItemButton
                     onClick={() => router.push('/setting/table')}
                     sx={{
                       border: '1px solid #e0e0e0',
@@ -111,9 +111,9 @@ export default function SettingPage() {
                       primary="Quản lý bàn"
                       secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
                     />
-                  </ListItemButton>
+                  </ListItemButton>}
 
-                  <ListItemButton
+                  {user && user.role === 'admin' && <ListItemButton
                     onClick={() => router.push('/setting/user')}
                     sx={{
                       border: '1px solid #e0e0e0',
@@ -129,7 +129,7 @@ export default function SettingPage() {
                       primary="Cài đặt người dùng"
                       secondary="Quản lý vai trò và quyền hạn người dùng"
                     />
-                  </ListItemButton>
+                  </ListItemButton>}
 
                   <ListItemButton
                     onClick={() => router.push('/setting/menus')}

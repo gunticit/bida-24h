@@ -11,6 +11,7 @@ import {
   MenuItem,
   Order,
   CreateOrderData,
+  CreateOrderResponse,
   TakeawayOrder,
   CreateTakeawayOrderData,
   Expense,
@@ -18,7 +19,6 @@ import {
   CreateExpenseData,
   UpdateExpenseData,
   ExpenseListResponse,
-  RevenueSummaryResponse,
   DailyRevenueReport,
   MonthlyRevenueResponse,
   YearlyRevenueResponse,
@@ -305,10 +305,10 @@ class ApiService {
     return this.request<Order>(`/orders/${id}`)
   }
 
-  async createOrder(data: CreateOrderData): Promise<Order> {
-    return this.request<Order>('/orders', {
+  async createOrder(data: CreateOrderData): Promise<CreateOrderResponse> {
+    return this.request<CreateOrderResponse>('/orders', {
       method: 'POST',
-      body: JSON.stringify(data),
+    body: JSON.stringify(data),
     })
   }
 

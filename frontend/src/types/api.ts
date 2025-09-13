@@ -117,6 +117,12 @@ export interface CreateOrderData {
   total_price: number
 }
 
+export interface CreateOrderResponse {
+  order: Order
+  message: string
+  remaining_quantity: number
+}
+
 // Takeaway Order interfaces
 export interface TakeawayOrder {
   id: number
@@ -267,13 +273,6 @@ export interface RevenueData {
   expenses: number
   profit: number
   profit_margin: number
-}
-
-export interface RevenueSummaryResponse {
-  today: RevenueData
-  this_month: RevenueData
-  this_year: RevenueData
-  total: RevenueData
 }
 
 export interface DailyRevenueData {

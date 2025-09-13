@@ -337,9 +337,9 @@ export default function MenuSettingPage() {
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6">Thiết lập thực đơn</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+          {user && user.role === 'admin' && <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
             Thêm món mới
-          </Button>
+          </Button>}
         </Box>
 
         <Card>
@@ -361,6 +361,7 @@ export default function MenuSettingPage() {
                 onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
+                user={user}
               />
             </TabPanel>
 
@@ -371,6 +372,7 @@ export default function MenuSettingPage() {
                 onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
+                user={user}
               />
             </TabPanel>
 
@@ -381,6 +383,7 @@ export default function MenuSettingPage() {
                 onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
+                user={user}
               />
             </TabPanel>
 
@@ -391,6 +394,7 @@ export default function MenuSettingPage() {
                 onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
+                user={user}
               />
             </TabPanel>
 
@@ -401,6 +405,7 @@ export default function MenuSettingPage() {
                 onDelete={handleDeleteMenu}
                 getCategoryChip={getCategoryChip}
                 getStatusChip={getStatusChip}
+                user={user}
               />
             </TabPanel>
           </CardContent>
@@ -476,7 +481,7 @@ export default function MenuSettingPage() {
             />
           </Box>
         </DialogContent>
-        <DialogActions>
+        {user && user.role === 'admin' && <DialogActions>
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
             Hủy
           </Button>
@@ -488,7 +493,7 @@ export default function MenuSettingPage() {
           >
             {editingMenu ? 'Cập nhật' : 'Thêm mới'}
           </Button>
-        </DialogActions>
+        </DialogActions>}
       </Dialog>
 
       {/* Snackbar */}
@@ -509,12 +514,14 @@ export default function MenuSettingPage() {
 // Menu Table Component
 function MenuTable({
   menus,
+  user,
   onEdit,
   onDelete,
   getCategoryChip,
   getStatusChip,
 }: {
   menus: MenuItem[]
+  user: User | null,
   onEdit: (menu: MenuItem) => void
   onDelete: (id: number) => void
   getCategoryChip: (category: string) => React.ReactNode
@@ -534,7 +541,7 @@ function MenuTable({
             <TableCell>Số lượng</TableCell>
             <TableCell>Trạng thái</TableCell>
             <TableCell>Ngày tạo</TableCell>
-            <TableCell>Thao tác</TableCell>
+            {user && user.role === 'admin' && <TableCell>Thao tác</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -588,7 +595,7 @@ function MenuTable({
                   </TableCell>
                   <TableCell>{getStatusChip(menu.is_active)}</TableCell>
                   <TableCell>{new Date(menu.created_at).toLocaleDateString('vi-VN')}</TableCell>
-                  <TableCell>
+                  {user && user.role === 'admin' && <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <Tooltip title="Sửa món ăn">
                         <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
@@ -601,7 +608,7 @@ function MenuTable({
                         </MuiIconButton>
                       </Tooltip>
                     </Box>
-                  </TableCell>
+                  </TableCell>}
                 </TableRow>
               )
             })

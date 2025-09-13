@@ -94,14 +94,12 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
             </ListItemIcon>
             Hồ sơ
           </MenuItem>
-          {user?.role === 'admin' && (
-            <MenuItem onClick={() => router.push('/setting')}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              Cài đặt
-            </MenuItem>
-          )}
+          <MenuItem onClick={() => router.push('/setting')}>
+            <ListItemIcon>
+              <SettingsIcon fontSize="small" />
+            </ListItemIcon>
+            Cài đặt
+          </MenuItem>
           <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>

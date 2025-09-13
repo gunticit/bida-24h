@@ -22,8 +22,21 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $order = $this->service->create($request->all());
-        return response()->json($order, 201);
+        // Validate request
+        $request->validate([
+            'menu_id' => 'required|exists:menus,id',
+            'quantity' => 'required|integer|min:1',
+            'session_id' => 'required|exists:game_sessions,id',
+        ]);
+
+        try {
+            $result = $this->service->create($request->all());
+            return response()->json($result, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
     public function show($id)
@@ -40,7 +53,13 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        $this->service->delete($id);
-        return response()->json(['message' => 'Order deleted']);
+        try {
+            $result = $this->service->delete($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 }

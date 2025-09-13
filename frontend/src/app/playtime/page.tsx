@@ -302,7 +302,7 @@ export default function PlaytimePage() {
       }
 
       // Tạo order mới
-      await apiService.createOrder({
+      const response = await apiService.createOrder({
         session_id: selectedSession.id,
         menu_id: foodFormData.menu_id,
         quantity: foodFormData.quantity,
@@ -313,12 +313,19 @@ export default function PlaytimePage() {
       // Tính toán lại tổng tiền đồ ăn từ tất cả orders
       await recalculateFoodTotal(selectedSession.id)
 
-      showSnackbar(`Thêm món ăn thành công!`, 'success')
+      showSnackbar(
+        `${response.message}. Còn lại: ${response.remaining_quantity} sản phẩm`,
+        'success'
+      )
       handleCloseFoodDialog()
       loadSessions() // Reload để cập nhật tổng tiền
-    } catch (error) {
+      loadMenus() // Reload để cập nhật số lượng menu
+    } catch (error: unknown) {
       console.error('Failed to add food:', error)
-      showSnackbar('Không thể thêm món ăn', 'error')
+      
+      // Hiển thị lỗi chi tiết từ backend
+      const errorMessage = error instanceof Error ? error.message : 'Không thể thêm món ăn'
+      showSnackbar(errorMessage, 'error')
     }
   }
 
