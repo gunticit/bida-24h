@@ -430,11 +430,6 @@ class ApiService {
     })
   }
 
-  // Revenue management methods
-  async getRevenueSummary(): Promise<RevenueSummaryResponse> {
-    return this.request<RevenueSummaryResponse>('/revenue/summary')
-  }
-
   async getDailyRevenue(startDate?: string, endDate?: string): Promise<DailyRevenueReport> {
     let url = '/revenue/daily';
     const params = [];

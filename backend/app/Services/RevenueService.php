@@ -274,20 +274,6 @@ class RevenueService
         ];
     }
 
-    public function getRevenueSummary($period = 'today')
-    {
-        switch ($period) {
-            case 'today':
-                return $this->getDailyRevenue();
-            case 'this_month':
-                return $this->getMonthlyRevenue();
-            case 'this_year':
-                return $this->getYearlyRevenue();
-            default:
-                return $this->getDailyRevenue();
-        }
-    }
-
     public function getTopTables($limit = 5, $period = 'this_month')
     {
         $query = GameSession::where('status', 'finished')

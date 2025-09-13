@@ -68,7 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/daily', [RevenueController::class, 'getDailyRevenue']);
         Route::get('/monthly', [RevenueController::class, 'getMonthlyRevenue']);
         Route::get('/yearly', [RevenueController::class, 'getYearlyRevenue']);
-        Route::get('/summary', [RevenueController::class, 'getRevenueSummary']);
         Route::get('/top-tables', [RevenueController::class, 'getTopTables']);
         Route::get('/chart', [RevenueController::class, 'getRevenueChart']);
     });
