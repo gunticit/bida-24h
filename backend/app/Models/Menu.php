@@ -15,6 +15,7 @@ class Menu extends Model
         'quantity',
         'category',
         'is_active',
+        'cost_price',
     ];
 
     protected $casts = [

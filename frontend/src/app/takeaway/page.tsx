@@ -53,6 +53,16 @@ interface CartItem {
   quantity: number
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string
+      message?: string
+    }
+  }
+  message?: string
+}
+
 export default function TakeawayPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -216,6 +226,7 @@ export default function TakeawayPage() {
           menu_id: item.menu_id,
           quantity: item.quantity,
         })),
+        status: 'completed',
       }
 
       await apiService.createTakeawayOrder(orderData)
@@ -225,11 +236,24 @@ export default function TakeawayPage() {
       handleCloseDialog()
       clearCart()
 
-      // Reload orders
-      await loadTakeawayOrders()
+      // Reload orders and menus to get updated quantities
+      await Promise.all([loadTakeawayOrders(), loadTakeawayMenus()])
     } catch (error) {
       console.error('Failed to create takeaway order:', error)
-      showSnackbar('Không thể tạo đơn hàng', 'error')
+      
+      // Extract error message from backend response
+      let errorMessage = 'Không thể tạo đơn hàng'
+      const apiError = error as ApiError
+      
+      if (apiError?.response?.data?.error) {
+        errorMessage = apiError.response.data.error
+      } else if (apiError?.response?.data?.message) {
+        errorMessage = apiError.response.data.message
+      } else if (apiError?.message) {
+        errorMessage = apiError.message
+      }
+      
+      showSnackbar(errorMessage, 'error')
     }
   }
 
@@ -240,7 +264,12 @@ export default function TakeawayPage() {
       await loadTakeawayOrders()
     } catch (error) {
       console.error('Failed to update order status:', error)
-      showSnackbar('Không thể cập nhật trạng thái', 'error')
+      const apiError = error as ApiError
+      const errorMessage = apiError?.response?.data?.error || 
+                          apiError?.response?.data?.message || 
+                          apiError?.message || 
+                          'Không thể cập nhật trạng thái'
+      showSnackbar(errorMessage, 'error')
     }
   }
 
@@ -250,10 +279,15 @@ export default function TakeawayPage() {
     try {
       await apiService.deleteTakeawayOrder(orderId)
       showSnackbar('Xóa đơn hàng thành công!')
-      await loadTakeawayOrders()
+      await Promise.all([loadTakeawayOrders(), loadTakeawayMenus()]) // Reload menus to update quantities
     } catch (error) {
       console.error('Failed to delete order:', error)
-      showSnackbar('Không thể xóa đơn hàng', 'error')
+      const apiError = error as ApiError
+      const errorMessage = apiError?.response?.data?.error || 
+                          apiError?.response?.data?.message || 
+                          apiError?.message || 
+                          'Không thể xóa đơn hàng'
+      showSnackbar(errorMessage, 'error')
     }
   }
 

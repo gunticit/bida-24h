@@ -52,11 +52,12 @@ class TakeawayOrderController extends Controller
                 'notes' => $request->notes,
                 'total_amount' => 0, // Sẽ update sau
                 'order_date' => now(),
+                'status' => $request->status ?? 'pending', // Mặc định là 'pending' nếu không có giá trị nào được gửi lên
             ]);
 
             $totalAmount = 0;
 
-            // Thêm các items
+            // Kiểm tra số lượng sản phẩm trước khi tạo đơn hàng
             foreach ($request->items as $item) {
                 $menu = Menu::findOrFail($item['menu_id']);
                 
@@ -64,6 +65,19 @@ class TakeawayOrderController extends Controller
                 if ($menu->category !== 'takeaway') {
                     throw new \Exception("Menu item {$menu->name} is not available for takeaway");
                 }
+
+                // Kiểm tra số lượng có đủ không
+                if ($menu->quantity < $item['quantity']) {
+                    throw new \Exception("Không đủ số lượng sản phẩm {$menu->name}. Số lượng hiện tại: {$menu->quantity}, số lượng yêu cầu: {$item['quantity']}");
+                }
+            }
+
+            // Nếu tất cả sản phẩm đều đủ số lượng, tiến hành tạo đơn hàng và trừ số lượng
+            foreach ($request->items as $item) {
+                $menu = Menu::findOrFail($item['menu_id']);
+                
+                // Trừ số lượng sản phẩm
+                $menu->decrement('quantity', $item['quantity']);
 
                 $orderItem = TakeawayOrderItem::create([
                     'takeaway_order_id' => $order->id,
@@ -105,7 +119,7 @@ class TakeawayOrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $order = TakeawayOrder::findOrFail($id);
+        $order = TakeawayOrder::with(['items.menu'])->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'status' => 'sometimes|in:pending,preparing,ready,completed,cancelled',
@@ -116,9 +130,27 @@ class TakeawayOrderController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $order->update($request->only(['status', 'notes']));
+        try {
+            DB::beginTransaction();
 
-        return response()->json($order);
+            // Nếu chuyển sang trạng thái cancelled, hoàn trả số lượng sản phẩm
+            if (isset($request->status) && $request->status === 'cancelled' && $order->status !== 'cancelled') {
+                foreach ($order->items as $item) {
+                    $menu = Menu::findOrFail($item->menu_id);
+                    $menu->increment('quantity', $item->quantity);
+                }
+            }
+
+            $order->update($request->only(['status', 'notes']));
+
+            DB::commit();
+
+            return response()->json($order);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -126,16 +158,33 @@ class TakeawayOrderController extends Controller
      */
     public function destroy(string $id)
     {
-        $order = TakeawayOrder::findOrFail($id);
+        $order = TakeawayOrder::with(['items.menu'])->findOrFail($id);
         
         // Chỉ cho phép xóa nếu status là pending hoặc cancelled
         if (!in_array($order->status, ['pending', 'cancelled'])) {
             return response()->json(['error' => 'Cannot delete order in current status'], 400);
         }
 
-        $order->delete();
+        try {
+            DB::beginTransaction();
 
-        return response()->json(['message' => 'Order deleted successfully']);
+            // Hoàn trả số lượng sản phẩm về menu
+            foreach ($order->items as $item) {
+                $menu = Menu::findOrFail($item->menu_id);
+                $menu->increment('quantity', $item->quantity);
+            }
+
+            // Xóa đơn hàng
+            $order->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Order deleted successfully and inventory restored']);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

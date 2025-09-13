@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TakeawayOrderController;
 use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\RevenueController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ExpenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,4 +72,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/top-tables', [RevenueController::class, 'getTopTables']);
         Route::get('/chart', [RevenueController::class, 'getRevenueChart']);
     });
+
+    // Expense management routes
+    Route::get('/expenses-summary', [ExpenseController::class, 'summary']);
+    Route::apiResource('expenses', ExpenseController::class);
 });

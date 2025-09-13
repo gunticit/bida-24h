@@ -36,13 +36,36 @@ interface RevenueData {
   table_revenue: number
   food_revenue: number
   takeaway_revenue: number
+  total_expenses?: number
+  total_cost_of_goods_sold?: number
+  total_profit?: number
   session_count: number
   date?: string
   year?: number
   month?: number
   month_name?: string
-  daily_breakdown?: any[]
-  monthly_breakdown?: any[]
+  daily_breakdown?: Array<{
+    date: string
+    total_revenue: number
+    table_revenue: number
+    food_revenue: number
+    takeaway_revenue: number
+    total_expenses?: number
+    profit?: number
+    session_count: number
+  }>
+  monthly_breakdown?: Array<{
+    year: number
+    month: number
+    month_name: string
+    total_revenue: number
+    table_revenue: number
+    food_revenue: number
+    takeaway_revenue: number
+    total_expenses?: number
+    profit?: number
+    session_count: number
+  }>
   sessions?: any[]
 }
 
@@ -205,7 +228,7 @@ export default function RevenuePage() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 3,
               mb: 3,
             }}
@@ -213,37 +236,73 @@ export default function RevenuePage() {
             <RevenueCard
               title="Tổng doanh thu"
               value={dailyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
               color="primary"
               isMoney={true}
             />
             <RevenueCard
               title="Doanh thu bàn"
               value={dailyData.table_revenue}
-              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              icon={<AccessTime sx={{ fontSize: 35 }} />}
               isMoney={true}
               color="success"
             />
             <RevenueCard
               title="Doanh thu thức ăn"
               value={dailyData.food_revenue}
-              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              icon={<Restaurant sx={{ fontSize: 35 }} />}
               color="warning"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={dailyData.takeaway_revenue}
-              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
               color="error"
               isMoney={true}
             />
+          </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
+            {dailyData.total_cost_of_goods_sold !== undefined && (
+              <RevenueCard
+                title="C/phí nguồn hàng"
+                value={dailyData.total_cost_of_goods_sold}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {dailyData.total_expenses !== undefined && (
+              <RevenueCard
+                title="Chi phí phát sinh"
+                value={dailyData.total_expenses}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {dailyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={dailyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={dailyData.total_profit >= 0 ? "success" : "error"}
+                isMoney={true}
+              />
+            )}
           </Box>
           {dailyData.sessions && dailyData.sessions.length > 0 && (
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Chi tiết session ngày {selectedDate}
+                  Chi tiết ngày {selectedDate}
                 </Typography>
                 <TableContainer component={Paper}>
                   <Table>
@@ -335,7 +394,7 @@ export default function RevenuePage() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 3,
               mb: 3,
             }}
@@ -343,31 +402,67 @@ export default function RevenuePage() {
             <RevenueCard
               title="Tổng doanh thu"
               value={monthlyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
               color="primary"
               isMoney={true}
             />
             <RevenueCard
               title="Doanh thu bàn"
               value={monthlyData.table_revenue}
-              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              icon={<AccessTime sx={{ fontSize: 35 }} />}
               color="success"
               isMoney={true}
             />
             <RevenueCard
               title="Doanh thu thức ăn"
               value={monthlyData.food_revenue}
-              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              icon={<Restaurant sx={{ fontSize: 35 }} />}
               color="warning"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={monthlyData.takeaway_revenue}
-              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
               color="error"
               isMoney={true}
             />
+          </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
+              {monthlyData.total_cost_of_goods_sold !== undefined && (
+                <RevenueCard
+                  title="C/phí nguồn hàng"
+                  value={monthlyData.total_cost_of_goods_sold}
+                  icon={<BarChart sx={{ fontSize: 35 }} />}
+                  color="secondary"
+                  isMoney={true}
+                />
+              )}
+              {monthlyData.total_expenses !== undefined && (
+                <RevenueCard
+                  title="Chi phí phát sinh"
+                  value={monthlyData.total_expenses}
+                  icon={<BarChart sx={{ fontSize: 35 }} />}
+                  color="secondary"
+                  isMoney={true}
+                />
+              )}
+              {monthlyData.total_profit !== undefined && (
+                <RevenueCard
+                  title="Lợi nhuận"
+                  value={monthlyData.total_profit}
+                  icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                  color={monthlyData.total_profit >= 0 ? "success" : "error"}
+                  isMoney={true}
+                />
+              )}
           </Box>
 
           {/* Top Tables Section */}
@@ -419,10 +514,12 @@ export default function RevenuePage() {
                     <TableHead>
                       <TableRow>
                         <TableCell>Ngày</TableCell>
-                        <TableCell>Tổng doanh thu</TableCell>
+                        <TableCell>Doanh thu</TableCell>
                         <TableCell>Doanh thu bàn</TableCell>
                         <TableCell>Doanh thu thức ăn</TableCell>
-                        <TableCell>Số lần đặt bàn</TableCell>
+                        <TableCell>Chi phí</TableCell>
+                        <TableCell>Lợi nhuận</TableCell>
+                        <TableCell>Số session</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -432,6 +529,14 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(day.total_revenue)}</TableCell>
                           <TableCell>{formatCurrency(day.table_revenue)}</TableCell>
                           <TableCell>{formatCurrency(day.food_revenue)}</TableCell>
+                          <TableCell>{formatCurrency(day.total_expenses || 0)}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={formatCurrency(day.profit || (day.total_revenue - (day.total_expenses || 0)))}
+                              color={(day.profit || (day.total_revenue - (day.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              variant="outlined"
+                            />
+                          </TableCell>
                           <TableCell>{day.session_count}</TableCell>
                         </TableRow>
                       ))}
@@ -479,7 +584,7 @@ export default function RevenuePage() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 3,
               mb: 3,
             }}
@@ -487,31 +592,67 @@ export default function RevenuePage() {
             <RevenueCard
               title="Tổng doanh thu"
               value={yearlyData.total_revenue}
-              icon={<AttachMoney sx={{ fontSize: 40 }} />}
+              icon={<AttachMoney sx={{ fontSize: 35 }} />}
               color="primary"
               isMoney={true}
             />
             <RevenueCard
               title="Doanh thu bàn"
               value={yearlyData.table_revenue}
-              icon={<AccessTime sx={{ fontSize: 40 }} />}
+              icon={<AccessTime sx={{ fontSize: 35 }} />}
               isMoney={true}
               color="success"
             />
             <RevenueCard
               title="Doanh thu thức ăn"
               value={yearlyData.food_revenue}
-              icon={<Restaurant sx={{ fontSize: 40 }} />}
+              icon={<Restaurant sx={{ fontSize: 35 }} />}
               color="warning"
               isMoney={true}
             />
             <RevenueCard
               title="Tổng tiền mang về"
               value={yearlyData.takeaway_revenue}
-              icon={<ShoppingBag sx={{ fontSize: 40 }} />}
+              icon={<ShoppingBag sx={{ fontSize: 35 }} />}
               color="error"
               isMoney={true}
             />
+          </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
+            {yearlyData.total_expenses !== undefined && (
+              <RevenueCard
+                title="C/phí nguồn hàng"
+                value={yearlyData.total_expenses}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {yearlyData.total_expenses !== undefined && (
+              <RevenueCard
+                title="Chi phí phát sinh"
+                value={yearlyData.total_expenses}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {yearlyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={yearlyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={yearlyData.total_profit >= 0 ? "success" : "error"}
+                isMoney={true}
+              />
+            )}
           </Box>
 
           {yearlyData.monthly_breakdown && yearlyData.monthly_breakdown.length > 0 && (
@@ -525,10 +666,12 @@ export default function RevenuePage() {
                     <TableHead>
                       <TableRow>
                         <TableCell>Tháng</TableCell>
-                        <TableCell>Tổng doanh thu</TableCell>
+                        <TableCell>Doanh thu</TableCell>
                         <TableCell>Doanh thu bàn</TableCell>
                         <TableCell>Doanh thu thức ăn</TableCell>
-                        <TableCell>Số lần đặt bàn</TableCell>
+                        <TableCell>Chi phí</TableCell>
+                        <TableCell>Lợi nhuận</TableCell>
+                        <TableCell>Số session</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -538,6 +681,14 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(month.total_revenue)}</TableCell>
                           <TableCell>{formatCurrency(month.table_revenue)}</TableCell>
                           <TableCell>{formatCurrency(month.food_revenue)}</TableCell>
+                          <TableCell>{formatCurrency(month.total_expenses || 0)}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={formatCurrency(month.profit || (month.total_revenue - (month.total_expenses || 0)))}
+                              color={(month.profit || (month.total_revenue - (month.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              variant="outlined"
+                            />
+                          </TableCell>
                           <TableCell>{month.session_count}</TableCell>
                         </TableRow>
                       ))}

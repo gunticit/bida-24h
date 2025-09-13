@@ -53,6 +53,7 @@ interface MenuItem {
   id: number
   name: string
   price: number
+  cost_price?: number
   quantity: number
   category: 'food' | 'drink' | 'tobacco' | 'takeaway'
   is_active: boolean
@@ -63,6 +64,7 @@ interface MenuItem {
 interface MenuFormData {
   name: string
   price: number
+  cost_price?: number
   quantity: number
   category: 'food' | 'drink' | 'tobacco' | 'takeaway'
   is_active: boolean
@@ -94,7 +96,6 @@ export default function MenuSettingPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [menus, setMenus] = useState<MenuItem[]>([])
   const [openDialog, setOpenDialog] = useState(false)
   const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
@@ -102,6 +103,7 @@ export default function MenuSettingPage() {
   const [formData, setFormData] = useState<MenuFormData>({
     name: '',
     price: 0,
+    cost_price: undefined,
     quantity: 0,
     category: 'food',
     is_active: true,
@@ -160,14 +162,6 @@ export default function MenuSettingPage() {
     loadMenus()
   }, [router, loadUser, loadMenus])
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
   const handleLogout = async () => {
     try {
       await apiService.logout()
@@ -187,6 +181,7 @@ export default function MenuSettingPage() {
       setFormData({
         name: menu.name,
         price: menu.price,
+        cost_price: menu.cost_price,
         quantity: menu.quantity,
         category: menu.category,
         is_active: menu.is_active,
@@ -196,6 +191,7 @@ export default function MenuSettingPage() {
       setFormData({
         name: '',
         price: 0,
+        cost_price: undefined,
         quantity: 0,
         category: 'food',
         is_active: true,
@@ -210,13 +206,14 @@ export default function MenuSettingPage() {
     setFormData({
       name: '',
       price: 0,
+      cost_price: undefined,
       quantity: 0,
       category: 'food',
       is_active: true,
     })
   }
 
-  const handleInputChange = (field: keyof MenuFormData, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof MenuFormData, value: string | number | boolean | undefined) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -424,13 +421,23 @@ export default function MenuSettingPage() {
             />
 
             <TextField
-              label="Giá (VNĐ)"
+              label="Giá bán (VNĐ)"
               type="number"
               value={formData.price}
               onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
               fullWidth
               required
               inputProps={{ min: 0, step: 1000 }}
+            />
+
+            <TextField
+              label="Giá vốn (VNĐ)"
+              type="number"
+              value={formData.cost_price || ''}
+              onChange={(e) => handleInputChange('cost_price', parseFloat(e.target.value) || undefined)}
+              fullWidth
+              inputProps={{ min: 0, step: 1000 }}
+              helperText="Để trống nếu muốn tự động tính 60% giá bán"
             />
 
             <TextField
@@ -521,7 +528,9 @@ function MenuTable({
             <TableCell>ID</TableCell>
             <TableCell>Tên món</TableCell>
             <TableCell>Danh mục</TableCell>
-            <TableCell>Giá (VNĐ)</TableCell>
+            <TableCell>Giá bán (VNĐ)</TableCell>
+            <TableCell>Giá vốn (VNĐ)</TableCell>
+            <TableCell>Tỷ lệ lợi nhuận</TableCell>
             <TableCell>Số lượng</TableCell>
             <TableCell>Trạng thái</TableCell>
             <TableCell>Ngày tạo</TableCell>
@@ -531,44 +540,71 @@ function MenuTable({
         <TableBody>
           {menus.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} align="center">
+              <TableCell colSpan={10} align="center">
                 <Typography variant="body2" color="text.secondary">
                   Không có món ăn nào
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            menus.map((menu) => (
-              <TableRow key={menu.id}>
-                <TableCell>{menu.id}</TableCell>
-                <TableCell>{menu.name}</TableCell>
-                <TableCell>{getCategoryChip(menu.category)}</TableCell>
-                <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={menu.quantity}
-                    color={menu.quantity > 0 ? 'success' : 'error'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{getStatusChip(menu.is_active)}</TableCell>
-                <TableCell>{new Date(menu.created_at).toLocaleDateString('vi-VN')}</TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Sửa món ăn">
-                      <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
-                        <EditIcon />
-                      </MuiIconButton>
-                    </Tooltip>
-                    <Tooltip title="Xóa món ăn">
-                      <MuiIconButton size="small" color="error" onClick={() => onDelete(menu.id)}>
-                        <DeleteIcon />
-                      </MuiIconButton>
-                    </Tooltip>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))
+            menus.map((menu) => {
+              const costPrice = menu.cost_price || menu.price * 0.6;
+              const profitMargin = menu.price > 0 ? ((menu.price - costPrice) / menu.price * 100) : 0;
+              
+              return (
+                <TableRow key={menu.id}>
+                  <TableCell>{menu.id}</TableCell>
+                  <TableCell>{menu.name}</TableCell>
+                  <TableCell>{getCategoryChip(menu.category)}</TableCell>
+                  <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2">
+                        {costPrice.toLocaleString('vi-VN')}
+                      </Typography>
+                      {!menu.cost_price && (
+                        <Chip
+                          label="Tự động"
+                          size="small"
+                          variant="outlined"
+                          color="info"
+                        />
+                      )}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${profitMargin.toFixed(1)}%`}
+                      color={profitMargin >= 40 ? 'success' : profitMargin >= 20 ? 'warning' : 'error'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={menu.quantity}
+                      color={menu.quantity > 0 ? 'success' : 'error'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{getStatusChip(menu.is_active)}</TableCell>
+                  <TableCell>{new Date(menu.created_at).toLocaleDateString('vi-VN')}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Sửa món ăn">
+                        <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
+                          <EditIcon />
+                        </MuiIconButton>
+                      </Tooltip>
+                      <Tooltip title="Xóa món ăn">
+                        <MuiIconButton size="small" color="error" onClick={() => onDelete(menu.id)}>
+                          <DeleteIcon />
+                        </MuiIconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )
+            })
           )}
         </TableBody>
       </Table>

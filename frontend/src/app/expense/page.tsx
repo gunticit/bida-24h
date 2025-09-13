@@ -52,6 +52,21 @@ const ExpensePage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
+  // Date filter states
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    return firstDay.getFullYear() + '-' + 
+           String(firstDay.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(firstDay.getDate()).padStart(2, '0');
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const today = new Date();
+    return today.getFullYear() + '-' + 
+           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(today.getDate()).padStart(2, '0');
+  });
+  
   // Form states
   const [open, setOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -85,10 +100,11 @@ const ExpensePage = () => {
         router.push('/login');
         return;
       }
+      console.log('Fetching expenses for page:', page);
 
       const [expenseResponse, summaryResponse] = await Promise.all([
-        apiService.getExpenses(page),
-        apiService.getExpenseSummary()
+        apiService.getExpenses({}, page),
+        apiService.getExpenseSummary(startDate, endDate)
       ]);
       
       setExpenses(expenseResponse.data);
@@ -110,7 +126,45 @@ const ExpensePage = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, router]);
+
+  const fetchExpensesWithDateFilter = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Check if user is authenticated
+      const token = apiService.getToken();
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const [expenseResponse, summaryResponse] = await Promise.all([
+        apiService.getExpenses({ start_date: startDate, end_date: endDate }, page),
+        apiService.getExpenseSummary(startDate, endDate)
+      ]);
+      
+      setExpenses(expenseResponse.data);
+      setTotalPages(expenseResponse.last_page);
+      setSummary(summaryResponse);
+    } catch (error) {
+      console.error('Failed to fetch expenses with date filter:', error);
+      
+      // If unauthorized, redirect to login
+      const apiError = error as ApiError;
+      if (apiError?.message?.includes('Unauthenticated') || 
+          apiError?.response?.status === 401) {
+        apiService.clearToken();
+        router.push('/login');
+        return;
+      }
+      
+      setError('Không thể tải dữ liệu chi phí phát sinh');
+    } finally {
+      setLoading(false);
+    }
+  }, [startDate, endDate, page, router]);
 
   useEffect(() => {
     // Check authentication first
@@ -164,8 +218,13 @@ const ExpensePage = () => {
   };
 
   const resetForm = () => {
+    const today = new Date();
+    const formattedDate = today.getFullYear() + '-' + 
+                         String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(today.getDate()).padStart(2, '0');
+    
     setFormData({
-      expense_date: new Date().toISOString().split('T')[0],
+      expense_date: formattedDate,
       amount: '',
       description: '',
       category: 'other'
@@ -176,10 +235,30 @@ const ExpensePage = () => {
 
   const handleEdit = (expense: Expense) => {
     setEditingExpense(expense);
+    
+    // Đảm bảo format ngày đúng cho input date field (YYYY-MM-DD)
+    let formattedDate = expense.expense_date;
+    try {
+      // Nếu expense_date là timestamp hoặc format khác, chuyển về YYYY-MM-DD
+      const dateObj = new Date(expense.expense_date);
+      if (!isNaN(dateObj.getTime())) {
+        formattedDate = dateObj.getFullYear() + '-' + 
+                       String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(dateObj.getDate()).padStart(2, '0');
+      }
+    } catch (error) {
+      console.error('Error formatting expense date:', error);
+      // Fallback về ngày hiện tại nếu có lỗi
+      const today = new Date();
+      formattedDate = today.getFullYear() + '-' + 
+                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(today.getDate()).padStart(2, '0');
+    }
+    
     setFormData({
-      expense_date: expense.expense_date,
+      expense_date: formattedDate,
       amount: expense.amount.toString(),
-      description: expense.description,
+      description: expense.description || '',
       category: expense.category
     });
     setOpen(true);
@@ -232,42 +311,42 @@ const ExpensePage = () => {
         </Alert>
       )}
 
+      {/* Date Filter */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Lọc theo ngày
+        </Typography>
+        <Box display="flex" gap={2} alignItems="center">
+          <TextField
+            label="Từ ngày"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
+          <TextField
+            label="Đến ngày"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
+          <Button
+            variant="contained"
+            onClick={fetchExpensesWithDateFilter}
+            disabled={loading}
+          >
+            Lọc dữ liệu
+          </Button>
+        </Box>
+      </Paper>
+
       {/* Summary Cards */}
       {summary && (
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Hôm nay
-                </Typography>
-                <Typography variant="h6" component="div">
-                  {formatCurrency(summary.today)}
-                </Typography>
-              </CardContent>
-            </Card>
-            
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Tháng này
-                </Typography>
-                <Typography variant="h6" component="div">
-                  {formatCurrency(summary.this_month)}
-                </Typography>
-              </CardContent>
-            </Card>
-            
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Năm này
-                </Typography>
-                <Typography variant="h6" component="div">
-                  {formatCurrency(summary.this_year)}
-                </Typography>
-              </CardContent>
-            </Card>
             
             <Card sx={{ flex: 1 }}>
               <CardContent>
@@ -377,6 +456,20 @@ const ExpensePage = () => {
           </DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
+            <FormControl fullWidth>
+                <InputLabel>Danh mục</InputLabel>
+                <Select
+                value={formData.category}
+                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                label="Danh mục"
+                >
+                {categories.map((category) => (
+                    <MenuItem key={category.value} value={category.value}>
+                    {category.label}
+                    </MenuItem>
+                ))}
+                </Select>
+            </FormControl>
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="Ngày"
@@ -394,31 +487,16 @@ const ExpensePage = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                   fullWidth
                   required
-                  inputProps={{ min: 0, step: 1000 }}
+                  inputProps={{ min: 0, max: 999999999, step: 1000, pattern: "[0-9]*" }}
+                  helperText="Lưu ý: Nhập chia hết cho 1000, ví dụ: 100000"
                 />
               </Stack>
               
-              <FormControl fullWidth>
-                <InputLabel>Danh mục</InputLabel>
-                <Select
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  label="Danh mục"
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.value} value={category.value}>
-                      {category.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              
               <TextField
-                label="Mô tả"
-                value={formData.description}
+                label="Mô tả (không bắt buộc)"
+                value={formData.description || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 fullWidth
-                required
                 multiline
                 rows={3}
               />

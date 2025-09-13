@@ -7,6 +7,7 @@ import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   CalendarToday as CalendarIcon,
+  AttachMoney as MoneyIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import { AppBar } from '@/components/ui'
@@ -114,6 +115,15 @@ export default function DashboardPage() {
                     onClick={() => router.push('/revenue')}
                   >
                     Xem thống kê
+                  </Button>
+                )}
+                {user?.role === 'admin' && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<MoneyIcon />}
+                    onClick={() => router.push('/expense')}
+                  >
+                    Quản lý Chi phí
                   </Button>
                 )}
                 {user?.role === 'admin' && (

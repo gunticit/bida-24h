@@ -1,155 +1,35 @@
+import {
+  User,
+  LoginCredentials,
+  RegisterData,
+  UpdateProfileData,
+  AuthResponse,
+  GameSession,
+  CreateSessionData,
+  UpdateSessionData,
+  Table,
+  MenuItem,
+  Order,
+  CreateOrderData,
+  TakeawayOrder,
+  CreateTakeawayOrderData,
+  Expense,
+  ExpenseSummary,
+  CreateExpenseData,
+  UpdateExpenseData,
+  ExpenseListResponse,
+  RevenueSummaryResponse,
+  DailyRevenueReport,
+  MonthlyRevenueResponse,
+  YearlyRevenueResponse,
+  CostBreakdownResponse,
+  MessageResponse
+} from '@/types/api'
+
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URL || 'http://tinhtien.24hbilliardscoffee.com/api'
     : 'http://localhost:8000/api'
-
-export interface User {
-  id: number
-  name: string
-  email: string
-  role?: 'admin' | 'staff'
-  created_at: string
-  updated_at: string
-}
-
-export interface LoginCredentials {
-  email: string
-  password: string
-}
-
-export interface RegisterData {
-  name: string
-  email: string
-  password: string
-  password_confirmation: string
-  role?: 'admin' | 'staff'
-}
-
-export interface UpdateProfileData {
-  name?: string
-  email?: string
-  password?: string
-  password_confirmation?: string
-  current_password?: string
-}
-
-export interface AuthResponse {
-  message: string
-  user: User
-  token: string
-}
-
-export interface GameSession {
-  id: number
-  table_id: number
-  start_time: string
-  end_time: string
-  total_time: number | null
-  hour_price: number
-  total_money_table: number | null
-  total_money_food: number | null
-  total_money: number | null
-  status: 'playing' | 'finished' | 'canceled'
-  table?: {
-    id: number
-    name: string
-  }
-  created_at: string
-  updated_at: string
-}
-
-export interface Table {
-  id: number
-  name: string
-  status: 'available' | 'playing' | 'maintenance'
-  price_per_hour: number
-  created_at: string
-  updated_at: string
-}
-
-export interface MenuItem {
-  id: number
-  name: string
-  price: number
-  quantity: number
-  category: 'food' | 'drink' | 'tobacco' | 'takeaway'
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface TakeawayOrder {
-  id: number
-  customer_name: string
-  customer_phone: string
-  notes?: string
-  total_amount: number
-  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
-  order_date: string
-  created_at: string
-  updated_at: string
-  items: TakeawayOrderItem[]
-}
-
-export interface TakeawayOrderItem {
-  id: number
-  takeaway_order_id: number
-  menu_id: number
-  quantity: number
-  price: number
-  total: number
-  created_at: string
-  updated_at: string
-  menu?: MenuItem
-}
-
-export interface CreateTakeawayOrderData {
-  customer_name?: string
-  customer_phone?: string
-  notes?: string
-  items: {
-    menu_id: number
-    quantity: number
-  }[]
-}
-
-export interface Order {
-  id: number
-  session_id: number
-  menu_id: number
-  quantity: number
-  unit_price: number
-  total_price: number
-  created_at: string
-  updated_at: string
-  menu?: MenuItem
-}
-
-export interface CreateOrderData {
-  session_id: number | null
-  menu_id: number
-  quantity: number
-  unit_price: number
-  total_price: number
-}
-
-export interface CreateSessionData {
-  table_id: number
-  start_time: string
-  hour_price: number
-  status?: 'playing' | 'finished' | 'canceled'
-}
-
-export interface UpdateSessionData {
-  table_id?: number
-  start_time?: string
-  end_time?: string
-  hour_price?: number
-  status?: 'playing' | 'finished' | 'canceled'
-  total_money_table?: number
-  total_money_food?: number
-  total_money?: number
-}
 
 class ApiService {
   private token: string | null = null
@@ -445,44 +325,21 @@ class ApiService {
     })
   }
 
-  // Revenue statistics methods
-  async getDailyRevenue(date?: string): Promise<any> {
-    const params = date ? `?date=${date}` : ''
-    return this.request<any>(`/revenue/daily${params}`)
-  }
-
-  async getMonthlyRevenue(year?: number, month?: number): Promise<any> {
-    const params = new URLSearchParams()
-    if (year) params.append('year', year.toString())
-    if (month) params.append('month', month.toString())
-    const queryString = params.toString() ? `?${params.toString()}` : ''
-    return this.request<any>(`/revenue/monthly${queryString}`)
-  }
-
-  async getYearlyRevenue(year?: number): Promise<any> {
-    const params = year ? `?year=${year}` : ''
-    return this.request<any>(`/revenue/yearly${params}`)
-  }
-
-  async getRevenueSummary(period?: string): Promise<any> {
-    const params = period ? `?period=${period}` : ''
-    return this.request<any>(`/revenue/summary${params}`)
-  }
-
-  async getTopTables(limit?: number, period?: string): Promise<any> {
+  // Revenue statistics methods (legacy - to be removed)
+  async getTopTables(limit?: number, period?: string): Promise<unknown> {
     const params = new URLSearchParams()
     if (limit) params.append('limit', limit.toString())
     if (period) params.append('period', period)
     const queryString = params.toString() ? `?${params.toString()}` : ''
-    return this.request<any>(`/revenue/top-tables${queryString}`)
+    return this.request<unknown>(`/revenue/top-tables${queryString}`)
   }
 
-  async getRevenueChart(period?: string, type?: string): Promise<any> {
+  async getRevenueChart(period?: string, type?: string): Promise<unknown> {
     const params = new URLSearchParams()
     if (period) params.append('period', period)
     if (type) params.append('type', type)
     const queryString = params.toString() ? `?${params.toString()}` : ''
-    return this.request<any>(`/revenue/chart${queryString}`)
+    return this.request<unknown>(`/revenue/chart${queryString}`)
   }
 
   // Takeaway order methods (new system)
@@ -539,6 +396,107 @@ class ApiService {
       body: JSON.stringify(data),
     })
   }
+
+  // Expense management methods
+  async getExpenses(filter: { start_date?: string; end_date?: string; category?: string }, page: number = 1): Promise<ExpenseListResponse> {
+    const params = new URLSearchParams();
+    if (filter.start_date) params.append('start_date', filter.start_date);
+    if (filter.end_date) params.append('end_date', filter.end_date);
+    if (filter.category) params.append('category', filter.category);
+    return this.request<ExpenseListResponse>(`/expenses?page=${page}&${params.toString()}`)
+  }
+
+  async getExpenseSummary(start_date: string, end_date: string): Promise<ExpenseSummary> {
+    return this.request<ExpenseSummary>('/expenses-summary?start_date=' + start_date + '&end_date=' + end_date)
+  }
+
+  async createExpense(data: CreateExpenseData): Promise<Expense> {
+    return this.request<Expense>('/expenses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateExpense(id: number, data: UpdateExpenseData): Promise<Expense> {
+    return this.request<Expense>(`/expenses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteExpense(id: number): Promise<MessageResponse> {
+    return this.request<MessageResponse>(`/expenses/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Revenue management methods
+  async getRevenueSummary(): Promise<RevenueSummaryResponse> {
+    return this.request<RevenueSummaryResponse>('/revenue/summary')
+  }
+
+  async getDailyRevenue(startDate?: string, endDate?: string): Promise<DailyRevenueReport> {
+    let url = '/revenue/daily';
+    const params = [];
+    if (startDate) params.push(`start_date=${startDate}`);
+    if (endDate) params.push(`end_date=${endDate}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    return this.request<DailyRevenueReport>(url)
+  }
+
+  async getMonthlyRevenue(year?: number, month?: number): Promise<MonthlyRevenueResponse> {
+    let url = '/revenue/monthly';
+    const params = [];
+    if (year) params.push(`year=${year}`);
+    if (month) params.push(`month=${month}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    return this.request<MonthlyRevenueResponse>(url)
+  }
+
+  async getYearlyRevenue(year?: number): Promise<YearlyRevenueResponse> {
+    let url = '/revenue/yearly';
+    const params = [];
+    if (year) params.push(`year=${year}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    return this.request<YearlyRevenueResponse>(url)
+  }
+
+  async getCostBreakdown(startDate?: string, endDate?: string): Promise<CostBreakdownResponse> {
+    let url = '/revenue/cost-breakdown';
+    const params = [];
+    if (startDate) params.push(`start_date=${startDate}`);
+    if (endDate) params.push(`end_date=${endDate}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    return this.request<CostBreakdownResponse>(url)
+  }
 }
 
 export const apiService = new ApiService()
+
+// Re-export commonly used interfaces for backward compatibility
+export type {
+  User,
+  LoginCredentials,
+  RegisterData,
+  UpdateProfileData,
+  AuthResponse,
+  GameSession,
+  Table,
+  MenuItem,
+  Order,
+  TakeawayOrder,
+  CreateTakeawayOrderData,
+  Expense,
+  ExpenseSummary,
+  DailyRevenueResponse,
+  MonthlyRevenueResponse,
+  YearlyRevenueResponse
+} from '@/types/api'

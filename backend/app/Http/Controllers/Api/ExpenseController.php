@@ -40,7 +40,7 @@ class ExpenseController extends Controller
         $request->validate([
             'expense_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'category' => 'nullable|string|max:100',
         ]);
 
@@ -77,7 +77,7 @@ class ExpenseController extends Controller
         $request->validate([
             'expense_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'category' => 'nullable|string|max:100',
         ]);
 
@@ -114,17 +114,40 @@ class ExpenseController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $totalExpenses = Expense::byDateRange($request->start_date, $request->end_date)
-            ->sum('amount');
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
 
-        $expensesByCategory = Expense::byDateRange($request->start_date, $request->end_date)
+        // Tính tổng trong khoảng thời gian được chọn
+        $totalInRange = Expense::byDateRange($startDate, $endDate)->sum('amount');
+
+        // Tính tổng hôm nay
+        $today = now()->toDateString();
+        $todayTotal = Expense::byDateRange($today, $today)->sum('amount');
+
+        // Tính tổng tháng này
+        $thisMonthStart = now()->startOfMonth()->toDateString();
+        $thisMonthEnd = now()->endOfMonth()->toDateString();
+        $thisMonthTotal = Expense::byDateRange($thisMonthStart, $thisMonthEnd)->sum('amount');
+
+        // Tính tổng năm này
+        $thisYearStart = now()->startOfYear()->toDateString();
+        $thisYearEnd = now()->endOfYear()->toDateString();
+        $thisYearTotal = Expense::byDateRange($thisYearStart, $thisYearEnd)->sum('amount');
+
+        // Tính theo danh mục trong khoảng thời gian được chọn
+        $expensesByCategory = Expense::byDateRange($startDate, $endDate)
             ->selectRaw('category, SUM(amount) as total')
             ->groupBy('category')
-            ->get();
+            ->get()
+            ->pluck('total', 'category')
+            ->toArray();
 
         return response()->json([
-            'total_expenses' => $totalExpenses,
-            'expenses_by_category' => $expensesByCategory,
+            'total' => $totalInRange,
+            'today' => $todayTotal,
+            'this_month' => $thisMonthTotal,
+            'this_year' => $thisYearTotal,
+            'by_category' => $expensesByCategory,
         ]);
     }
 }

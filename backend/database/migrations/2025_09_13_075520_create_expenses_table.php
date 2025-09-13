@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->date('expense_date');
-            $table->decimal('amount', 15, 2);
-            $table->text('description');
+            $table->decimal('amount', 15, 0);
+            $table->text('description')->nullable();
             $table->string('category')->nullable(); // danh mục chi phí (optional)
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // người tạo
             $table->timestamps();
