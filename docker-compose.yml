@@ -35,7 +35,7 @@ services:
       - mysql
 
     networks:
-        - 24h_network
+      - 24h_network
   mysql:
     image: mysql:8.0
     container_name: 24h_billiard_mysql

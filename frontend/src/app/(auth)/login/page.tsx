@@ -1,146 +1,154 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   Box,
   Container,
-  Paper,
   Typography,
   TextField,
   Button,
-  Link,
   Alert,
   CircularProgress,
+  Avatar,
 } from '@mui/material'
-import { apiService, LoginCredentials } from '@/lib/api'
+import useLogin from '@/hook/auth/useLogin'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [formData, setFormData] = useState<LoginCredentials>({
-    email: '',
-    password: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await apiService.login(formData)
-      apiService.setToken(response.token)
-      router.push('/dashboard')
-    } catch (err) {
-      let message = 'Đăng nhập thất bại'
-      if (
-        err &&
-        typeof err === 'object' &&
-        'message' in err &&
-        typeof (err as Record<string, unknown>).message === 'string'
-      ) {
-        message = (err as { message: string }).message
-      }
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { formData, loading, error, handleChange, handleSubmit } = useLogin();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Đăng nhập
-          </Typography>
+    <Box component="main">
+      <Container maxWidth="md">
+        <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            mt: 4, 
+            padding: '25px',
+            borderRadius: '12px',
+            alignItems: 'center',
+            height: '100vh',
+          }}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'row', 
+              alignSelf: 'center', 
+              paddingX: 3, 
+              backgroundColor: "rgb(236, 240, 243)", 
+              boxShadow: "rgb(209, 217, 230) 10px 10px 10px, rgb(249, 249, 249) -10px -10px 10px", 
+              borderRadius: 5,
+              padding: 5,
+              gap: 5,  
+              flex: 1,
+              width: '100%',
+            }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 2,
+                  width: '100%',
+                }}
+              >
+                {error && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                  </Alert>
+                )}
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{
-              mt: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <TextField
-              required
-              fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={formData.email}
-              onChange={handleChange}
-              type="email"
-              sx={{
-                backgroundColor: 'background.paper',
-                borderRadius: 1,
-              }}
-            />
-            <TextField
-              required
-              fullWidth
-              name="password"
-              label="Mật khẩu"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              sx={{
-                backgroundColor: 'background.paper',
-                borderRadius: 1,
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={loading}
-              sx={{
-                mt: 3,
-                mb: 2,
-                paddingY: 1.5,
-                fontSize: '1rem',
-              }}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Đăng nhập'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link href="/register" variant="body2" underline="hover">
-                Chưa có tài khoản? Đăng ký ngay
-              </Link>
+                <Box
+                  component="form"
+                  onSubmit={handleSubmit}
+                  sx={{
+                    mt: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4,
+                    width: '100%',
+                    flex: 1
+                  }}
+                >
+                  <Typography component="h1" variant="h4" align="center" gutterBottom sx={{
+                    fontSize: { xs: 30, sm: 34 },
+                    fontWeight: 700,
+                    lineHeight: 3,
+                    color: '#181818'
+                  }}>
+                    Đăng nhập 
+                  </Typography>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email"
+                    name="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={formData.email}
+                    onChange={handleChange}
+                    type="email"
+                    sx={{
+                      backgroundColor: 'background.paper',
+                      borderRadius: 1
+                    }}
+                  />
+                  <TextField
+                    required
+                    fullWidth
+                    name="password"
+                    label="Mật khẩu"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    sx={{
+                      backgroundColor: 'background.paper',
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    disabled={loading}
+                    sx={{
+                      paddingY: 1.5,
+                      fontSize: '1rem',
+                      borderRadius: 30,
+                      margin: '60px auto 30px',
+                      backgroundColor: 'rgb(75, 112, 226)',
+                      color: 'rgb(249, 249, 249)',
+                      boxShadow: 'rgb(209, 217, 230) 8px 8px 16px, rgb(249, 249, 249) -8px -8px 16px',
+                      maxWidth: '180px'
+                    }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Đăng nhập'}
+                  </Button>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: { xs: 'none', sm: 'flex' },
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 1,
+                }}
+              >
+                  <Avatar src="/fingerprint.jpg" alt="Login Image" sx={{ 
+                    borderRadius: '50%', 
+                    width: '200px', 
+                    height: '200px',
+                    boxShadow: "rgb(209, 217, 230) 10px 10px 10px, rgb(249, 249, 249) -10px -10px 10px",
+                    border: "5px solid #589eff",
+                    color: 'rgb(249, 249, 249)',
+                  }} />
+              </Box>
             </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   )
 }
