@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { calculatePlayTime } from './formatters'
-import { generateVietinBankQR } from './qrGenerate';
+import { generateVietinBankQR } from './qrGenerate'
 import { formatMoney } from './formatters'
 
 dayjs.extend(utc)
@@ -162,7 +162,9 @@ export const generateInvoiceContent = async (
       
       <div class="footer">
         <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách và hẹn gặp lại!</p>
-         ${qrCodeDataURL ? `
+         ${
+           qrCodeDataURL
+             ? `
             <div style="text-align: center; margin: 10px 0; border: 1px dashed #000; padding: 8px;">
                 <p style="font-size:13px; margin: 5px 0; font-weight: bold;">THANH TOÁN CHUYỂN KHOẢN</p>
                 <img src="${qrCodeDataURL}" style="width: 80px; height: 80px; display: block; margin: 5px auto;" alt="QR Code"/>
@@ -172,7 +174,9 @@ export const generateInvoiceContent = async (
                 <p style="font-size:12px; margin: 2px 0; font-weight: bold;">Số tiền: ${formatMoney(totalMoney)}</p>
                 <p style="font-size:11px; margin: 2px 0;">ND: DHMV${session.id.toString()}</p>
             </div>
-        ` : ''}
+        `
+             : ''
+         }
         <p style="font-size:12px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
       </div>
     </body>

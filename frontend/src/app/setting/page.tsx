@@ -95,41 +95,45 @@ export default function SettingPage() {
                   Cài đặt chung
                 </Typography>
                 <List>
-                  {user && user.role === 'admin' && <ListItemButton
-                    onClick={() => router.push('/setting/table')}
-                    sx={{
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 1,
-                      mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' },
-                    }}
-                  >
-                    <MuiListItemIcon>
-                      <TableIcon color="primary" />
-                    </MuiListItemIcon>
-                    <ListItemText
-                      primary="Quản lý bàn"
-                      secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
-                    />
-                  </ListItemButton>}
+                  {user && user.role === 'admin' && (
+                    <ListItemButton
+                      onClick={() => router.push('/setting/table')}
+                      sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        mb: 1,
+                        '&:hover': { backgroundColor: '#f5f5f5' },
+                      }}
+                    >
+                      <MuiListItemIcon>
+                        <TableIcon color="primary" />
+                      </MuiListItemIcon>
+                      <ListItemText
+                        primary="Quản lý bàn"
+                        secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
+                      />
+                    </ListItemButton>
+                  )}
 
-                  {user && user.role === 'admin' && <ListItemButton
-                    onClick={() => router.push('/setting/user')}
-                    sx={{
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 1,
-                      mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' },
-                    }}
-                  >
-                    <MuiListItemIcon>
-                      <PersonIcon color="primary" />
-                    </MuiListItemIcon>
-                    <ListItemText
-                      primary="Cài đặt người dùng"
-                      secondary="Quản lý vai trò và quyền hạn người dùng"
-                    />
-                  </ListItemButton>}
+                  {user && user.role === 'admin' && (
+                    <ListItemButton
+                      onClick={() => router.push('/setting/user')}
+                      sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        mb: 1,
+                        '&:hover': { backgroundColor: '#f5f5f5' },
+                      }}
+                    >
+                      <MuiListItemIcon>
+                        <PersonIcon color="primary" />
+                      </MuiListItemIcon>
+                      <ListItemText
+                        primary="Cài đặt người dùng"
+                        secondary="Quản lý vai trò và quyền hạn người dùng"
+                      />
+                    </ListItemButton>
+                  )}
 
                   <ListItemButton
                     onClick={() => router.push('/setting/menus')}

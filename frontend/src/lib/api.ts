@@ -23,13 +23,13 @@ import {
   MonthlyRevenueResponse,
   YearlyRevenueResponse,
   CostBreakdownResponse,
-  MessageResponse
+  MessageResponse,
 } from '@/types/api'
 
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URL || 'http://tinhtien.24hbilliardscoffee.com/api'
-    : 'http://localhost:8000/api'
+    : 'http://localhost:8001/api'
 
 class ApiService {
   private token: string | null = null
@@ -313,7 +313,7 @@ class ApiService {
   async createOrder(data: CreateOrderData): Promise<CreateOrderResponse> {
     return this.request<CreateOrderResponse>('/orders', {
       method: 'POST',
-    body: JSON.stringify(data),
+      body: JSON.stringify(data),
     })
   }
 
@@ -435,16 +435,21 @@ class ApiService {
   }
 
   // Expense management methods
-  async getExpenses(filter: { start_date?: string; end_date?: string; category?: string }, page: number = 1): Promise<ExpenseListResponse> {
-    const params = new URLSearchParams();
-    if (filter.start_date) params.append('start_date', filter.start_date);
-    if (filter.end_date) params.append('end_date', filter.end_date);
-    if (filter.category) params.append('category', filter.category);
+  async getExpenses(
+    filter: { start_date?: string; end_date?: string; category?: string },
+    page: number = 1,
+  ): Promise<ExpenseListResponse> {
+    const params = new URLSearchParams()
+    if (filter.start_date) params.append('start_date', filter.start_date)
+    if (filter.end_date) params.append('end_date', filter.end_date)
+    if (filter.category) params.append('category', filter.category)
     return this.request<ExpenseListResponse>(`/expenses?page=${page}&${params.toString()}`)
   }
 
   async getExpenseSummary(start_date: string, end_date: string): Promise<ExpenseSummary> {
-    return this.request<ExpenseSummary>('/expenses-summary?start_date=' + start_date + '&end_date=' + end_date)
+    return this.request<ExpenseSummary>(
+      '/expenses-summary?start_date=' + start_date + '&end_date=' + end_date,
+    )
   }
 
   async createExpense(data: CreateExpenseData): Promise<Expense> {
@@ -468,44 +473,44 @@ class ApiService {
   }
 
   async getDailyRevenue(startDate?: string, endDate?: string): Promise<DailyRevenueReport> {
-    let url = '/revenue/daily';
-    const params = [];
-    if (startDate) params.push(`start_date=${startDate}`);
-    if (endDate) params.push(`end_date=${endDate}`);
+    let url = '/revenue/daily'
+    const params = []
+    if (startDate) params.push(`start_date=${startDate}`)
+    if (endDate) params.push(`end_date=${endDate}`)
     if (params.length > 0) {
-      url += `?${params.join('&')}`;
+      url += `?${params.join('&')}`
     }
     return this.request<DailyRevenueReport>(url)
   }
 
   async getMonthlyRevenue(year?: number, month?: number): Promise<MonthlyRevenueResponse> {
-    let url = '/revenue/monthly';
-    const params = [];
-    if (year) params.push(`year=${year}`);
-    if (month) params.push(`month=${month}`);
+    let url = '/revenue/monthly'
+    const params = []
+    if (year) params.push(`year=${year}`)
+    if (month) params.push(`month=${month}`)
     if (params.length > 0) {
-      url += `?${params.join('&')}`;
+      url += `?${params.join('&')}`
     }
     return this.request<MonthlyRevenueResponse>(url)
   }
 
   async getYearlyRevenue(year?: number): Promise<YearlyRevenueResponse> {
-    let url = '/revenue/yearly';
-    const params = [];
-    if (year) params.push(`year=${year}`);
+    let url = '/revenue/yearly'
+    const params = []
+    if (year) params.push(`year=${year}`)
     if (params.length > 0) {
-      url += `?${params.join('&')}`;
+      url += `?${params.join('&')}`
     }
     return this.request<YearlyRevenueResponse>(url)
   }
 
   async getCostBreakdown(startDate?: string, endDate?: string): Promise<CostBreakdownResponse> {
-    let url = '/revenue/cost-breakdown';
-    const params = [];
-    if (startDate) params.push(`start_date=${startDate}`);
-    if (endDate) params.push(`end_date=${endDate}`);
+    let url = '/revenue/cost-breakdown'
+    const params = []
+    if (startDate) params.push(`start_date=${startDate}`)
+    if (endDate) params.push(`end_date=${endDate}`)
     if (params.length > 0) {
-      url += `?${params.join('&')}`;
+      url += `?${params.join('&')}`
     }
     return this.request<CostBreakdownResponse>(url)
   }
@@ -530,5 +535,5 @@ export type {
   ExpenseSummary,
   DailyRevenueResponse,
   MonthlyRevenueResponse,
-  YearlyRevenueResponse
+  YearlyRevenueResponse,
 } from '@/types/api'

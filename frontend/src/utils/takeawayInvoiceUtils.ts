@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { formatMoney } from './formatters'
-import { generateVietinBankQR } from './qrGenerate';
+import { generateVietinBankQR } from './qrGenerate'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -31,7 +31,7 @@ interface TakeawayInvoiceOrder {
 export const generateTakeawayInvoiceContent = async (order: TakeawayInvoiceOrder) => {
   // Tạo mã QR thanh toán
   const qrCodeDataURL = await generateVietinBankQR(order.total_amount, order.id.toString(), 'TTTG')
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -110,7 +110,10 @@ export const generateTakeawayInvoiceContent = async (order: TakeawayInvoiceOrder
                 <th>Đơn giá</th>
                 <th>Thành tiền</th>
             </tr>
-            ${order.items?.map((item, idx) => `
+            ${
+              order.items
+                ?.map(
+                  (item, idx) => `
             <tr class="item-row">
                 <td>${idx + 1}</td>
                 <td class="item-name">${item.menu?.name || `Món ${item.menu_id}`}</td>
@@ -120,7 +123,10 @@ export const generateTakeawayInvoiceContent = async (order: TakeawayInvoiceOrder
                 </td>
                 <td><div style="font-weight: bold;">${formatMoney(item.total)}</div></td>
             </tr>
-            `).join('') || ''}
+            `,
+                )
+                .join('') || ''
+            }
         </table>
       </div>
         
@@ -130,7 +136,9 @@ export const generateTakeawayInvoiceContent = async (order: TakeawayInvoiceOrder
         
         <div class="footer">
             <p style="font-size:15px; margin: 3px 0;">Cảm ơn quý khách và hẹn gặp lại!</p>
-            ${qrCodeDataURL ? `
+            ${
+              qrCodeDataURL
+                ? `
             <div style="text-align: center; margin: 10px 0; border: 1px dashed #000; padding: 8px;">
               <p style="font-size:13px; margin: 5px 0; font-weight: bold;">THANH TOÁN CHUYỂN KHOẢN</p>
               <img src="${qrCodeDataURL}" style="width: 80px; height: 80px; display: block; margin: 5px auto;" alt="QR Code"/>
@@ -140,7 +148,9 @@ export const generateTakeawayInvoiceContent = async (order: TakeawayInvoiceOrder
               <p style="font-size:12px; margin: 2px 0; font-weight: bold;">Số tiền: ${formatMoney(order.total_amount)}</p>
               <p style="font-size:11px; margin: 2px 0;">ND: TTTG${order.id}</p>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             <p style="font-size:15px; margin: 3px 0;">In lúc: ${dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}</p>
         </div>
     </body>

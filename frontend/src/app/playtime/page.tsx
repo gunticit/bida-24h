@@ -46,18 +46,8 @@ import {
   TakeoutDining as TakeawayIcon,
   RestaurantMenu as RestaurantIcon,
 } from '@mui/icons-material'
-import {
-  apiService,
-  User,
-  GameSession,
-  Table,
-  MenuItem as MenuItemType,
-  Order,
-} from '@/lib/api'
-import type {
-  CreateSessionData,
-  UpdateSessionData,
-} from '@/types/api'
+import { apiService, User, GameSession, Table, MenuItem as MenuItemType, Order } from '@/lib/api'
+import type { CreateSessionData, UpdateSessionData } from '@/types/api'
 import { AppBar } from '@/components/ui'
 import { StatisticsCards } from '@/components/playtime'
 import { formatDateTime, formatMoney, calculatePlayTime, formatCurrency } from '@/utils/formatters'
@@ -116,7 +106,9 @@ export default function PlaytimePage() {
     message: '',
     severity: 'info',
   })
-  const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>('playingOrLast7Days')
+  const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>(
+    'playingOrLast7Days',
+  )
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -147,13 +139,13 @@ export default function PlaytimePage() {
     try {
       const currentMode = mode || viewMode
       let sessionsData
-      
+
       if (currentMode === 'todayOrPlaying') {
         sessionsData = await apiService.getSessionsTodayOrPlaying()
       } else {
         sessionsData = await apiService.getSessionsPlayingOrLast7Days()
       }
-      
+
       setSessions(sessionsData)
     } catch (error) {
       console.error('Failed to load sessions:', error)
@@ -318,14 +310,14 @@ export default function PlaytimePage() {
 
       showSnackbar(
         `${response.message}. Còn lại: ${response.remaining_quantity} sản phẩm`,
-        'success'
+        'success',
       )
       handleCloseFoodDialog()
       loadSessions() // Reload để cập nhật tổng tiền
       loadMenus() // Reload để cập nhật số lượng menu
     } catch (error: unknown) {
       console.error('Failed to add food:', error)
-      
+
       // Hiển thị lỗi chi tiết từ backend
       const errorMessage = error instanceof Error ? error.message : 'Không thể thêm món ăn'
       showSnackbar(errorMessage, 'error')
@@ -815,25 +807,21 @@ export default function PlaytimePage() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <Autocomplete
               options={menus}
-              getOptionLabel={(option) => 
+              getOptionLabel={(option) =>
                 `${option.name} - ${parseInt(option?.price?.toString()).toLocaleString('vi-VN')} đ`
               }
-              value={menus.find(menu => menu.id === foodFormData.menu_id) || null}
+              value={menus.find((menu) => menu.id === foodFormData.menu_id) || null}
               onChange={(_, newValue) => {
-                setFoodFormData({ 
-                  ...foodFormData, 
-                  menu_id: newValue ? newValue.id : 0 
+                setFoodFormData({
+                  ...foodFormData,
+                  menu_id: newValue ? newValue.id : 0,
                 })
               }}
               renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Chọn món ăn"
-                  placeholder="Tìm kiếm món ăn..."
-                />
+                <TextField {...params} label="Chọn món ăn" placeholder="Tìm kiếm món ăn..." />
               )}
               renderOption={(props, option) => {
-                const { key, ...otherProps } = props;
+                const { key, ...otherProps } = props
                 return (
                   <Box component="li" key={key} {...otherProps}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
@@ -842,20 +830,21 @@ export default function PlaytimePage() {
                         {option.name} - {formatCurrency(option?.price)}
                       </span>
                       {option.quantity <= 5 && (
-                        <Chip 
+                        <Chip
                           label={`Còn ${option.quantity}`}
                           size="small"
-                          color={option.quantity === 0 ? "error" : "warning"}
+                          color={option.quantity === 0 ? 'error' : 'warning'}
                         />
                       )}
                     </Box>
                   </Box>
-                );
+                )
               }}
               filterOptions={(options, { inputValue }) => {
-                return options.filter(option =>
-                  option.name.toLowerCase().includes(inputValue.toLowerCase()) ||
-                  option.category.toLowerCase().includes(inputValue.toLowerCase())
+                return options.filter(
+                  (option) =>
+                    option.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+                    option.category.toLowerCase().includes(inputValue.toLowerCase()),
                 )
               }}
               noOptionsText="Không tìm thấy món ăn"

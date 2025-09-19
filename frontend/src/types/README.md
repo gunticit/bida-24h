@@ -5,9 +5,11 @@ This directory contains TypeScript interfaces and types for the billiard managem
 ## Files Structure
 
 ### `/types/api.ts`
+
 Contains all the interfaces and types used for API communication:
 
 #### User Management
+
 - `User` - User profile information
 - `LoginCredentials` - Login request data
 - `RegisterData` - User registration data
@@ -15,22 +17,26 @@ Contains all the interfaces and types used for API communication:
 - `AuthResponse` - Authentication response
 
 #### Game Sessions
+
 - `GameSession` - Game session data
 - `CreateSessionData` - Create session request
 - `UpdateSessionData` - Update session request
 
 #### Tables & Menus
+
 - `Table` - Billiard table information
 - `MenuItem` - Food/drink menu items
 - `Order` - Order information
 - `CreateOrderData` - Create order request
 
 #### Takeaway Orders
+
 - `TakeawayOrder` - Takeaway order data
 - `TakeawayOrderItem` - Individual items in takeaway order
 - `CreateTakeawayOrderData` - Create takeaway order request
 
 #### Expenses
+
 - `Expense` - Expense record
 - `ExpenseSummary` - Expense statistics
 - `CreateExpenseData` - Create expense request
@@ -38,6 +44,7 @@ Contains all the interfaces and types used for API communication:
 - `ExpenseListResponse` - Paginated expense list response
 
 #### Revenue & Analytics
+
 - `RevenueBreakdownItem` - Daily revenue breakdown
 - `MonthlyRevenueBreakdownItem` - Monthly revenue breakdown
 - `DailyRevenueResponse` - Daily revenue API response
@@ -45,6 +52,7 @@ Contains all the interfaces and types used for API communication:
 - `YearlyRevenueResponse` - Yearly revenue API response
 
 #### Utility Types
+
 - `ApiResponse<T>` - Generic API response wrapper
 - `PaginatedResponse<T>` - Generic paginated response
 - `MessageResponse` - Simple message response
@@ -52,6 +60,7 @@ Contains all the interfaces and types used for API communication:
 - `UpdateData<T>` - Utility type for update operations
 
 #### Enums & Constants
+
 - `MenuCategory` - Menu item categories
 - `TableStatus` - Table status options
 - `SessionStatus` - Game session status
@@ -62,6 +71,7 @@ Contains all the interfaces and types used for API communication:
 ## Usage
 
 ### In Components
+
 ```typescript
 import { User, GameSession, ExpenseSummary } from '@/types/api'
 
@@ -70,6 +80,7 @@ import { User, GameSession } from '@/lib/api'
 ```
 
 ### In API Service
+
 ```typescript
 import { CreateExpenseData, DailyRevenueResponse } from '@/types/api'
 
@@ -79,6 +90,7 @@ async function createExpense(data: CreateExpenseData): Promise<Expense> {
 ```
 
 ### Type Safety Benefits
+
 - Auto-completion in IDEs
 - Compile-time error checking
 - Better documentation through types

@@ -283,7 +283,7 @@ export default function RevenuePage() {
                 title="Lợi nhuận"
                 value={dailyData.total_profit}
                 icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={dailyData.total_profit >= 0 ? "success" : "error"}
+                color={dailyData.total_profit >= 0 ? 'success' : 'error'}
                 isMoney={true}
               />
             )}
@@ -451,33 +451,33 @@ export default function RevenuePage() {
               color="success"
               isMoney={true}
             />
-              {monthlyData.total_profit !== undefined && (
-                <RevenueCard
-                  title="Lợi nhuận"
-                  value={monthlyData.total_profit}
-                  icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                  color={monthlyData.total_profit >= 0 ? "success" : "error"}
-                  isMoney={true}
-                />
-              )}
-              {monthlyData.total_cost_of_goods_sold !== undefined && (
-                <RevenueCard
-                  title="C/phí nguồn hàng"
-                  value={monthlyData.total_cost_of_goods_sold}
-                  icon={<BarChart sx={{ fontSize: 35 }} />}
-                  color="secondary"
-                  isMoney={true}
-                />
-              )}
-              {monthlyData.total_expenses !== undefined && (
-                <RevenueCard
-                  title="Chi phí phát sinh"
-                  value={monthlyData.total_expenses}
-                  icon={<BarChart sx={{ fontSize: 35 }} />}
-                  color="secondary"
-                  isMoney={true}
-                />
-              )}
+            {monthlyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={monthlyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={monthlyData.total_profit >= 0 ? 'success' : 'error'}
+                isMoney={true}
+              />
+            )}
+            {monthlyData.total_cost_of_goods_sold !== undefined && (
+              <RevenueCard
+                title="C/phí nguồn hàng"
+                value={monthlyData.total_cost_of_goods_sold}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {monthlyData.total_expenses !== undefined && (
+              <RevenueCard
+                title="Chi phí phát sinh"
+                value={monthlyData.total_expenses}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
           </Box>
 
           {/* Top Tables Section */}
@@ -547,8 +547,14 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(day.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(day.profit || (day.total_revenue - (day.total_expenses || 0)))}
-                              color={(day.profit || (day.total_revenue - (day.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              label={formatCurrency(
+                                day.profit || day.total_revenue - (day.total_expenses || 0),
+                              )}
+                              color={
+                                (day.profit || day.total_revenue - (day.total_expenses || 0)) >= 0
+                                  ? 'success'
+                                  : 'error'
+                              }
                               variant="outlined"
                             />
                           </TableCell>
@@ -653,7 +659,7 @@ export default function RevenuePage() {
                 title="Lợi nhuận"
                 value={yearlyData.total_profit}
                 icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={yearlyData.total_profit >= 0 ? "success" : "error"}
+                color={yearlyData.total_profit >= 0 ? 'success' : 'error'}
                 isMoney={true}
               />
             )}
@@ -706,8 +712,15 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(month.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(month.profit || (month.total_revenue - (month.total_expenses || 0)))}
-                              color={(month.profit || (month.total_revenue - (month.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              label={formatCurrency(
+                                month.profit || month.total_revenue - (month.total_expenses || 0),
+                              )}
+                              color={
+                                (month.profit ||
+                                  month.total_revenue - (month.total_expenses || 0)) >= 0
+                                  ? 'success'
+                                  : 'error'
+                              }
                               variant="outlined"
                             />
                           </TableCell>
