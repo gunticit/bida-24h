@@ -27,9 +27,10 @@ import {
 } from '@mui/material'
 import { Restaurant, AccessTime, AttachMoney, BarChart, ShoppingBag } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
 import { RevenueCard } from '@/components/items/RevenueCard'
 import { formatCurrency } from '@/utils/formatters'
+import SideBar from '@/app/SideBar'
+import Loading from '@/components/loading'
 
 interface RevenueData {
   total_revenue: number
@@ -738,9 +739,24 @@ export default function RevenuePage() {
     </Box>
   )
 
+  if (loading) {
+    return (
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
+        <Loading />
+      </Box>
+    )
+  }else{
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar title="Thống kê doanh thu" user={user} onLogout={handleLogout} icon={<BarChart />} />
+      <SideBar
+        title="Thống kê doanh thu"
+        href="/revenue"
+        user={user}
+        icon={<BarChart />}
+      >
 
       <Box sx={{ p: 3 }}>
         {error && (
@@ -787,6 +803,8 @@ export default function RevenuePage() {
           )}
         </TabPanel>
       </Box>
+      </SideBar>
     </Box>
   )
+  }
 }

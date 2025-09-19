@@ -338,6 +338,11 @@ export interface MessageResponse {
   message: string
 }
 
+export interface FoodData {
+  menu_id: number,
+  quantity: number
+}
+
 // Category types
 export type MenuCategory = 'food' | 'drink' | 'tobacco' | 'takeaway'
 export type TableStatus = 'available' | 'playing' | 'maintenance'

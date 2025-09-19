@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
-import List from '@mui/material/List'
 import CssBaseline from '@mui/material/CssBaseline'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
@@ -15,6 +14,8 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { AppBar as AppBarDOM } from '@/components/ui'
 import { dashboardMenuItems } from '@/config/dashboard/dashboardMenuItems'
+import { apiService } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 
 const drawerWidth = 240
 
@@ -74,13 +75,13 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export default function SideBar({
   title,
-  handleLogout,
+  href,
   icon,
   user,
   children,
 }: {
   title: string
-  handleLogout: () => void
+  href?: string
   icon?: React.ReactNode
   user?: any
   children?: React.ReactNode
@@ -90,9 +91,16 @@ export default function SideBar({
 
   const handleDrawerOpen = () => setOpen(true)
   const handleDrawerClose = () => setOpen(false)
-  React.useEffect(() => {
-    console.log('openopenopenopen:', open)
-  }, [open])
+
+  const router = useRouter()
+  const handleLogout = async () => {
+    try {
+      await apiService.logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -104,6 +112,7 @@ export default function SideBar({
         icon={icon}
         open={open}
         handleDrawerOpen={handleDrawerOpen}
+        href={href}
       />
       <Drawer variant="persistent" open={open}>
         <DrawerHeader>

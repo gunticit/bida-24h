@@ -403,7 +403,7 @@ export default function DineInPage() {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
           {/* Menu Section */}
           <Box sx={{ flex: 1 }}>
-            <Card>
+            <Card sx={{ height: '80vh', overflowY: 'auto' }}>
               <CardContent>
                 <Typography
                   variant="h6"
@@ -567,8 +567,6 @@ export default function DineInPage() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Mã đơn</TableCell>
-                      <TableCell>Khách hàng</TableCell>
-                      <TableCell>Số điện thoại</TableCell>
                       <TableCell>Chi tiết</TableCell>
                       <TableCell>Tổng tiền</TableCell>
                       <TableCell>Trạng thái</TableCell>
@@ -580,8 +578,6 @@ export default function DineInPage() {
                     {dineInOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>#{order.id}</TableCell>
-                        <TableCell>{order.customer_name}</TableCell>
-                        <TableCell>{order.customer_phone}</TableCell>
                         <TableCell>
                           {order.items?.map((item, index) => (
                             <Typography key={index} variant="caption" display="block">

@@ -377,7 +377,7 @@ export default function TakeawayPage() {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
           {/* Menu Section */}
           <Box sx={{ flex: 1 }}>
-            <Card>
+            <Card sx={{ height: '80vh', overflowY: 'auto' }}>
               <CardContent>
                 <Typography
                   variant="h6"

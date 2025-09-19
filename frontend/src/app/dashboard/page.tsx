@@ -61,11 +61,15 @@ export default function DashboardPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Nếu SideBar là AppBar + Drawer, nên đổi tên thành AppBar hoặc MainLayout cho rõ nghĩa */}
-      <SideBar title="Dashboard" user={user} handleLogout={handleLogout} icon={<DashboardIcon />} >
-
+      <SideBar
+        title="Dashboard"
+        href="/dashboard"
+        user={user}
+        icon={<DashboardIcon />}
+      >
         {/* Main Content */}
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" sx={{ fontSize: { sm: '18px', xs: '15px' } }} gutterBottom>
             Chào mừng, {user?.name}!
           </Typography>
 
@@ -90,11 +94,19 @@ export default function DashboardPage() {
               </CardContent>
               <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6" gutterBottom></Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    width: { sm: 'auto', xs: '100%' },
+                  }}
+                >
                   <Button
                     variant="contained"
                     startIcon={<CalendarIcon />}
                     onClick={() => router.push('/playtime')}
+                    sx={{ width: { sm: 'auto', xs: '100%' } }}
                   >
                     Quản lý Giờ chơi
                   </Button>
@@ -103,6 +115,7 @@ export default function DashboardPage() {
                       variant="outlined"
                       startIcon={<DashboardIcon />}
                       onClick={() => router.push('/revenue')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
                     >
                       Xem thống kê
                     </Button>
@@ -112,6 +125,7 @@ export default function DashboardPage() {
                       variant="outlined"
                       startIcon={<MoneyIcon />}
                       onClick={() => router.push('/expense')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
                     >
                       Quản lý Chi phí
                     </Button>
@@ -121,6 +135,7 @@ export default function DashboardPage() {
                       variant="outlined"
                       startIcon={<SettingsIcon />}
                       onClick={() => router.push('/setting')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
                     >
                       Cài đặt hệ thống
                     </Button>
@@ -131,7 +146,6 @@ export default function DashboardPage() {
           </Grid>
         </Box>
       </SideBar>
-
     </Box>
   )
 }

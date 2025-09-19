@@ -108,7 +108,6 @@ const ExpensePage = () => {
         router.push('/login')
         return
       }
-      console.log('Fetching expenses for page:', page)
 
       const [expenseResponse, summaryResponse] = await Promise.all([
         apiService.getExpenses({}, page),

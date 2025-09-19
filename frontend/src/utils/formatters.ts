@@ -4,7 +4,6 @@ export const formatDateTime = (dateTime: string) => {
 }
 
 export const formatMoney = (amount: number | null) => {
-  console.log('Formatting amount:', amount) // Debug log
   if (amount === null) return '0 đ'
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
