@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { useState } from 'react'
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles'
+import { useState, useEffect } from 'react'
+import { styled, useTheme, Theme, CSSObject } from '@mui/material'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -12,12 +12,29 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { AppBar as AppBarDOM } from '@/components/ui'
 import { dashboardMenuItems } from '@/config/dashboard/dashboardMenuItems'
 import { apiService } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 
 const drawerWidth = 240
+
+interface User {
+  id: number
+  name: string
+  email: string
+  role?: string
+  [key: string]: unknown
+}
+
+interface SideBarProps {
+  title: string
+  href?: string
+  icon?: React.ReactNode
+  user?: User
+  children?: React.ReactNode
+}
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
@@ -79,15 +96,17 @@ export default function SideBar({
   icon,
   user,
   children,
-}: {
-  title: string
-  href?: string
-  icon?: React.ReactNode
-  user?: any
-  children?: React.ReactNode
-}) {
+}: SideBarProps) {
   const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [open, setOpen] = useState(false)
+
+  // Update drawer state based on screen size
+  useEffect(() => {
+    if (isMobile) {
+      setOpen(false)
+    }
+  }, [isMobile])
 
   const handleDrawerOpen = () => setOpen(true)
   const handleDrawerClose = () => setOpen(false)
@@ -107,14 +126,14 @@ export default function SideBar({
       <CssBaseline />
       <AppBarDOM
         title={title}
-        user={user}
+        user={user || null}
         onLogout={handleLogout}
         icon={icon}
         open={open}
         handleDrawerOpen={handleDrawerOpen}
         href={href}
       />
-      <Drawer variant="persistent" open={open}>
+      <Drawer variant={isMobile ? 'temporary' : 'permanent'} open={open} onClose={handleDrawerClose}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -122,7 +141,7 @@ export default function SideBar({
         </DrawerHeader>
         <Divider />
         <Box>
-          {dashboardMenuItems.map((item, index) => {
+          {dashboardMenuItems.map((item) => {
             if (item.admin && user?.role !== 'admin') return null
             return (
               <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
@@ -132,7 +151,7 @@ export default function SideBar({
                     px: 2.5,
                     justifyContent: open ? 'initial' : 'center',
                   }}
-                  onClick={() => item.path && window.location.assign(item.path)}
+                  onClick={() => item.path && router.push(item.path)}
                 >
                   <ListItemIcon
                     sx={{
@@ -150,7 +169,18 @@ export default function SideBar({
           })}
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          p: 3,
+          marginLeft: isMobile ? 0 : (open ? 0 : `-${drawerWidth - 64}px`),
+          transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        }}
+      >
         <DrawerHeader />
         {children}
       </Box>
