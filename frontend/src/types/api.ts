@@ -160,6 +160,26 @@ export interface CreateTakeawayOrderData {
   status?: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 }
 
+// Takeaway Report interfaces
+export interface TakeawayReportItem {
+  menu_name: string
+  total_quantity: number
+  unit_price: number
+  total_amount: number
+}
+
+export interface TakeawayReportData {
+  from_date: string
+  to_date: string
+  total_orders: number
+  total_amount: number
+  items: TakeawayReportItem[]
+  summary: {
+    total_items_sold: number
+    average_order_value: number
+  }
+}
+
 // Expense interfaces
 export interface Expense {
   id: number

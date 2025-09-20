@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Takeaway Order management routes (new dedicated system)
     Route::get('/takeaway-orders/today', [TakeawayOrderController::class, 'todayOrders']);
+    Route::get('/takeaway-orders/report', [TakeawayOrderController::class, 'report']);
+    Route::get('/takeaway-orders/report/download', [TakeawayOrderController::class, 'downloadReport']);
     Route::apiResource('takeaway-orders', TakeawayOrderController::class);
     
     // Dine-in Order management routes

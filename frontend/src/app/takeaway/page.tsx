@@ -32,17 +32,18 @@ import {
   Add as AddIcon,
   Reply as ReplyIcon,
   Delete as DeleteIcon,
-  TakeoutDining as TakeawayIcon,
   Restaurant as FoodIcon,
   ShoppingCart as CartIcon,
   Remove as RemoveIcon,
   Search as SearchIcon,
   Print as PrintIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material'
 import { apiService, User, MenuItem as MenuItemType, TakeawayOrder } from '@/lib/api'
 import { AppBar } from '@/components/ui'
 import { formatMoney, formatDateTime } from '@/utils/formatters'
 import { generateTakeawayInvoiceContent, printTakeawayInvoice } from '@/utils/takeawayInvoiceUtils'
+import { printTakeawayReport } from '@/utils/takeawayReportUtils'
 import { useRouter } from 'next/navigation'
 import { CreateTakeawayOrderData } from '@/lib/api'
 
@@ -70,6 +71,19 @@ export default function TakeawayPage() {
   const [takeawayOrders, setTakeawayOrders] = useState<TakeawayOrder[]>([])
   const [filteredMenus, setFilteredMenus] = useState<MenuItemType[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // Date range states for report
+  const [fromDate, setFromDate] = useState(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today.toISOString().slice(0, 16)
+  })
+  const [toDate, setToDate] = useState(() => {
+    const today = new Date()
+    today.setHours(23, 59, 59, 999)
+    return today.toISOString().slice(0, 16)
+  })
+  const [reportLoading, setReportLoading] = useState(false)
 
   // Form states
   const [openDialog, setOpenDialog] = useState(false)
@@ -347,6 +361,71 @@ export default function TakeawayPage() {
     }
   }
 
+  // Handle download report
+  const handleDownloadReport = async () => {
+    if (!fromDate || !toDate) {
+      showSnackbar('Vui lòng chọn khoảng thời gian', 'error')
+      return
+    }
+
+    const from = new Date(fromDate)
+    const to = new Date(toDate)
+    
+    if (from > to) {
+      showSnackbar('Ngày bắt đầu phải nhỏ hơn ngày kết thúc', 'error')
+      return
+    }
+
+    setReportLoading(true)
+    try {
+      await apiService.downloadTakeawayReport(fromDate, toDate)
+      showSnackbar('Tải báo cáo thành công!')
+    } catch (error) {
+      console.error('Failed to download report:', error)
+      const apiError = error as ApiError
+      const errorMessage = apiError?.response?.data?.error || 
+                          apiError?.response?.data?.message || 
+                          apiError?.message || 
+                          'Không thể tải báo cáo'
+      showSnackbar(errorMessage, 'error')
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
+  // Handle print report
+  const handlePrintReport = async () => {
+    if (!fromDate || !toDate) {
+      showSnackbar('Vui lòng chọn khoảng thời gian', 'error')
+      return
+    }
+
+    const from = new Date(fromDate)
+    const to = new Date(toDate)
+    
+    if (from > to) {
+      showSnackbar('Ngày bắt đầu phải nhỏ hơn ngày kết thúc', 'error')
+      return
+    }
+
+    setReportLoading(true)
+    try {
+      const reportData = await apiService.getTakeawayReportData(fromDate, toDate)
+      printTakeawayReport(reportData)
+      showSnackbar('In báo cáo thành công!')
+    } catch (error) {
+      console.error('Failed to print report:', error)
+      const apiError = error as ApiError
+      const errorMessage = apiError?.response?.data?.error || 
+                          apiError?.response?.data?.message || 
+                          apiError?.message || 
+                          'Không thể in báo cáo'
+      showSnackbar(errorMessage, 'error')
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <Box
@@ -360,6 +439,50 @@ export default function TakeawayPage() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       <AppBar title="Đặt hàng mang về" user={user} onLogout={handleLogout} />
+      
+      {/*Date Range Filter and Download Buttons*/}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', bgcolor: 'white', borderBottom: '1px solid #ddd' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            type="datetime-local"
+            label="Từ ngày giờ"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ m: 3, width: '250px' }}
+          />  
+          <TextField
+            type="datetime-local"
+            label="Đến ngày giờ"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ m: 3, width: '250px' }}
+          />  
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<DownloadIcon />}
+            sx={{ m: 3 }}
+            onClick={handleDownloadReport}
+            disabled={reportLoading || !fromDate || !toDate}
+          >
+            {reportLoading ? 'Đang tải...' : 'Tải báo cáo Excel'}
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<PrintIcon />}
+            sx={{ m: 3 }}
+            onClick={handlePrintReport}
+            disabled={reportLoading || !fromDate || !toDate}
+          >
+            In báo cáo
+          </Button>
+        </Box>
+      </Box>
 
       <Box sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -538,8 +661,6 @@ export default function TakeawayPage() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Mã đơn</TableCell>
-                      <TableCell>Khách hàng</TableCell>
-                      <TableCell>Số điện thoại</TableCell>
                       <TableCell>Chi tiết</TableCell>
                       <TableCell>Tổng tiền</TableCell>
                       <TableCell>Trạng thái</TableCell>
@@ -551,8 +672,6 @@ export default function TakeawayPage() {
                     {takeawayOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>#{order.id}</TableCell>
-                        <TableCell>{order.customer_name}</TableCell>
-                        <TableCell>{order.customer_phone}</TableCell>
                         <TableCell>
                           {order.items?.map((item, index) => (
                             <Typography key={index} variant="caption" display="block">

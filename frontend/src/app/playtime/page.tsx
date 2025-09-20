@@ -839,7 +839,12 @@ export default function PlaytimePage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                       {getCategoryChipLocal(option.category)}
                       <span style={{ flex: 1 }}>
-                        {option.name} - {formatCurrency(option?.price)}
+                        <Chip
+                            label={option.quantity}
+                            color={option.quantity > 0 ? 'success' : 'error'}
+                            size="small"
+                            sx={{ fontSize: '10px', padding: '2px'}}
+                          /> {option.name} - {formatCurrency(option?.price)} 
                       </span>
                       {option.quantity <= 5 && (
                         <Chip 

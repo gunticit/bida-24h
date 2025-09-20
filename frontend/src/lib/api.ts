@@ -14,6 +14,7 @@ import {
   CreateOrderResponse,
   TakeawayOrder,
   CreateTakeawayOrderData,
+  TakeawayReportData,
   Expense,
   ExpenseSummary,
   CreateExpenseData,
@@ -29,7 +30,7 @@ import {
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URL || 'http://tinhtien.24hbilliardscoffee.com/api'
-    : 'http://localhost:8000/api'
+    : 'http://localhost:8001/api'
 
 class ApiService {
   private token: string | null = null
@@ -349,7 +350,7 @@ class ApiService {
 
   // Takeaway order methods (new system)
   async getTakeawayOrders(): Promise<TakeawayOrder[]> {
-    return this.request<TakeawayOrder[]>('/takeaway-orders')
+    return this.request<TakeawayOrder[]>('/takeaway-orders/')
   }
 
   async getTodayTakeawayOrders(): Promise<TakeawayOrder[]> {
@@ -381,6 +382,35 @@ class ApiService {
     return this.request<{ message: string }>(`/takeaway-orders/${id}`, {
       method: 'DELETE',
     })
+  }
+
+  // Takeaway reports
+  async getTakeawayReportData(fromDate: string, toDate: string): Promise<TakeawayReportData> {
+    return this.request<TakeawayReportData>(`/takeaway-orders/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`)
+  }
+
+  async downloadTakeawayReport(fromDate: string, toDate: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/takeaway-orders/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `takeaway-report-${fromDate}-${toDate}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   }
 
   // Dine-in order methods
