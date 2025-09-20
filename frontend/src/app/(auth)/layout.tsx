@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '../globals.css'
 import ThemeRegistry from '@/components/providers/ThemeRegistry'
+import AuthThemeProvider from '@/components/providers/AuthThemeProvider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,8 +28,12 @@ export default function AdminLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>
-      <body className={inter.className} style={{ backgroundColor: 'rgb(236, 240, 243)' }}>
-        <ThemeRegistry>{children}</ThemeRegistry>
+      <body className={inter.className}>
+        <ThemeRegistry>
+          <AuthThemeProvider>
+            {children}
+          </AuthThemeProvider>
+        </ThemeRegistry>
       </body>
     </html>
   )
