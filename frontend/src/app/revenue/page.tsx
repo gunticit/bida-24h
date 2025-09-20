@@ -27,9 +27,10 @@ import {
 } from '@mui/material'
 import { Restaurant, AccessTime, AttachMoney, BarChart, ShoppingBag } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
 import { RevenueCard } from '@/components/items/RevenueCard'
 import { formatCurrency } from '@/utils/formatters'
+import SideBar from '@/app/SideBar'
+import Loading from '@/components/loading'
 
 interface RevenueData {
   total_revenue: number
@@ -283,7 +284,7 @@ export default function RevenuePage() {
                 title="Lợi nhuận"
                 value={dailyData.total_profit}
                 icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={dailyData.total_profit >= 0 ? "success" : "error"}
+                color={dailyData.total_profit >= 0 ? 'success' : 'error'}
                 isMoney={true}
               />
             )}
@@ -451,33 +452,33 @@ export default function RevenuePage() {
               color="success"
               isMoney={true}
             />
-              {monthlyData.total_profit !== undefined && (
-                <RevenueCard
-                  title="Lợi nhuận"
-                  value={monthlyData.total_profit}
-                  icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                  color={monthlyData.total_profit >= 0 ? "success" : "error"}
-                  isMoney={true}
-                />
-              )}
-              {monthlyData.total_cost_of_goods_sold !== undefined && (
-                <RevenueCard
-                  title="C/phí nguồn hàng"
-                  value={monthlyData.total_cost_of_goods_sold}
-                  icon={<BarChart sx={{ fontSize: 35 }} />}
-                  color="secondary"
-                  isMoney={true}
-                />
-              )}
-              {monthlyData.total_expenses !== undefined && (
-                <RevenueCard
-                  title="Chi phí phát sinh"
-                  value={monthlyData.total_expenses}
-                  icon={<BarChart sx={{ fontSize: 35 }} />}
-                  color="secondary"
-                  isMoney={true}
-                />
-              )}
+            {monthlyData.total_profit !== undefined && (
+              <RevenueCard
+                title="Lợi nhuận"
+                value={monthlyData.total_profit}
+                icon={<AttachMoney sx={{ fontSize: 35 }} />}
+                color={monthlyData.total_profit >= 0 ? 'success' : 'error'}
+                isMoney={true}
+              />
+            )}
+            {monthlyData.total_cost_of_goods_sold !== undefined && (
+              <RevenueCard
+                title="C/phí nguồn hàng"
+                value={monthlyData.total_cost_of_goods_sold}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
+            {monthlyData.total_expenses !== undefined && (
+              <RevenueCard
+                title="Chi phí phát sinh"
+                value={monthlyData.total_expenses}
+                icon={<BarChart sx={{ fontSize: 35 }} />}
+                color="secondary"
+                isMoney={true}
+              />
+            )}
           </Box>
 
           {/* Top Tables Section */}
@@ -547,8 +548,14 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(day.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(day.profit || (day.total_revenue - (day.total_expenses || 0)))}
-                              color={(day.profit || (day.total_revenue - (day.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              label={formatCurrency(
+                                day.profit || day.total_revenue - (day.total_expenses || 0),
+                              )}
+                              color={
+                                (day.profit || day.total_revenue - (day.total_expenses || 0)) >= 0
+                                  ? 'success'
+                                  : 'error'
+                              }
                               variant="outlined"
                             />
                           </TableCell>
@@ -653,7 +660,7 @@ export default function RevenuePage() {
                 title="Lợi nhuận"
                 value={yearlyData.total_profit}
                 icon={<AttachMoney sx={{ fontSize: 35 }} />}
-                color={yearlyData.total_profit >= 0 ? "success" : "error"}
+                color={yearlyData.total_profit >= 0 ? 'success' : 'error'}
                 isMoney={true}
               />
             )}
@@ -706,8 +713,15 @@ export default function RevenuePage() {
                           <TableCell>{formatCurrency(month.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(month.profit || (month.total_revenue - (month.total_expenses || 0)))}
-                              color={(month.profit || (month.total_revenue - (month.total_expenses || 0))) >= 0 ? "success" : "error"}
+                              label={formatCurrency(
+                                month.profit || month.total_revenue - (month.total_expenses || 0),
+                              )}
+                              color={
+                                (month.profit ||
+                                  month.total_revenue - (month.total_expenses || 0)) >= 0
+                                  ? 'success'
+                                  : 'error'
+                              }
                               variant="outlined"
                             />
                           </TableCell>
@@ -725,9 +739,24 @@ export default function RevenuePage() {
     </Box>
   )
 
+  if (loading) {
+    return (
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
+        <Loading />
+      </Box>
+    )
+  }else{
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar title="Thống kê doanh thu" user={user} onLogout={handleLogout} icon={<BarChart />} />
+      <SideBar
+        title="Thống kê doanh thu"
+        href="/revenue"
+        user={user}
+        icon={<BarChart />}
+      >
 
       <Box sx={{ p: 3 }}>
         {error && (
@@ -774,6 +803,8 @@ export default function RevenuePage() {
           )}
         </TabPanel>
       </Box>
+      </SideBar>
     </Box>
   )
+  }
 }

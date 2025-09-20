@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  AppBar as MuiAppBar,
   Toolbar,
-  Typography,
+  Link,
   IconButton,
   Avatar,
   Menu,
@@ -20,7 +19,9 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
   BarChart as BarChartIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material'
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 
 interface User {
   id: number
@@ -31,12 +32,47 @@ interface User {
 
 interface AppBarProps {
   title: string
+  href?: string
   user: User | null
   onLogout: () => void
   icon?: React.ReactNode
+  open?: boolean
+  handleDrawerOpen: () => void
+}
+import { styled } from '@mui/material/styles'
+const drawerWidth = 240
+
+interface StyledAppBarProps extends MuiAppBarProps {
+  open?: boolean
 }
 
-export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
+const CustomAppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<StyledAppBarProps>(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}))
+
+export default function AppBar({
+  title,
+  href,
+  user,
+  onLogout,
+  icon,
+  open,
+  handleDrawerOpen,
+}: AppBarProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const router = useRouter()
 
@@ -54,12 +90,36 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
   }
 
   return (
-    <MuiAppBar position="static">
+    <CustomAppBar position="fixed" open={open}>
       <Toolbar>
-        {icon && <Box sx={{ mr: 2 }}>{icon}</Box>}
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          onClick={handleDrawerOpen}
+          edge="start"
+          sx={{
+            marginRight: 5,
+            borderRight: '1px',
+            borderColor: '#fff',
+            borderStyle: 'solid',
+            ...(open && { display: 'none' }),
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Link
+          href={href}
+          sx={{
+            color: '#fff',
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+          }}
+        >
+          {icon && <Box sx={{ mr: 2 }}>{icon}</Box>}
           {title}
-        </Typography>
+        </Link>
         <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
           <Avatar sx={{ width: 32, height: 32 }}>{user?.name?.charAt(0) || 'U'}</Avatar>
         </IconButton>
@@ -109,6 +169,6 @@ export default function AppBar({ title, user, onLogout, icon }: AppBarProps) {
           </MenuItem>
         </Menu>
       </Toolbar>
-    </MuiAppBar>
+    </CustomAppBar>
   )
 }

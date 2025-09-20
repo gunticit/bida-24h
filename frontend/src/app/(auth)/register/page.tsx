@@ -14,7 +14,7 @@ import {
 import useRegister from '@/hook/auth/useRegister'
 
 export default function RegisterPage() {
-  const { formData, loading, error, handleChange, handleSubmit } = useRegister();
+  const { formData, loading, error, handleChange, handleSubmit } = useRegister()
   return (
     <Container component="main" maxWidth="xs">
       <Box

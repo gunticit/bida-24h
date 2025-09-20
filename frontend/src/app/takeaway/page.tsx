@@ -107,7 +107,7 @@ export default function TakeawayPage() {
     loadUserData()
     loadTakeawayMenus()
     loadTakeawayOrders()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Filter menus based on search query
@@ -254,11 +254,11 @@ export default function TakeawayPage() {
       await Promise.all([loadTakeawayOrders(), loadTakeawayMenus()])
     } catch (error) {
       console.error('Failed to create takeaway order:', error)
-      
+
       // Extract error message from backend response
       let errorMessage = 'Không thể tạo đơn hàng'
       const apiError = error as ApiError
-      
+
       if (apiError?.response?.data?.error) {
         errorMessage = apiError.response.data.error
       } else if (apiError?.response?.data?.message) {
@@ -266,7 +266,7 @@ export default function TakeawayPage() {
       } else if (apiError?.message) {
         errorMessage = apiError.message
       }
-      
+
       showSnackbar(errorMessage, 'error')
     }
   }
@@ -279,10 +279,11 @@ export default function TakeawayPage() {
     } catch (error) {
       console.error('Failed to update order status:', error)
       const apiError = error as ApiError
-      const errorMessage = apiError?.response?.data?.error || 
-                          apiError?.response?.data?.message || 
-                          apiError?.message || 
-                          'Không thể cập nhật trạng thái'
+      const errorMessage =
+        apiError?.response?.data?.error ||
+        apiError?.response?.data?.message ||
+        apiError?.message ||
+        'Không thể cập nhật trạng thái'
       showSnackbar(errorMessage, 'error')
     }
   }
@@ -297,10 +298,11 @@ export default function TakeawayPage() {
     } catch (error) {
       console.error('Failed to delete order:', error)
       const apiError = error as ApiError
-      const errorMessage = apiError?.response?.data?.error || 
-                          apiError?.response?.data?.message || 
-                          apiError?.message || 
-                          'Không thể xóa đơn hàng'
+      const errorMessage =
+        apiError?.response?.data?.error ||
+        apiError?.response?.data?.message ||
+        apiError?.message ||
+        'Không thể xóa đơn hàng'
       showSnackbar(errorMessage, 'error')
     }
   }
@@ -338,7 +340,7 @@ export default function TakeawayPage() {
         return status
     }
   }
-  
+
   const handleOpenInvoiceDialog = (order: TakeawayOrder) => {
     setSelectedOrder(order)
     setOpenInvoiceDialog(true)
@@ -498,7 +500,7 @@ export default function TakeawayPage() {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
           {/* Menu Section */}
           <Box sx={{ flex: 1 }}>
-            <Card>
+            <Card sx={{ height: '80vh', overflowY: 'auto' }}>
               <CardContent>
                 <Typography
                   variant="h6"
@@ -811,7 +813,8 @@ export default function TakeawayPage() {
                   <strong>Khách hàng:</strong> {selectedOrder.customer_name || 'Không có thông tin'}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Số điện thoại:</strong> {selectedOrder.customer_phone || 'Không có thông tin'}
+                  <strong>Số điện thoại:</strong>{' '}
+                  {selectedOrder.customer_phone || 'Không có thông tin'}
                 </Typography>
                 {selectedOrder.notes && (
                   <Typography variant="body1" sx={{ mb: 1 }}>
@@ -841,16 +844,10 @@ export default function TakeawayPage() {
                       <TableBody>
                         {selectedOrder.items.map((item, index) => (
                           <TableRow key={index}>
-                            <TableCell>
-                              {item.menu?.name || `Món ${item.menu_id}`}
-                            </TableCell>
+                            <TableCell>{item.menu?.name || `Món ${item.menu_id}`}</TableCell>
                             <TableCell align="center">{item.quantity}</TableCell>
-                            <TableCell align="right">
-                              {formatMoney(item.price)}
-                            </TableCell>
-                            <TableCell align="right">
-                              {formatMoney(item.total)}
-                            </TableCell>
+                            <TableCell align="right">{formatMoney(item.price)}</TableCell>
+                            <TableCell align="right">{formatMoney(item.total)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

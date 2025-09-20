@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Box, Container, Typography, Card, CardContent, Grid, Button } from '@mui/material'
+import { Box, Typography, Card, CardContent, Grid, Button } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
@@ -10,7 +10,7 @@ import {
   AttachMoney as MoneyIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
+import SideBar from '@/app/SideBar'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -60,86 +60,92 @@ export default function DashboardPage() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* App Bar */}
-      <AppBar title="Dashboard" user={user} onLogout={handleLogout} icon={<DashboardIcon />} />
-
-      {/* Main Content */}
-      <Container
-        maxWidth="lg"
-        sx={{
-          mt: 4,
-          mb: 4,
-          backgroundImage: 'url(/public/bg-bida.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
+      {/* Nếu SideBar là AppBar + Drawer, nên đổi tên thành AppBar hoặc MainLayout cho rõ nghĩa */}
+      <SideBar
+        title="Dashboard"
+        href="/dashboard"
+        user={user}
+        icon={<DashboardIcon />}
       >
-        <Typography variant="h4" gutterBottom>
-          Chào mừng, {user?.name}!
-        </Typography>
+        {/* Main Content */}
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <Typography variant="h4" sx={{ fontSize: { sm: '18px', xs: '15px' } }} gutterBottom>
+            Chào mừng, {user?.name}!
+          </Typography>
 
-        <Grid container spacing={3}>
-          {/* System Status */}
-          <Card sx={{ flexGrow: 1, mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Trạng thái hệ thống
-              </Typography>
-              <Grid container spacing={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Backend API: <span style={{ color: 'green' }}>● Hoạt động</span>
+          <Grid container spacing={3}>
+            {/* System Status */}
+            <Card sx={{ flexGrow: 1, mb: 3 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Trạng thái hệ thống
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Database: <span style={{ color: 'green' }}>● Kết nối</span>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Authentication: <span style={{ color: 'green' }}>● Đã đăng nhập</span>
-                </Typography>
-              </Grid>
-            </CardContent>
-            <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="h6" gutterBottom></Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<CalendarIcon />}
-                  onClick={() => router.push('/playtime')}
+                <Grid container spacing={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Backend API: <span style={{ color: 'green' }}>● Hoạt động</span>
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Database: <span style={{ color: 'green' }}>● Kết nối</span>
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Authentication: <span style={{ color: 'green' }}>● Đã đăng nhập</span>
+                  </Typography>
+                </Grid>
+              </CardContent>
+              <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="h6" gutterBottom></Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    width: { sm: 'auto', xs: '100%' },
+                  }}
                 >
-                  Quản lý Giờ chơi
-                </Button>
-                {user?.role === 'admin' && (
                   <Button
-                    variant="outlined"
-                    startIcon={<DashboardIcon />}
-                    onClick={() => router.push('/revenue')}
+                    variant="contained"
+                    startIcon={<CalendarIcon />}
+                    onClick={() => router.push('/playtime')}
+                    sx={{ width: { sm: 'auto', xs: '100%' } }}
                   >
-                    Xem thống kê
+                    Quản lý Giờ chơi
                   </Button>
-                )}
-                {user?.role === 'admin' && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<MoneyIcon />}
-                    onClick={() => router.push('/expense')}
-                  >
-                    Quản lý Chi phí
-                  </Button>
-                )}
-                {user?.role === 'admin' && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<SettingsIcon />}
-                    onClick={() => router.push('/setting')}
-                  >
-                    Cài đặt hệ thống
-                  </Button>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Container>
+                  {user?.role === 'admin' && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<DashboardIcon />}
+                      onClick={() => router.push('/revenue')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
+                    >
+                      Xem thống kê
+                    </Button>
+                  )}
+                  {user?.role === 'admin' && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<MoneyIcon />}
+                      onClick={() => router.push('/expense')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
+                    >
+                      Quản lý Chi phí
+                    </Button>
+                  )}
+                  {user?.role === 'admin' && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<SettingsIcon />}
+                      onClick={() => router.push('/setting')}
+                      sx={{ width: { sm: 'auto', xs: '100%' } }}
+                    >
+                      Cài đặt hệ thống
+                    </Button>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Box>
+      </SideBar>
     </Box>
   )
 }

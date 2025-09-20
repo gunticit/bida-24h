@@ -213,7 +213,10 @@ export default function MenuSettingPage() {
     })
   }
 
-  const handleInputChange = (field: keyof MenuFormData, value: string | number | boolean | undefined) => {
+  const handleInputChange = (
+    field: keyof MenuFormData,
+    value: string | number | boolean | undefined,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -337,9 +340,11 @@ export default function MenuSettingPage() {
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6">Thiết lập thực đơn</Typography>
-          {user && user.role === 'admin' && <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-            Thêm món mới
-          </Button>}
+          {user && user.role === 'admin' && (
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+              Thêm món mới
+            </Button>
+          )}
         </Box>
 
         <Card>
@@ -439,7 +444,9 @@ export default function MenuSettingPage() {
               label="Giá vốn (VNĐ)"
               type="number"
               value={formData.cost_price || ''}
-              onChange={(e) => handleInputChange('cost_price', parseFloat(e.target.value) || undefined)}
+              onChange={(e) =>
+                handleInputChange('cost_price', parseFloat(e.target.value) || undefined)
+              }
               fullWidth
               inputProps={{ min: 0, step: 1000 }}
               helperText="Để trống nếu muốn tự động tính 60% giá bán"
@@ -481,19 +488,21 @@ export default function MenuSettingPage() {
             />
           </Box>
         </DialogContent>
-        {user && user.role === 'admin' && <DialogActions>
-          <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
-            Hủy
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            startIcon={<SaveIcon />}
-            disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
-          >
-            {editingMenu ? 'Cập nhật' : 'Thêm mới'}
-          </Button>
-        </DialogActions>}
+        {user && user.role === 'admin' && (
+          <DialogActions>
+            <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
+              Hủy
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              startIcon={<SaveIcon />}
+              disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
+            >
+              {editingMenu ? 'Cập nhật' : 'Thêm mới'}
+            </Button>
+          </DialogActions>
+        )}
       </Dialog>
 
       {/* Snackbar */}
@@ -521,7 +530,7 @@ function MenuTable({
   getStatusChip,
 }: {
   menus: MenuItem[]
-  user: User | null,
+  user: User | null
   onEdit: (menu: MenuItem) => void
   onDelete: (id: number) => void
   getCategoryChip: (category: string) => React.ReactNode
@@ -555,9 +564,10 @@ function MenuTable({
             </TableRow>
           ) : (
             menus.map((menu) => {
-              const costPrice = menu.cost_price || menu.price * 0.6;
-              const profitMargin = menu.price > 0 ? ((menu.price - costPrice) / menu.price * 100) : 0;
-              
+              const costPrice = menu.cost_price || menu.price * 0.6
+              const profitMargin =
+                menu.price > 0 ? ((menu.price - costPrice) / menu.price) * 100 : 0
+
               return (
                 <TableRow key={menu.id}>
                   <TableCell>{menu.id}</TableCell>
@@ -566,23 +576,18 @@ function MenuTable({
                   <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">
-                        {costPrice.toLocaleString('vi-VN')}
-                      </Typography>
+                      <Typography variant="body2">{costPrice.toLocaleString('vi-VN')}</Typography>
                       {!menu.cost_price && (
-                        <Chip
-                          label="Tự động"
-                          size="small"
-                          variant="outlined"
-                          color="info"
-                        />
+                        <Chip label="Tự động" size="small" variant="outlined" color="info" />
                       )}
                     </Box>
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={`${profitMargin.toFixed(1)}%`}
-                      color={profitMargin >= 40 ? 'success' : profitMargin >= 20 ? 'warning' : 'error'}
+                      color={
+                        profitMargin >= 40 ? 'success' : profitMargin >= 20 ? 'warning' : 'error'
+                      }
                       size="small"
                     />
                   </TableCell>
@@ -595,20 +600,26 @@ function MenuTable({
                   </TableCell>
                   <TableCell>{getStatusChip(menu.is_active)}</TableCell>
                   <TableCell>{new Date(menu.created_at).toLocaleDateString('vi-VN')}</TableCell>
-                  {user && user.role === 'admin' && <TableCell>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Tooltip title="Sửa món ăn">
-                        <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
-                          <EditIcon />
-                        </MuiIconButton>
-                      </Tooltip>
-                      <Tooltip title="Xóa món ăn">
-                        <MuiIconButton size="small" color="error" onClick={() => onDelete(menu.id)}>
-                          <DeleteIcon />
-                        </MuiIconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>}
+                  {user && user.role === 'admin' && (
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Tooltip title="Sửa món ăn">
+                          <MuiIconButton size="small" color="primary" onClick={() => onEdit(menu)}>
+                            <EditIcon />
+                          </MuiIconButton>
+                        </Tooltip>
+                        <Tooltip title="Xóa món ăn">
+                          <MuiIconButton
+                            size="small"
+                            color="error"
+                            onClick={() => onDelete(menu.id)}
+                          >
+                            <DeleteIcon />
+                          </MuiIconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  )}
                 </TableRow>
               )
             })

@@ -156,7 +156,7 @@ export interface CreateTakeawayOrderData {
   items: {
     menu_id: number
     quantity: number
-  }[],
+  }[]
   status?: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 }
 
@@ -358,13 +358,26 @@ export interface MessageResponse {
   message: string
 }
 
+export interface FoodData {
+  menu_id: number,
+  quantity: number
+}
+
 // Category types
 export type MenuCategory = 'food' | 'drink' | 'tobacco' | 'takeaway'
 export type TableStatus = 'available' | 'playing' | 'maintenance'
 export type SessionStatus = 'playing' | 'finished' | 'canceled'
 export type TakeawayStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 export type UserRole = 'admin' | 'staff'
-export type ExpenseCategory = 'food' | 'utilities' | 'rent' | 'staff' | 'equipment' | 'marketing' | 'maintenance' | 'other'
+export type ExpenseCategory =
+  | 'food'
+  | 'utilities'
+  | 'rent'
+  | 'staff'
+  | 'equipment'
+  | 'marketing'
+  | 'maintenance'
+  | 'other'
 
 // Utility types
 export type CreateData<T> = Omit<T, 'id' | 'created_at' | 'updated_at'>
