@@ -29,10 +29,14 @@ import {
   Pagination,
   Stack,
 } from '@mui/material'
+import {
+  BarChart as BarChartIcon,
+} from '@mui/icons-material'
 import { Add, Edit, Delete } from '@mui/icons-material'
-import { apiService } from '@/lib/api'
+import { apiService, User } from '@/lib/api'
 import { Expense, ExpenseSummary } from '@/types/api'
 import { useRouter } from 'next/navigation'
+import SideBar from '@/app/SideBar'
 
 interface ApiError {
   message?: string
@@ -86,6 +90,7 @@ const ExpensePage = () => {
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [user, setUser] = useState<User | null>(null)
 
   const categories = [
     { value: 'food', label: 'Nguyên liệu thực phẩm' },
@@ -311,6 +316,28 @@ const ExpensePage = () => {
     return colors[category] || 'default'
   }
 
+  useEffect(() => {
+    const token = apiService.getToken()
+    if (!token) {
+      router.push('/login')
+      return
+    }
+
+    loadUser()
+  }, [router])
+
+  const loadUser = async () => {
+    try {
+      const userData = await apiService.getCurrentUser()
+      setUser(userData)
+    } catch (error) {
+      console.error('Failed to load user:', error)
+      router.push('/login')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -320,214 +347,221 @@ const ExpensePage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
+    <SideBar
+        title="Quản lý chi phí phát sinh"
+        href="/dashboard"
+        user={user}
+        icon={<BarChartIcon />}
+      >
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>
-          {success}
-        </Alert>
-      )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>
+            {success}
+          </Alert>
+        )}
 
-      {/* Date Filter */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Lọc theo ngày
-        </Typography>
-        <Box display="flex" gap={2} alignItems="center">
-          <TextField
-            label="Từ ngày"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            size="small"
-          />
-          <TextField
-            label="Đến ngày"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            size="small"
-          />
-          <Button variant="contained" onClick={fetchExpensesWithDateFilter} disabled={loading}>
-            Lọc dữ liệu
-          </Button>
-        </Box>
-      </Paper>
-
-      {/* Summary Cards */}
-      {summary && (
-        <Box sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Tổng cộng
-                </Typography>
-                <Typography variant="h6" component="div">
-                  {formatCurrency(summary.total)}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Box>
-      )}
-
-      {/* Main Content */}
-      <Paper sx={{ p: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" component="h1">
-            Quản lý Chi phí phát sinh
+        {/* Date Filter */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Lọc theo ngày
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => {
-              resetForm()
-              setOpen(true)
-            }}
-          >
-            Thêm chi phí
-          </Button>
-        </Box>
-
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Ngày</TableCell>
-                <TableCell>Số tiền</TableCell>
-                <TableCell>Mô tả</TableCell>
-                <TableCell>Danh mục</TableCell>
-                <TableCell>Người tạo</TableCell>
-                <TableCell>Hành động</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell>
-                    {new Date(expense.expense_date).toLocaleDateString('vi-VN')}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="error">
-                      {formatCurrency(expense.amount)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>{expense.description}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getCategoryLabel(expense.category)}
-                      color={getCategoryColor(expense.category)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>{expense.user.name}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit(expense)}
-                      sx={{ mr: 1 }}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      startIcon={<Delete />}
-                      onClick={() => handleDelete(expense.id)}
-                    >
-                      Xóa
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {totalPages > 1 && (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={(_, value) => setPage(value)}
-              color="primary"
+          <Box display="flex" gap={2} alignItems="center">
+            <TextField
+              label="Từ ngày"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              size="small"
             />
+            <TextField
+              label="Đến ngày"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+            />
+            <Button variant="contained" onClick={fetchExpensesWithDateFilter} disabled={loading}>
+              Lọc dữ liệu
+            </Button>
+          </Box>
+        </Paper>
+
+        {/* Summary Cards */}
+        {summary && (
+          <Box sx={{ mb: 3 }}>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              <Card sx={{ flex: 1 }}>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>
+                    Tổng cộng
+                  </Typography>
+                  <Typography variant="h6" component="div">
+                    {formatCurrency(summary.total)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Stack>
           </Box>
         )}
-      </Paper>
 
-      {/* Form Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle>{editingExpense ? 'Sửa chi phí' : 'Thêm chi phí mới'}</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <FormControl fullWidth>
-                <InputLabel>Danh mục</InputLabel>
-                <Select
-                  value={formData.category}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-                  label="Danh mục"
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.value} value={category.value}>
-                      {category.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Stack direction="row" spacing={2}>
-                <TextField
-                  label="Ngày"
-                  type="date"
-                  value={formData.expense_date}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, expense_date: e.target.value }))
-                  }
-                  fullWidth
-                  required
-                />
+        {/* Main Content */}
+        <Paper sx={{ p: 2 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h5" component="h1">
+              Quản lý Chi phí phát sinh
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => {
+                resetForm()
+                setOpen(true)
+              }}
+            >
+              Thêm chi phí
+            </Button>
+          </Box>
+
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Ngày</TableCell>
+                  <TableCell>Số tiền</TableCell>
+                  <TableCell>Mô tả</TableCell>
+                  <TableCell>Danh mục</TableCell>
+                  <TableCell>Người tạo</TableCell>
+                  <TableCell>Hành động</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {expenses.map((expense) => (
+                  <TableRow key={expense.id}>
+                    <TableCell>
+                      {new Date(expense.expense_date).toLocaleDateString('vi-VN')}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="error">
+                        {formatCurrency(expense.amount)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{expense.description}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={getCategoryLabel(expense.category)}
+                        color={getCategoryColor(expense.category)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{expense.user.name}</TableCell>
+                    <TableCell>
+                      <Button
+                        size="small"
+                        startIcon={<Edit />}
+                        onClick={() => handleEdit(expense)}
+                        sx={{ mr: 1 }}
+                      >
+                        Sửa
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        startIcon={<Delete />}
+                        onClick={() => handleDelete(expense.id)}
+                      >
+                        Xóa
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {totalPages > 1 && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Paper>
+
+        {/* Form Dialog */}
+        <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+          <form onSubmit={handleSubmit}>
+            <DialogTitle>{editingExpense ? 'Sửa chi phí' : 'Thêm chi phí mới'}</DialogTitle>
+            <DialogContent>
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Danh mục</InputLabel>
+                  <Select
+                    value={formData.category}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                    label="Danh mục"
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category.value} value={category.value}>
+                        {category.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    label="Ngày"
+                    type="date"
+                    value={formData.expense_date}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, expense_date: e.target.value }))
+                    }
+                    fullWidth
+                    required
+                  />
+
+                  <TextField
+                    label="Số tiền"
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0, max: 999999999, step: 1000, pattern: '[0-9]*' }}
+                    helperText="Lưu ý: Nhập chia hết cho 1000, ví dụ: 100000"
+                  />
+                </Stack>
 
                 <TextField
-                  label="Số tiền"
-                  type="number"
-                  value={formData.amount}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
+                  label="Mô tả (không bắt buộc)"
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   fullWidth
-                  required
-                  inputProps={{ min: 0, max: 999999999, step: 1000, pattern: '[0-9]*' }}
-                  helperText="Lưu ý: Nhập chia hết cho 1000, ví dụ: 100000"
+                  multiline
+                  rows={3}
                 />
               </Stack>
-
-              <TextField
-                label="Mô tả (không bắt buộc)"
-                value={formData.description || ''}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                fullWidth
-                multiline
-                rows={3}
-              />
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpen(false)}>Hủy</Button>
-            <Button type="submit" variant="contained">
-              {editingExpense ? 'Cập nhật' : 'Thêm'}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </Container>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpen(false)}>Hủy</Button>
+              <Button type="submit" variant="contained">
+                {editingExpense ? 'Cập nhật' : 'Thêm'}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+      </Box>
+    </SideBar>
   )
 }
 

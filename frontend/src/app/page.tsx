@@ -24,6 +24,7 @@ import {
   PersonAdd as PersonAddIcon,
 } from '@mui/icons-material'
 import { useRouter } from 'next/navigation'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -140,6 +141,9 @@ export default function Home() {
             <Typography variant="h3" component="h2" color="primary" gutterBottom>
               Phần mềm quản lý 24h Billiard
             </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <DotLottieReact src="/ai-powered.lottie" style={{ width: 300, height: 300 }} />
+            </Box>
             <Typography variant="h6" color="text.secondary" paragraph>
               Quản lý giờ chơi, bàn, món ăn, đồ uống và tính toán tổng tiền
             </Typography>

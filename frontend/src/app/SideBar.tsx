@@ -32,7 +32,7 @@ interface SideBarProps {
   title: string
   href?: string
   icon?: React.ReactNode
-  user?: User
+  user?: User | null
   children?: React.ReactNode
 }
 
@@ -90,6 +90,30 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   ],
 }))
 
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
+  open?: boolean;
+}>(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create('margin', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: `-${drawerWidth}px`,
+  variants: [
+    {
+      props: ({ open }) => open,
+      style: {
+        transition: theme.transitions.create('margin', {
+          easing: theme.transitions.easing.easeOut,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: 0,
+      },
+    },
+  ],
+}));
+
 export default function SideBar({
   title,
   href,
@@ -133,7 +157,11 @@ export default function SideBar({
         handleDrawerOpen={handleDrawerOpen}
         href={href}
       />
-      <Drawer variant={isMobile ? 'temporary' : 'permanent'} open={open} onClose={handleDrawerClose}>
+      <Drawer 
+        variant={isMobile ? 'temporary' : 'permanent'} 
+        open={open} onClose={handleDrawerClose}
+        anchor="left"
+      >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -169,8 +197,7 @@ export default function SideBar({
           })}
         </Box>
       </Drawer>
-      <Box 
-        component="main" 
+      <Main open={open}
         sx={{ 
           flexGrow: 1, 
           p: 3,
@@ -183,7 +210,7 @@ export default function SideBar({
       >
         <DrawerHeader />
         {children}
-      </Box>
+      </Main>
     </Box>
   )
 }
