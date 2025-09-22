@@ -120,7 +120,6 @@ export default function PlaytimePage() {
     loadMenus()
   }, [router])
 
-
   if (loading) {
     return (
       <Box
@@ -133,9 +132,7 @@ export default function PlaytimePage() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* Nếu SideBar là AppBar + Drawer, nên đổi tên thành AppBar hoặc MainLayout cho rõ nghĩa */}
       <SideBar title="Quản lý Giờ chơi" href="/playtime" user={user} icon={<CalendarIcon />}>
-        {/* Main Content */}
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           <Box
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
@@ -197,7 +194,7 @@ export default function PlaytimePage() {
 
           {/* Sessions Table */}
           <Card>
-            <CardContent>
+            <CardContent sx={{ p: 0, m: 0, pb: '0!important' }}>
               <TableContainer component={Paper}>
                 <MuiTable>
                   <TableHead>
@@ -346,7 +343,11 @@ export default function PlaytimePage() {
                   }}
                 >
                   {tables.map((table) => (
-                    <MenuItem disabled={table.status !== 'available'} key={table.id} value={table.id}>
+                    <MenuItem
+                      disabled={table.status !== 'available'}
+                      key={table.id}
+                      value={table.id}
+                    >
                       {table.name} -{' '}
                       {table.status === 'available'
                         ? 'Sẵn sàng'
@@ -708,7 +709,13 @@ export default function PlaytimePage() {
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
-          onClose={() => setSnackbar({ ...snackbar, open: false, severity: snackbar.severity === 'warning' ? 'info' : snackbar.severity })}
+          onClose={() =>
+            setSnackbar({
+              ...snackbar,
+              open: false,
+              severity: snackbar.severity === 'warning' ? 'info' : snackbar.severity,
+            })
+          }
         >
           <Alert
             onClose={() =>

@@ -8,11 +8,11 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Button,
   List,
   ListItemButton,
   ListItemText,
+  Grid,
 } from '@mui/material'
 import MuiListItemIcon from '@mui/material/ListItemIcon'
 import {
@@ -23,7 +23,7 @@ import {
   Dashboard as DashboardIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
+import SideBar from '@/app/SideBar'
 
 export default function SettingPage() {
   const router = useRouter()
@@ -73,31 +73,63 @@ export default function SettingPage() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* App Bar */}
-      <AppBar
-        title="Cài đặt hệ thống"
-        user={user}
-        onLogout={handleLogout}
-        icon={<SettingsIcon />}
-      />
+      <SideBar title="Cài đặt hệ thống" href="/setting" user={user} icon={<SettingsIcon />}>
+        {/* Main Content */}
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            CÀI ĐẶT HỆ THỐNG
+          </Typography>
 
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          CÀI ĐẶT HỆ THỐNG
-        </Typography>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Cài đặt chung
+                  </Typography>
+                  <List>
+                    {user && user.role === 'admin' && (
+                      <ListItemButton
+                        onClick={() => router.push('/setting/table')}
+                        sx={{
+                          border: '1px solid #e0e0e0',
+                          borderRadius: 1,
+                          mb: 1,
+                          '&:hover': { backgroundColor: '#f5f5f5' },
+                        }}
+                      >
+                        <MuiListItemIcon>
+                          <TableIcon color="primary" />
+                        </MuiListItemIcon>
+                        <ListItemText
+                          primary="Quản lý bàn"
+                          secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
+                        />
+                      </ListItemButton>
+                    )}
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Cài đặt chung
-                </Typography>
-                <List>
-                  {user && user.role === 'admin' && (
+                    {user && user.role === 'admin' && (
+                      <ListItemButton
+                        onClick={() => router.push('/setting/user')}
+                        sx={{
+                          border: '1px solid #e0e0e0',
+                          borderRadius: 1,
+                          mb: 1,
+                          '&:hover': { backgroundColor: '#f5f5f5' },
+                        }}
+                      >
+                        <MuiListItemIcon>
+                          <PersonIcon color="primary" />
+                        </MuiListItemIcon>
+                        <ListItemText
+                          primary="Cài đặt người dùng"
+                          secondary="Quản lý vai trò và quyền hạn người dùng"
+                        />
+                      </ListItemButton>
+                    )}
+
                     <ListItemButton
-                      onClick={() => router.push('/setting/table')}
+                      onClick={() => router.push('/setting/menus')}
                       sx={{
                         border: '1px solid #e0e0e0',
                         borderRadius: 1,
@@ -106,100 +138,62 @@ export default function SettingPage() {
                       }}
                     >
                       <MuiListItemIcon>
-                        <TableIcon color="primary" />
+                        <MenuIcon color="primary" />
                       </MuiListItemIcon>
                       <ListItemText
-                        primary="Quản lý bàn"
-                        secondary="Cài đặt số lượng bàn, tên bàn và giá theo giờ"
+                        primary="Thiết lập thực đơn"
+                        secondary="Quản lý món ăn và đồ uống"
                       />
                     </ListItemButton>
-                  )}
 
-                  {user && user.role === 'admin' && (
                     <ListItemButton
-                      onClick={() => router.push('/setting/user')}
                       sx={{
                         border: '1px solid #e0e0e0',
                         borderRadius: 1,
                         mb: 1,
+                        opacity: 0.6,
                         '&:hover': { backgroundColor: '#f5f5f5' },
                       }}
                     >
                       <MuiListItemIcon>
-                        <PersonIcon color="primary" />
+                        <SettingsIcon color="disabled" />
                       </MuiListItemIcon>
                       <ListItemText
-                        primary="Cài đặt người dùng"
-                        secondary="Quản lý vai trò và quyền hạn người dùng"
+                        primary="Cài đặt hệ thống"
+                        secondary="Cấu hình chung của hệ thống"
                       />
                     </ListItemButton>
-                  )}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
 
-                  <ListItemButton
-                    onClick={() => router.push('/setting/menus')}
-                    sx={{
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 1,
-                      mb: 1,
-                      '&:hover': { backgroundColor: '#f5f5f5' },
-                    }}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Thông tin hệ thống
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Phiên bản: 1.0.0
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => router.push('/dashboard')}
+                    fullWidth
                   >
-                    <MuiListItemIcon>
-                      <MenuIcon color="primary" />
-                    </MuiListItemIcon>
-                    <ListItemText
-                      primary="Thiết lập thực đơn"
-                      secondary="Quản lý món ăn và đồ uống"
-                    />
-                  </ListItemButton>
-
-                  <ListItemButton
-                    sx={{
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 1,
-                      mb: 1,
-                      opacity: 0.6,
-                      '&:hover': { backgroundColor: '#f5f5f5' },
-                    }}
-                  >
-                    <MuiListItemIcon>
-                      <SettingsIcon color="disabled" />
-                    </MuiListItemIcon>
-                    <ListItemText
-                      primary="Cài đặt hệ thống"
-                      secondary="Cấu hình chung của hệ thống"
-                    />
-                  </ListItemButton>
-                </List>
-              </CardContent>
-            </Card>
+                    Quay lại Dashboard
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Thông tin hệ thống
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Phiên bản: 1.0.0
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<DashboardIcon />}
-                  onClick={() => router.push('/dashboard')}
-                  fullWidth
-                >
-                  Quay lại Dashboard
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </SideBar>
     </Box>
   )
 }

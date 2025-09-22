@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import {
   Box,
   Container,
@@ -11,9 +13,29 @@ import {
   Avatar,
 } from '@mui/material'
 import useLogin from '@/hook/auth/useLogin'
+import Loading from '@/components/loading/index'
 
 export default function LoginPage() {
-  const { formData, loading, error, handleChange, handleSubmit } = useLogin()
+  const { formData, loading, error, setLoading, handleChange, handleSubmit } = useLogin()
+
+  useEffect(() => {
+    setLoading(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Loading />
+      </Box>
+    )
+  }
 
   return (
     <Box component="main">

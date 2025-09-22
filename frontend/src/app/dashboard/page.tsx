@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Box, Typography, Card, CardContent, Grid, Button } from '@mui/material'
 import {
-  Dashboard as DashboardIcon,
+  Widgets as WidgetsIcon,
   Settings as SettingsIcon,
-  CalendarToday as CalendarIcon,
-  AttachMoney as MoneyIcon,
+  AccessTime as AccessTimeIcon,
+  AttachMoney as AttachMoneyIcon,
+  BarChart as BarChartIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import SideBar from '@/app/SideBar'
+import Loading from '@/components/loading/index'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -23,7 +25,6 @@ export default function DashboardPage() {
       router.push('/login')
       return
     }
-
     loadUser()
   }, [router])
 
@@ -39,34 +40,19 @@ export default function DashboardPage() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await apiService.logout()
-      router.push('/')
-    } catch (error) {
-      console.error('Logout failed:', error)
-    }
-  }
-
   if (loading) {
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
       >
-        <Typography>Đang tải...</Typography>
+        <Loading />
       </Box>
     )
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* Nếu SideBar là AppBar + Drawer, nên đổi tên thành AppBar hoặc MainLayout cho rõ nghĩa */}
-      <SideBar
-        title="Dashboard"
-        href="/dashboard"
-        user={user}
-        icon={<DashboardIcon />}
-      >
+      <SideBar title="Bảng điều khiển" href="/dashboard" user={user} icon={<WidgetsIcon />}>
         {/* Main Content */}
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h4" sx={{ fontSize: { sm: '18px', xs: '15px' } }} gutterBottom>
@@ -104,7 +90,7 @@ export default function DashboardPage() {
                 >
                   <Button
                     variant="contained"
-                    startIcon={<CalendarIcon />}
+                    startIcon={<AccessTimeIcon />}
                     onClick={() => router.push('/playtime')}
                     sx={{ width: { sm: 'auto', xs: '100%' } }}
                   >
@@ -113,7 +99,7 @@ export default function DashboardPage() {
                   {user?.role === 'admin' && (
                     <Button
                       variant="outlined"
-                      startIcon={<DashboardIcon />}
+                      startIcon={<BarChartIcon />}
                       onClick={() => router.push('/revenue')}
                       sx={{ width: { sm: 'auto', xs: '100%' } }}
                     >
@@ -123,7 +109,7 @@ export default function DashboardPage() {
                   {user?.role === 'admin' && (
                     <Button
                       variant="outlined"
-                      startIcon={<MoneyIcon />}
+                      startIcon={<AttachMoneyIcon />}
                       onClick={() => router.push('/expense')}
                       sx={{ width: { sm: 'auto', xs: '100%' } }}
                     >

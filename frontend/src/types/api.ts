@@ -359,7 +359,7 @@ export interface MessageResponse {
 }
 
 export interface FoodData {
-  menu_id: number,
+  menu_id: number
   quantity: number
 }
 

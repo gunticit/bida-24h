@@ -747,64 +747,57 @@ export default function RevenuePage() {
         <Loading />
       </Box>
     )
-  }else{
+  } else {
+    return (
+      <Box sx={{ flexGrow: 1 }}>
+        <SideBar title="Thống kê doanh thu" href="/revenue" user={user} icon={<BarChart />}>
+          <Box sx={{ p: 3 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <SideBar
-        title="Thống kê doanh thu"
-        href="/revenue"
-        user={user}
-        icon={<BarChart />}
-      >
-
-      <Box sx={{ p: 3 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="revenue tabs">
-            <Tab label="Doanh thu ngày" />
-            <Tab label="Doanh thu tháng" />
-            <Tab label="Doanh thu năm" />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={tabValue} index={0}>
-          {loading ? (
-            <Box display="flex" justifyContent="center" p={3}>
-              <CircularProgress />
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={tabValue} onChange={handleTabChange} aria-label="revenue tabs">
+                <Tab label="Doanh thu ngày" />
+                <Tab label="Doanh thu tháng" />
+                <Tab label="Doanh thu năm" />
+              </Tabs>
             </Box>
-          ) : (
-            renderDailyTab()
-          )}
-        </TabPanel>
 
-        <TabPanel value={tabValue} index={1}>
-          {loading ? (
-            <Box display="flex" justifyContent="center" p={3}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            renderMonthlyTab()
-          )}
-        </TabPanel>
+            <TabPanel value={tabValue} index={0}>
+              {loading ? (
+                <Box display="flex" justifyContent="center" p={3}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                renderDailyTab()
+              )}
+            </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
-          {loading ? (
-            <Box display="flex" justifyContent="center" p={3}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            renderYearlyTab()
-          )}
-        </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              {loading ? (
+                <Box display="flex" justifyContent="center" p={3}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                renderMonthlyTab()
+              )}
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+              {loading ? (
+                <Box display="flex" justifyContent="center" p={3}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                renderYearlyTab()
+              )}
+            </TabPanel>
+          </Box>
+        </SideBar>
       </Box>
-      </SideBar>
-    </Box>
-  )
+    )
   }
 }

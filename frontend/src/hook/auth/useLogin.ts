@@ -8,7 +8,7 @@ const useLogin = () => {
     email: '',
     password: '',
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +46,7 @@ const useLogin = () => {
     formData,
     loading,
     error,
+    setLoading,
     handleChange,
     handleSubmit,
   }

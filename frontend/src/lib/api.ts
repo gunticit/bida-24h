@@ -386,17 +386,22 @@ class ApiService {
 
   // Takeaway reports
   async getTakeawayReportData(fromDate: string, toDate: string): Promise<TakeawayReportData> {
-    return this.request<TakeawayReportData>(`/takeaway-orders/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`)
+    return this.request<TakeawayReportData>(
+      `/takeaway-orders/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+    )
   }
 
   async downloadTakeawayReport(fromDate: string, toDate: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/takeaway-orders/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
-        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    const response = await fetch(
+      `${API_BASE_URL}/takeaway-orders/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.getToken()}`,
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
       },
-    })
+    )
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)

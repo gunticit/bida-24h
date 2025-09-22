@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useState, useEffect } from 'react'
-import { styled, useTheme, Theme, CSSObject } from '@mui/material'
+import { styled, useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -15,8 +15,10 @@ import ListItemText from '@mui/material/ListItemText'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { AppBar as AppBarDOM } from '@/components/ui'
 import { dashboardMenuItems } from '@/config/dashboard/dashboardMenuItems'
+import Button from '@mui/material/Button'
 import { apiService } from '@/lib/api'
 import { useRouter } from 'next/navigation'
+import LogoutIcon from '@mui/icons-material/Logout'
 
 const drawerWidth = 240
 
@@ -36,27 +38,6 @@ interface SideBarProps {
   children?: React.ReactNode
 }
 
-const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: 'hidden',
-})
-
-const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
-})
-
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -65,33 +46,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar,
 }))
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
-  visibility: 'visible',
-  transform: 'unset',
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        ...openedMixin(theme),
-        '& .MuiDrawer-paper': openedMixin(theme),
-      },
-    },
-    {
-      props: ({ open }) => !open,
-      style: {
-        ...closedMixin(theme),
-        '& .MuiDrawer-paper': closedMixin(theme),
-      },
-    },
-  ],
-}))
-
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
-  open?: boolean;
+  open?: boolean
 }>(({ theme }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
@@ -99,41 +55,21 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: `-${drawerWidth}px`,
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        transition: theme.transitions.create('margin', {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginLeft: 0,
-      },
-    },
-  ],
-}));
+}))
 
-export default function SideBar({
-  title,
-  href,
-  icon,
-  user,
-  children,
-}: SideBarProps) {
+export default function SideBar({ title, href, icon, user, children }: SideBarProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [open, setOpen] = useState(false)
 
-  // Update drawer state based on screen size
-  useEffect(() => {
-    if (isMobile) {
-      setOpen(false)
-    }
-  }, [isMobile])
-
-  const handleDrawerOpen = () => setOpen(true)
-  const handleDrawerClose = () => setOpen(false)
+  const handleDrawerOpen = () => {
+    console.log('Opening drawer, isMobile:', isMobile)
+    setOpen(true)
+  }
+  const handleDrawerClose = () => {
+    console.log('Closing drawer')
+    setOpen(false)
+  }
 
   const router = useRouter()
   const handleLogout = async () => {
@@ -157,10 +93,32 @@ export default function SideBar({
         handleDrawerOpen={handleDrawerOpen}
         href={href}
       />
-      <Drawer 
-        variant={isMobile ? 'temporary' : 'permanent'} 
-        open={open} onClose={handleDrawerClose}
+      <MuiDrawer
+        variant={isMobile ? 'temporary' : 'permanent'}
+        open={open}
+        onClose={handleDrawerClose}
         anchor="left"
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          width: isMobile ? 0 : open ? drawerWidth : theme.spacing(8),
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            overflowX: 'hidden',
+            ...(isMobile
+              ? {}
+              : {
+                  width: open ? drawerWidth : theme.spacing(8),
+                }),
+          },
+        }}
       >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -168,40 +126,86 @@ export default function SideBar({
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <Box>
-          {dashboardMenuItems.map((item) => {
-            if (item.admin && user?.role !== 'admin') return null
-            return (
-              <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    px: 2.5,
-                    justifyContent: open ? 'initial' : 'center',
-                  }}
-                  onClick={() => item.path && router.push(item.path)}
-                >
-                  <ListItemIcon
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            justifyContent: 'center',
+            textAlign: 'center',
+          }}
+        >
+          <Box sx={{ flexGrow: 1 }}>
+            {dashboardMenuItems.map((item) => {
+              if (item.admin && user?.role !== 'admin') return null
+
+              const isExpanded = isMobile ? true : open
+              const isActive = href === item.path
+
+              return (
+                <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
+                  <ListItemButton
                     sx={{
-                      minWidth: 0,
-                      justifyContent: 'center',
-                      mr: open ? 3 : 'auto',
+                      height: 70,
+                      px: 2.5,
+                      justifyContent: isExpanded ? 'initial' : 'center',
+                      backgroundColor: isActive ? 'rgba(25, 118, 210, 0.12)' : 'transparent',
+                      color: isActive ? 'primary.main' : 'inherit',
+                      '&:hover': {
+                        backgroundColor: isActive 
+                          ? 'rgba(25, 118, 210, 0.2)' 
+                          : 'rgba(0, 0, 0, 0.04)',
+                      },
+                      borderRight: isActive ? `3px solid ${theme.palette.primary.main}` : 'none',
                     }}
+                    onClick={() => item.path && router.push(item.path)}
                   >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} sx={{ opacity: open ? 1 : 0 }} />
-                </ListItemButton>
-              </ListItem>
-            )
-          })}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        justifyContent: 'center',
+                        mr: isExpanded ? 3 : 'auto',
+                        color: isActive ? 'primary.main' : 'inherit',
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={item.text} 
+                      sx={{ 
+                        opacity: isExpanded ? 1 : 0,
+                        color: isActive ? 'primary.main' : 'inherit',
+                        fontWeight: isActive ? 'bold' : 'normal',
+                      }} 
+                    />
+                  </ListItemButton>
+                </ListItem>
+              )
+            })}
+          </Box>
+          <Button
+            onClick={handleLogout}
+            sx={{
+              height: 70,
+              display: 'flex',
+              px: 2.5,
+              justifyContent: 'center',
+              textAlign: 'center',
+              width: 'calc(100% - 16px)',
+              borderTop: '1px solid',
+            }}
+          >
+            <LogoutIcon fontSize="small" />
+            {open && 'Đăng xuất'}
+          </Button>
         </Box>
-      </Drawer>
-      <Main open={open}
-        sx={{ 
-          flexGrow: 1, 
+      </MuiDrawer>
+      <Main
+        open={open}
+        sx={{
+          flexGrow: 1,
           p: 3,
-          marginLeft: isMobile ? 0 : (open ? 0 : `-${drawerWidth - 64}px`),
+          marginLeft: isMobile ? 0 : 0,
           transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,

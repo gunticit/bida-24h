@@ -1,8 +1,5 @@
-
 import { useState } from 'react'
-import {
-  Chip,
-} from '@mui/material'
+import { Chip } from '@mui/material'
 import {
   Restaurant as FoodIcon,
   LocalBar as DrinkIcon,
@@ -17,7 +14,7 @@ import type {
   Table,
   Order,
   FoodData,
-  MenuItem as MenuItemType, 
+  MenuItem as MenuItemType,
 } from '@/types/api'
 import { apiService } from '@/lib/api'
 import { generateInvoiceContent } from '@/utils/invoiceUtils'
@@ -26,12 +23,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { useRouter } from 'next/navigation'
-import { 
-  IUserPlayTime, 
-  InvoiceData, 
-  ISeverity,
-  CategoryChipInfo
-} from '@/types/playtime'
+import { IUserPlayTime, InvoiceData, ISeverity, CategoryChipInfo } from '@/types/playtime'
 
 const usePlaytime = (): IUserPlayTime => {
   dayjs.extend(utc)
@@ -336,7 +328,7 @@ const usePlaytime = (): IUserPlayTime => {
 
   // Local category chip helper
   const getCategoryChipLocal = (category: string) => {
-    const getCategoryInfo = (cat: string): CategoryChipInfo  => {
+    const getCategoryInfo = (cat: string): CategoryChipInfo => {
       switch (cat) {
         case 'food':
           return { icon: <FoodIcon />, label: 'Đồ ăn', color: 'primary' as const }

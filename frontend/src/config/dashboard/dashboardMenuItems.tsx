@@ -1,10 +1,15 @@
-import InboxIcon from '@mui/icons-material/MoveToInbox'
-import MailIcon from '@mui/icons-material/Mail'
+import {
+  Widgets as WidgetsIcon,
+  Settings as SettingsIcon,
+  AccessTime as AccessTimeIcon,
+  BarChart as BarChartIcon,
+  AttachMoney as AttachMoneyIcon,
+} from '@mui/icons-material'
 
 export const dashboardMenuItems = [
-  { text: 'Dashboard', icon: <InboxIcon />, path: '/dashboard' },
-  { text: 'Quản lý giờ chơi', icon: <MailIcon />, path: '/playtime' },
-  { text: 'Thống kê', icon: <InboxIcon />, path: '/revenue', admin: true },
-  { text: 'Chi phí', icon: <MailIcon />, path: '/expense', admin: true },
-  { text: 'Cài đặt', icon: <InboxIcon />, path: '/setting', admin: true },
+  { text: 'Bảng điều khiển', icon: <WidgetsIcon />, path: '/dashboard' },
+  { text: 'Quản lý giờ chơi', icon: <AccessTimeIcon />, path: '/playtime' },
+  { text: 'Thống kê', icon: <BarChartIcon />, path: '/revenue', admin: true },
+  { text: 'Chi phí', icon: <AttachMoneyIcon />, path: '/expense', admin: true },
+  { text: 'Cài đặt', icon: <SettingsIcon />, path: '/setting', admin: true },
 ]

@@ -3,7 +3,7 @@ import { formatMoney, formatDateTime } from './formatters'
 
 export const printTakeawayReport = (reportData: TakeawayReportData) => {
   const printWindow = window.open('', '_blank')
-  
+
   if (!printWindow) {
     alert('Vui lòng cho phép popup để in báo cáo')
     return
@@ -148,7 +148,9 @@ export const printTakeawayReport = (reportData: TakeawayReportData) => {
           </tr>
         </thead>
         <tbody>
-          ${reportData.items.map((item, index) => `
+          ${reportData.items
+            .map(
+              (item, index) => `
             <tr>
               <td class="text-center">${index + 1}</td>
               <td>${item.menu_name}</td>
@@ -156,7 +158,9 @@ export const printTakeawayReport = (reportData: TakeawayReportData) => {
               <td class="text-right">${formatMoney(item.unit_price)}</td>
               <td class="text-right">${formatMoney(item.total_amount)}</td>
             </tr>
-          `).join('')}
+          `,
+            )
+            .join('')}
           <tr class="total-row">
             <td colspan="2" class="text-center"><strong>TỔNG CỘNG</strong></td>
             <td class="text-center"><strong>${reportData.summary.total_items_sold}</strong></td>
@@ -176,7 +180,7 @@ export const printTakeawayReport = (reportData: TakeawayReportData) => {
 
   printWindow.document.write(html)
   printWindow.document.close()
-  
+
   // Wait for content to load then print
   printWindow.onload = () => {
     printWindow.print()

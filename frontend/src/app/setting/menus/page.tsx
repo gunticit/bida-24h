@@ -47,7 +47,7 @@ import {
   TakeoutDining as TakeawayIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
+import SideBar from '@/app/SideBar'
 
 interface MenuItem {
   id: number
@@ -329,193 +329,194 @@ export default function MenuSettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar
-        title="Thiết lập thực đơn"
-        user={user}
-        onLogout={handleLogout}
-        icon={<TakeawayIcon />}
-      />
-
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6">Thiết lập thực đơn</Typography>
-          {user && user.role === 'admin' && (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-              Thêm món mới
-            </Button>
-          )}
-        </Box>
-
-        <Card>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={tabValue} onChange={handleTabChange} aria-label="menu categories">
-                <Tab label="Đồ ăn" icon={<FoodIcon />} iconPosition="start" />
-                <Tab label="Đồ uống" icon={<DrinkIcon />} iconPosition="start" />
-                <Tab label="Thuốc" icon={<TobaccoIcon />} iconPosition="start" />
-                <Tab label="Mang về" icon={<TakeawayIcon />} iconPosition="start" />
-                <Tab label="Tất cả" />
-              </Tabs>
-            </Box>
-
-            <TabPanel value={tabValue} index={0}>
-              <MenuTable
-                menus={filteredMenus}
-                onEdit={handleOpenDialog}
-                onDelete={handleDeleteMenu}
-                getCategoryChip={getCategoryChip}
-                getStatusChip={getStatusChip}
-                user={user}
-              />
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={1}>
-              <MenuTable
-                menus={filteredMenus}
-                onEdit={handleOpenDialog}
-                onDelete={handleDeleteMenu}
-                getCategoryChip={getCategoryChip}
-                getStatusChip={getStatusChip}
-                user={user}
-              />
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={2}>
-              <MenuTable
-                menus={filteredMenus}
-                onEdit={handleOpenDialog}
-                onDelete={handleDeleteMenu}
-                getCategoryChip={getCategoryChip}
-                getStatusChip={getStatusChip}
-                user={user}
-              />
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={3}>
-              <MenuTable
-                menus={filteredMenus}
-                onEdit={handleOpenDialog}
-                onDelete={handleDeleteMenu}
-                getCategoryChip={getCategoryChip}
-                getStatusChip={getStatusChip}
-                user={user}
-              />
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={4}>
-              <MenuTable
-                menus={menus}
-                onEdit={handleOpenDialog}
-                onDelete={handleDeleteMenu}
-                getCategoryChip={getCategoryChip}
-                getStatusChip={getStatusChip}
-                user={user}
-              />
-            </TabPanel>
-          </CardContent>
-        </Card>
-      </Container>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingMenu ? 'Sửa món ăn' : 'Thêm món mới'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Tên món"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              fullWidth
-              required
-            />
-
-            <TextField
-              label="Giá bán (VNĐ)"
-              type="number"
-              value={formData.price}
-              onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-              fullWidth
-              required
-              inputProps={{ min: 0, step: 1000 }}
-            />
-
-            <TextField
-              label="Giá vốn (VNĐ)"
-              type="number"
-              value={formData.cost_price || ''}
-              onChange={(e) =>
-                handleInputChange('cost_price', parseFloat(e.target.value) || undefined)
-              }
-              fullWidth
-              inputProps={{ min: 0, step: 1000 }}
-              helperText="Để trống nếu muốn tự động tính 60% giá bán"
-            />
-
-            <TextField
-              label="Số lượng tồn kho"
-              type="number"
-              value={formData.quantity}
-              onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
-              fullWidth
-              required
-              inputProps={{ min: 0 }}
-            />
-
-            <FormControl fullWidth>
-              <InputLabel>Danh mục</InputLabel>
-              <Select
-                value={formData.category}
-                label="Danh mục"
-                onChange={(e) => handleInputChange('category', e.target.value)}
+      <SideBar title="Thiết lập thực đơn" href="/setting/menus" user={user} icon={<TakeawayIcon />}>
+        {/* Main Content */}
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
+            <Typography variant="h6">Thiết lập thực đơn</Typography>
+            {user && user.role === 'admin' && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenDialog()}
               >
-                <MenuItem value="food">Đồ ăn</MenuItem>
-                <MenuItem value="drink">Đồ uống</MenuItem>
-                <MenuItem value="tobacco">Thuốc lá</MenuItem>
-                <MenuItem value="takeaway">Mang về</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.is_active}
-                  onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Món ăn đang hoạt động"
-            />
+                Thêm món mới
+              </Button>
+            )}
           </Box>
-        </DialogContent>
-        {user && user.role === 'admin' && (
-          <DialogActions>
-            <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
-              Hủy
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              startIcon={<SaveIcon />}
-              disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
-            >
-              {editingMenu ? 'Cập nhật' : 'Thêm mới'}
-            </Button>
-          </DialogActions>
-        )}
-      </Dialog>
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Card>
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tabs value={tabValue} onChange={handleTabChange} aria-label="menu categories">
+                  <Tab label="Đồ ăn" icon={<FoodIcon />} iconPosition="start" />
+                  <Tab label="Đồ uống" icon={<DrinkIcon />} iconPosition="start" />
+                  <Tab label="Thuốc" icon={<TobaccoIcon />} iconPosition="start" />
+                  <Tab label="Mang về" icon={<TakeawayIcon />} iconPosition="start" />
+                  <Tab label="Tất cả" />
+                </Tabs>
+              </Box>
+
+              <TabPanel value={tabValue} index={0}>
+                <MenuTable
+                  menus={filteredMenus}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDeleteMenu}
+                  getCategoryChip={getCategoryChip}
+                  getStatusChip={getStatusChip}
+                  user={user}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <MenuTable
+                  menus={filteredMenus}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDeleteMenu}
+                  getCategoryChip={getCategoryChip}
+                  getStatusChip={getStatusChip}
+                  user={user}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={2}>
+                <MenuTable
+                  menus={filteredMenus}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDeleteMenu}
+                  getCategoryChip={getCategoryChip}
+                  getStatusChip={getStatusChip}
+                  user={user}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={3}>
+                <MenuTable
+                  menus={filteredMenus}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDeleteMenu}
+                  getCategoryChip={getCategoryChip}
+                  getStatusChip={getStatusChip}
+                  user={user}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={4}>
+                <MenuTable
+                  menus={menus}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDeleteMenu}
+                  getCategoryChip={getCategoryChip}
+                  getStatusChip={getStatusChip}
+                  user={user}
+                />
+              </TabPanel>
+            </CardContent>
+          </Card>
+        </Container>
+
+        {/* Add/Edit Dialog */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+          <DialogTitle>{editingMenu ? 'Sửa món ăn' : 'Thêm món mới'}</DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                label="Tên món"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                fullWidth
+                required
+              />
+
+              <TextField
+                label="Giá bán (VNĐ)"
+                type="number"
+                value={formData.price}
+                onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                fullWidth
+                required
+                inputProps={{ min: 0, step: 1000 }}
+              />
+
+              <TextField
+                label="Giá vốn (VNĐ)"
+                type="number"
+                value={formData.cost_price || ''}
+                onChange={(e) =>
+                  handleInputChange('cost_price', parseFloat(e.target.value) || undefined)
+                }
+                fullWidth
+                inputProps={{ min: 0, step: 1000 }}
+                helperText="Để trống nếu muốn tự động tính 60% giá bán"
+              />
+
+              <TextField
+                label="Số lượng tồn kho"
+                type="number"
+                value={formData.quantity}
+                onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+                fullWidth
+                required
+                inputProps={{ min: 0 }}
+              />
+
+              <FormControl fullWidth>
+                <InputLabel>Danh mục</InputLabel>
+                <Select
+                  value={formData.category}
+                  label="Danh mục"
+                  onChange={(e) => handleInputChange('category', e.target.value)}
+                >
+                  <MenuItem value="food">Đồ ăn</MenuItem>
+                  <MenuItem value="drink">Đồ uống</MenuItem>
+                  <MenuItem value="tobacco">Thuốc lá</MenuItem>
+                  <MenuItem value="takeaway">Mang về</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.is_active}
+                    onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Món ăn đang hoạt động"
+              />
+            </Box>
+          </DialogContent>
+          {user && user.role === 'admin' && (
+            <DialogActions>
+              <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                startIcon={<SaveIcon />}
+                disabled={!formData.name || formData.price <= 0 || formData.quantity < 0}
+              >
+                {editingMenu ? 'Cập nhật' : 'Thêm mới'}
+              </Button>
+            </DialogActions>
+          )}
+        </Dialog>
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </SideBar>
     </Box>
   )
 }

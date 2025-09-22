@@ -29,9 +29,7 @@ import {
   Pagination,
   Stack,
 } from '@mui/material'
-import {
-  BarChart as BarChartIcon,
-} from '@mui/icons-material'
+import { BarChart as BarChartIcon } from '@mui/icons-material'
 import { Add, Edit, Delete } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import { Expense, ExpenseSummary } from '@/types/api'
@@ -348,11 +346,11 @@ const ExpensePage = () => {
 
   return (
     <SideBar
-        title="Quản lý chi phí phát sinh"
-        href="/dashboard"
-        user={user}
-        icon={<BarChartIcon />}
-      >
+      title="Quản lý chi phí phát sinh"
+      href="/expense"
+      user={user}
+      icon={<BarChartIcon />}
+    >
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -545,7 +543,9 @@ const ExpensePage = () => {
                 <TextField
                   label="Mô tả (không bắt buộc)"
                   value={formData.description || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   fullWidth
                   multiline
                   rows={3}

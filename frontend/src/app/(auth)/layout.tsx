@@ -9,9 +9,7 @@ export default function AdminLayout({
 }>) {
   return (
     <ThemeRegistry>
-      <AuthThemeProvider>
-        {children}
-      </AuthThemeProvider>
+      <AuthThemeProvider>{children}</AuthThemeProvider>
     </ThemeRegistry>
   )
 }

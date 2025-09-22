@@ -39,7 +39,7 @@ import {
   TableRestaurant as TableIcon,
 } from '@mui/icons-material'
 import { apiService, User, Table } from '@/lib/api'
-import { AppBar } from '@/components/ui'
+import SideBar from '@/app/SideBar'
 
 interface TableFormData {
   name: string
@@ -205,12 +205,7 @@ export default function TableSettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar
-        title="Quản lý cài đặt bàn"
-        user={user}
-        onLogout={handleLogout}
-        icon={<TableIcon />}
-      />
+      <SideBar title="Cài đặt" href="/setting" user={user} icon={<TableIcon />}>
 
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -372,6 +367,7 @@ export default function TableSettingPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      </SideBar>
     </Box>
   )
 }

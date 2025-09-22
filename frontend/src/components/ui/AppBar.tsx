@@ -14,7 +14,7 @@ import {
   Box,
 } from '@mui/material'
 import {
-  Dashboard as DashboardIcon,
+  Widgets as WidgetsIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
@@ -126,9 +126,9 @@ export default function AppBar({
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem onClick={() => router.push('/dashboard')}>
             <ListItemIcon>
-              <DashboardIcon fontSize="small" />
+              <WidgetsIcon fontSize="small" />
             </ListItemIcon>
-            Dashboard
+            Bảng điều khiển
           </MenuItem>
           {user?.role === 'admin' && (
             <MenuItem

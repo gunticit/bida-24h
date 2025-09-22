@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import ThemeRegistry from '@/components/providers/ThemeRegistry'
@@ -12,7 +12,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Phần mềm quản lý 24h Billiard App',
   description: 'Fullstack application with Laravel backend and Next.js frontend',
-  viewport: 'initial-scale=1, width=device-width',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
