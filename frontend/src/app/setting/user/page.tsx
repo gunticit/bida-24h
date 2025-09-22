@@ -45,7 +45,7 @@ import {
   VisibilityOff as HideIcon,
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
-import { AppBar } from '@/components/ui'
+import SideBar from '@/app/SideBar'
 
 interface UserFormData {
   name: string
@@ -286,12 +286,7 @@ export default function UserSettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <AppBar
-        title="Quản lý người dùng"
-        user={user}
-        onLogout={handleLogout}
-        icon={<PersonIcon />}
-      />
+      <SideBar title="Cài đặt hệ thống" href="/setting" user={user} icon={<PersonIcon />}>
 
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -338,14 +333,16 @@ export default function UserSettingPage() {
                             </MuiIconButton>
                           </Tooltip>
                           <Tooltip title="Xóa người dùng">
-                            <MuiIconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteUser(userItem.id)}
-                              disabled={userItem.id === user?.id}
-                            >
-                              <DeleteIcon />
-                            </MuiIconButton>
+                            <span>
+                              <MuiIconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteUser(userItem.id)}
+                                disabled={userItem.id === user?.id}
+                              >
+                                <DeleteIcon />
+                              </MuiIconButton>
+                            </span>
                           </Tooltip>
                         </Box>
                       </TableCell>
@@ -465,6 +462,7 @@ export default function UserSettingPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      </SideBar>
     </Box>
   )
 }

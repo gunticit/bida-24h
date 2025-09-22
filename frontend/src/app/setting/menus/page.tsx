@@ -329,7 +329,7 @@ export default function MenuSettingPage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
-      <SideBar title="Thiết lập thực đơn" href="/setting/menus" user={user} icon={<TakeawayIcon />}>
+      <SideBar title="Thiết lập thực đơn" href="/setting" user={user} icon={<TakeawayIcon />}>
         {/* Main Content */}
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Box
