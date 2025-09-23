@@ -344,7 +344,7 @@ class TakeawayOrderController extends Controller
             </style>
         </head>
         <body>
-            <h2>BÁO CÁO TAKEAWAY</h2>
+            <h2>BÁO CÁO MUA MANG VỀ</h2>
             <p><strong>Từ ngày:</strong> ' . $reportData['from_date'] . '</p>
             <p><strong>Đến ngày:</strong> ' . $reportData['to_date'] . '</p>
             <p><strong>Tổng đơn hàng:</strong> ' . $reportData['total_orders'] . '</p>

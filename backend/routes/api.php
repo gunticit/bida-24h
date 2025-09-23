@@ -65,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Dine-in Order management routes
     Route::get('/dine-in-orders/today', [DineInOrderController::class, 'todayOrders']);
+    Route::get('/dine-in-orders/report', [DineInOrderController::class, 'report']);
+    Route::get('/dine-in-orders/report/download', [DineInOrderController::class, 'downloadReport']);
     Route::apiResource('dine-in-orders', DineInOrderController::class);
     
     // Table management routes

@@ -155,6 +155,125 @@ class DineInOrderController extends Controller
     }
 
     /**
+     * Get takeaway report data for date range
+     */
+    public function report(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+
+        try {
+            // Get orders in date range
+            $orders = TakeawayOrder::with(['items.menu'])
+                ->where('type', 'dine-in')
+                ->whereBetween('order_date', [$fromDate, $toDate])
+                ->get();
+
+            // Calculate summary data
+            $totalOrders = $orders->count();
+            $totalAmount = $orders->sum('total_amount');
+
+            // Group items by menu and calculate totals
+            $itemsData = [];
+            $totalItemsSold = 0;
+
+            foreach ($orders as $order) {
+                foreach ($order->items as $item) {
+                    $menuName = $item->menu ? $item->menu->name : 'Unknown Menu';
+                    $menuId = $item->menu_id;
+                    
+                    if (!isset($itemsData[$menuId])) {
+                        $itemsData[$menuId] = [
+                            'menu_name' => $menuName,
+                            'total_quantity' => 0,
+                            'unit_price' => $item->price,
+                            'total_amount' => 0,
+                        ];
+                    }
+                    
+                    $itemsData[$menuId]['total_quantity'] += $item->quantity;
+                    $itemsData[$menuId]['total_amount'] += $item->total;
+                    $totalItemsSold += $item->quantity;
+                }
+            }
+
+            // Convert to array and sort by total quantity desc
+            $items = array_values($itemsData);
+            usort($items, function($a, $b) {
+                return $b['total_quantity'] <=> $a['total_quantity'];
+            });
+
+            $averageOrderValue = $totalOrders > 0 ? $totalAmount / $totalOrders : 0;
+
+            $reportData = [
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'total_orders' => $totalOrders,
+                'total_amount' => $totalAmount,
+                'items' => $items,
+                'summary' => [
+                    'total_items_sold' => $totalItemsSold,
+                    'average_order_value' => round($averageOrderValue, 2),
+                ]
+            ];
+
+            return response()->json($reportData);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Download takeaway report as Excel file
+     */
+    public function downloadReport(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+
+        try {
+            // Get report data (reuse logic from report method)
+            $reportRequest = new Request(['from' => $fromDate, 'to' => $toDate]);
+            $reportResponse = $this->report($reportRequest);
+            $reportData = json_decode($reportResponse->getContent(), true);
+
+            // Create Excel content using simple HTML table format
+            $filename = "do-an-tai-cho-tu-{$fromDate}-{$toDate}.xlsx";
+            
+            // Simple Excel export using HTML table
+            $html = $this->generateExcelHtml($reportData);
+            
+            return response($html, 200, [
+                'Content-Type' => 'application/vnd.ms-excel',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'max-age=0',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
@@ -182,5 +301,68 @@ class DineInOrderController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 400);
         }
+    }
+
+    /**
+     * Generate HTML for Excel export
+     */
+    private function generateExcelHtml($reportData)
+    {
+        $html = '
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; font-weight: bold; }
+                .text-right { text-align: right; }
+                .text-center { text-align: center; }
+            </style>
+        </head>
+        <body>
+            <h2>BÁO CÁO ĐỒ ĂN TẠI CHỖ</h2>
+            <p><strong>Từ ngày:</strong> ' . $reportData['from_date'] . '</p>
+            <p><strong>Đến ngày:</strong> ' . $reportData['to_date'] . '</p>
+            <p><strong>Tổng đơn hàng:</strong> ' . $reportData['total_orders'] . '</p>
+            <p><strong>Tổng doanh thu:</strong> ' . number_format($reportData['total_amount'], 0, ',', '.') . ' VND</p>
+            <p><strong>Tổng sản phẩm bán:</strong> ' . $reportData['summary']['total_items_sold'] . '</p>
+            <br>
+            <table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên sản phẩm</th>
+                        <th class="text-center">Số lượng bán</th>
+                        <th class="text-right">Đơn giá</th>
+                        <th class="text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>';
+                
+        foreach ($reportData['items'] as $index => $item) {
+            $html .= '
+                    <tr>
+                        <td class="text-center">' . ($index + 1) . '</td>
+                        <td>' . htmlspecialchars($item['menu_name']) . '</td>
+                        <td class="text-center">' . $item['total_quantity'] . '</td>
+                        <td class="text-right">' . number_format($item['unit_price'], 0, ',', '.') . '</td>
+                        <td class="text-right">' . number_format($item['total_amount'], 0, ',', '.') . '</td>
+                    </tr>';
+        }
+        
+        $html .= '
+                    <tr style="background-color: #e3f2fd; font-weight: bold;">
+                        <td colspan="2" class="text-center">TỔNG CỘNG</td>
+                        <td class="text-center">' . $reportData['summary']['total_items_sold'] . '</td>
+                        <td></td>
+                        <td class="text-right">' . number_format($reportData['total_amount'], 0, ',', '.') . '</td>
+                    </tr>
+                </tbody>
+            </table>
+        </body>
+        </html>';
+        
+        return $html;
     }
 }
