@@ -38,11 +38,13 @@ import {
   Remove as RemoveIcon,
   Search as SearchIcon,
   Print as PrintIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material'
-import { apiService, User, MenuItem as MenuItemType, TakeawayOrder } from '@/lib/api'
+import { apiService, User as ApiUser, MenuItem as MenuItemType, TakeawayOrder } from '@/lib/api'
 import SideBar from '@/app/SideBar'
 import { formatMoney, formatDateTime } from '@/utils/formatters'
 import { generateTakeawayInvoiceContent, printTakeawayInvoice } from '@/utils/takeawayInvoiceUtils'
+import { printTakeawayReport } from '@/utils/takeawayReportUtils'
 import { useRouter } from 'next/navigation'
 import { CreateTakeawayOrderData } from '@/lib/api'
 
@@ -64,7 +66,7 @@ interface ApiError {
 }
 
 export default function DineInPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [dineInMenus, setDineInMenus] = useState<MenuItemType[]>([])
   const [dineInOrders, setDineInOrders] = useState<TakeawayOrder[]>([])
@@ -87,6 +89,11 @@ export default function DineInPage() {
     severity: 'success' as 'success' | 'error',
   })
 
+  // Date filter states
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+  const [reportLoading, setReportLoading] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -94,6 +101,16 @@ export default function DineInPage() {
     loadDineInMenus()
     loadDineInOrders()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Set default date range (today)
+  useEffect(() => {
+    const now = new Date()
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0)
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59)
+
+    setFromDate(startOfDay.toISOString().slice(0, 16))
+    setToDate(endOfDay.toISOString().slice(0, 16))
   }, [])
 
   // Filter menus based on search query
@@ -141,15 +158,6 @@ export default function DineInPage() {
     } catch (error) {
       console.error('Failed to load dine-in orders:', error)
       showSnackbar('Không thể tải danh sách đơn hàng tại chỗ', 'error')
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      await apiService.logout()
-      window.location.href = '/'
-    } catch (error) {
-      console.error('Logout failed:', error)
     }
   }
 
@@ -348,6 +356,49 @@ export default function DineInPage() {
     }
   }
 
+  const handleDownloadReport = async () => {
+    if (!fromDate || !toDate) {
+      showSnackbar('Vui lòng chọn khoảng thời gian', 'error')
+      return
+    }
+
+    setReportLoading(true)
+    try {
+      await apiService.downloadDineInReport(fromDate, toDate)
+      showSnackbar('Tải báo cáo thành công!')
+    } catch (error) {
+      console.error('Failed to download report:', error)
+      showSnackbar(
+        `Failed to download report: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'error',
+      )
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
+  const handlePrintReport = async () => {
+    if (!fromDate || !toDate) {
+      showSnackbar('Vui lòng chọn khoảng thời gian', 'error')
+      return
+    }
+
+    setReportLoading(true)
+    try {
+      const reportData = await apiService.getDineInReportData(fromDate, toDate)
+      printTakeawayReport(reportData)
+      showSnackbar('Báo cáo đã được in!')
+    } catch (error) {
+      console.error('Failed to print report:', error)
+      showSnackbar(
+        `Failed to print report: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'error',
+      )
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
   const getCategoryChip = (category: string) => {
     const getCategoryInfo = (cat: string) => {
       switch (cat) {
@@ -387,7 +438,63 @@ export default function DineInPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
-      <SideBar title="Bảng điều khiển" href="/dine-in" user={user} icon={<RestaurantIcon />}>
+      <SideBar
+        title="Bảng điều khiển"
+        href="/dine-in"
+        user={user as { id: number; name: string; email: string; role?: string; [key: string]: unknown } | null}
+        icon={<RestaurantIcon />}
+      >
+        {/*Date Range Filter and Download Buttons*/}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            bgcolor: 'white',
+            borderBottom: '1px solid #ddd',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              type="datetime-local"
+              label="Từ ngày giờ"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              sx={{ m: 3, width: '250px' }}
+            />
+            <TextField
+              type="datetime-local"
+              label="Đến ngày giờ"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              sx={{ m: 3, width: '250px' }}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<DownloadIcon />}
+              sx={{ m: 3 }}
+              onClick={handleDownloadReport}
+              disabled={reportLoading || !fromDate || !toDate}
+            >
+              {reportLoading ? 'Đang tải...' : 'Tải báo cáo Excel'}
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<PrintIcon />}
+              sx={{ m: 3 }}
+              onClick={handlePrintReport}
+              disabled={reportLoading || !fromDate || !toDate}
+            >
+              In báo cáo
+            </Button>
+          </Box>
+        </Box>
+
         <Box sx={{ p: 3 }}>
           <Box
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}

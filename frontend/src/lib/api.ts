@@ -450,6 +450,133 @@ class ApiService {
     })
   }
 
+  // Dine-in reports
+  async getDineInReportData(fromDate: string, toDate: string): Promise<TakeawayReportData> {
+    return this.request<TakeawayReportData>(
+      `/dine-in-orders/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+    )
+  }
+
+  async downloadDineInReport(fromDate: string, toDate: string): Promise<void> {
+    try {
+      console.log('Attempting to download dine-in report from:', fromDate, 'to:', toDate)
+
+      const response = await fetch(
+        `${API_BASE_URL}/dine-in-orders/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.getToken()}`,
+            Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          },
+        },
+      )
+
+      // Log all response headers for debugging
+      console.log('Response status:', response.status, response.statusText)
+      console.log('Response headers:')
+      response.headers.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Download error:', errorText)
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
+      }
+
+      // Kiểm tra content type
+      const contentType = response.headers.get('content-type')
+      console.log('Response content type:', contentType)
+
+      // Get response as blob first for validation
+      const blob = await response.blob()
+      console.log('Blob size:', blob.size, 'Blob type:', blob.type)
+
+      if (blob.size === 0) {
+        throw new Error('Received empty file')
+      }
+
+      // Check if response is actually HTML (common backend error)
+      const arrayBuffer = await blob.arrayBuffer()
+      const uint8Array = new Uint8Array(arrayBuffer)
+      const decoder = new TextDecoder()
+      const textContent = decoder.decode(uint8Array.slice(0, 500))
+
+      // If content starts with HTML, it's not a valid Excel file
+      if (
+        textContent.trim().toLowerCase().startsWith('<html') ||
+        textContent.trim().toLowerCase().startsWith('<!doctype html')
+      ) {
+        console.error(
+          'Server returned HTML instead of Excel file. Content:',
+          textContent.substring(0, 500),
+        )
+        throw new Error(
+          'Server returned HTML page instead of Excel file. This usually indicates an authentication error or API endpoint issue.',
+        )
+      }
+
+      // Validate content type - accept both modern and legacy Excel formats
+      const isValidExcelType =
+        contentType &&
+        (contentType.includes('spreadsheetml') || // Modern Excel (.xlsx)
+          contentType.includes('vnd.ms-excel') || // Legacy Excel (.xls)
+          contentType.includes('application/excel') ||
+          contentType.includes('application/x-excel'))
+
+      if (!isValidExcelType) {
+        console.error('Invalid content type:', contentType)
+        console.error('Response content preview:', textContent.substring(0, 200))
+        throw new Error(
+          `Server returned invalid content type: ${contentType}. Expected Excel format.`,
+        )
+      }
+
+      // Additional validation: check if blob contains valid file signature
+      // Excel files (.xlsx) start with PK (ZIP signature) - bytes 0x50, 0x4B
+      // Legacy Excel files (.xls) start with different signatures
+      const hasValidSignature =
+        (uint8Array.length > 2 && uint8Array[0] === 0x50 && uint8Array[1] === 0x4b) || // ZIP/XLSX format
+        (uint8Array.length > 8 && uint8Array[0] === 0xd0 && uint8Array[1] === 0xcf) || // OLE2/XLS format
+        (uint8Array.length > 2 && uint8Array[0] === 0x09 && uint8Array[1] === 0x08) // Another XLS variant
+
+      if (hasValidSignature) {
+        console.log('✓ File appears to be a valid Excel file')
+      } else {
+        console.error('✗ File does not have a valid Excel signature')
+        console.log(
+          'First 20 bytes:',
+          Array.from(uint8Array.slice(0, 20))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join(' '),
+        )
+        console.log('Content preview:', textContent.substring(0, 200))
+        throw new Error('Downloaded file is not a valid Excel format')
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+
+      // Tạo filename với timestamp để tránh conflict
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+      link.download = `dine-in-report-${fromDate}-${toDate}-${timestamp}.xlsx`
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      console.log('Download completed successfully')
+    } catch (error) {
+      console.error('Download failed:', error)
+      throw new Error(
+        `Tải file thất bại: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`,
+      )
+    }
+  }
+
   // Legacy takeaway methods (will be deprecated)
   async getLegacyTakeawayOrders(): Promise<Order[]> {
     return this.request<Order[]>('/orders/takeaway')
