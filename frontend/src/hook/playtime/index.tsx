@@ -458,6 +458,11 @@ const usePlaytime = (): IUserPlayTime => {
   const handleRedirectDineIn = () => {
     router.push('/dine-in')
   }
+
+  const handleExportExcel = () => {
+    
+  }
+
   return {
     router,
     user,
@@ -505,6 +510,7 @@ const usePlaytime = (): IUserPlayTime => {
     setFormData,
     setFoodFormData,
     recalculateFoodTotal,
+    handleExportExcel,
   }
 }
 

@@ -42,6 +42,7 @@ import {
   Print as PrintIcon,
   TakeoutDining as TakeawayIcon,
   RestaurantMenu as RestaurantIcon,
+  CloudDownload as CloudDownloadIcon,
 } from '@mui/icons-material'
 import { apiService } from '@/lib/api'
 import { StatisticsCards } from '@/components/playtime'
@@ -105,6 +106,7 @@ export default function PlaytimePage() {
     setFormData,
     setFoodFormData,
     recalculateFoodTotal,
+    handleExportExcel,
   } = usePlaytime()
 
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function PlaytimePage() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, position: 'relative'}}>
       <SideBar title="Quản lý Giờ chơi" href="/playtime" user={user} icon={<CalendarIcon />}>
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           <Box
@@ -728,6 +730,16 @@ export default function PlaytimePage() {
           </Alert>
         </Snackbar>
       </SideBar>
+      <Box sx={{ position: 'fixed', display: 'flex', flexDirection: 'column', bottom: '50%', right: 16, zIndex: 10, gap: 2 }}>
+        <Button 
+            variant="outlined"
+            onClick={handleExportExcel}
+            sx={{ width: { sm: 'auto', xs: '100%' }, p: 1 }}
+            title="Xuất Excel"
+        >
+          <CloudDownloadIcon />
+        </Button>
+      </Box>
     </Box>
   )
 }

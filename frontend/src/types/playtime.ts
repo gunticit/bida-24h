@@ -87,4 +87,5 @@ export type IUserPlayTime = {
   setFormData: React.Dispatch<React.SetStateAction<CreateSessionData>>
   setFoodFormData: React.Dispatch<React.SetStateAction<FoodData>>
   recalculateFoodTotal: (sessionId: number) => number
+  handleExportExcel: () => void
 }
