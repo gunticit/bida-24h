@@ -14,7 +14,7 @@ export const printTakeawayReport = (reportData: TakeawayReportData) => {
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Báo cáo Takeaway - ${reportData.from_date} đến ${reportData.to_date}</title>
+      <title>BÁO CÁO MUA MANG VỀ - ${reportData.from_date} đến ${reportData.to_date}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -112,7 +112,7 @@ export const printTakeawayReport = (reportData: TakeawayReportData) => {
     </head>
     <body>
       <div class="header">
-        <h1>BÁO CÁO TAKEAWAY</h1>
+        <h1>BÁO CÁO MUA MANG VỀ</h1>
         <p><strong>Khoảng thời gian:</strong> ${formatDateTime(reportData.from_date)} - ${formatDateTime(reportData.to_date)}</p>
         <p><strong>Ngày xuất báo cáo:</strong> ${formatDateTime(new Date().toISOString())}</p>
       </div>

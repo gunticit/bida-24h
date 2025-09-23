@@ -283,7 +283,7 @@ const usePlaytime = (): IUserPlayTime => {
   }
 
   // Hàm tính toán lại tổng tiền đồ ăn từ orders
-  const recalculateFoodTotal = async (sessionId: number) => {
+  const recalculateFoodTotal = async (sessionId: number): number => {
     try {
       const orders = await apiService.getOrders()
       const sessionOrders = orders.filter((order) => order.session_id === sessionId)
@@ -303,7 +303,7 @@ const usePlaytime = (): IUserPlayTime => {
         })
       }
 
-      return totalFoodMoney
+      return Number(totalFoodMoney)
     } catch (error) {
       console.error('Failed to recalculate food total:', error)
       return 0
@@ -503,6 +503,7 @@ const usePlaytime = (): IUserPlayTime => {
     handleRedirectTakeAway,
     handleRedirectDineIn,
     setFormData,
+    setFoodFormData,
     recalculateFoodTotal,
   }
 }

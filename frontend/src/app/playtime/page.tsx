@@ -390,6 +390,7 @@ export default function PlaytimePage() {
                 value={parseInt(formData.hour_price.toString()).toLocaleString('vi-VN')}
                 onChange={(e) => setFormData({ ...formData, hour_price: parseInt(e.target.value) })}
                 fullWidth
+                InputProps={{ readOnly: true, disabled: true }}
               />
             </Box>
           </DialogContent>
@@ -596,38 +597,35 @@ export default function PlaytimePage() {
           <DialogTitle>Hóa đơn - Giờ chơi #{invoiceData.session?.id}</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Thông tin giờ chơi
-              </Typography>
-              <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-                <Typography variant="body1">
+              <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'space-between' }}>
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
                   <strong>Bàn:</strong>{' '}
                   {tables.find((t) => t.id === invoiceData.session?.table_id)?.name || 'N/A'}
                 </Typography>
-                <Typography variant="body1">
-                  <strong>Thời gian bắt đầu:</strong>{' '}
-                  {invoiceData.session?.start_time
-                    ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN')
-                    : 'N/A'}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Thời gian kết thúc:</strong>{' '}
-                  {invoiceData.session?.end_time
-                    ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN')
-                    : 'Đang chơi'}
-                </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
                   <strong>Giá/giờ:</strong>{' '}
                   {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString(
                     'vi-VN',
                   )}{' '}
                   đ
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                  <strong>Thời gian bắt đầu:</strong>{' '}
+                  {invoiceData.session?.start_time
+                    ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN')
+                    : 'N/A'}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                  <strong>Thời gian kết thúc:</strong>{' '}
+                  {invoiceData.session?.end_time
+                    ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN')
+                    : 'Đang chơi'}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
                   <strong>Thời gian chơi:</strong>{' '}
                   {invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
                   <strong>Tiền bàn:</strong>{' '}
                   {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
                 </Typography>
@@ -635,9 +633,6 @@ export default function PlaytimePage() {
 
               {invoiceData.orders.length > 0 && (
                 <>
-                  <Typography variant="h6" gutterBottom>
-                    Thực đơn đã đặt
-                  </Typography>
                   <TableContainer component={Paper} sx={{ mb: 3 }}>
                     <MuiTable>
                       <TableHead>
@@ -671,29 +666,30 @@ export default function PlaytimePage() {
               )}
 
               <Box sx={{ p: 2, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                  Tổng kết
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Tiền bàn:{' '}
-                  <strong>
-                    {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
-                  </strong>
-                </Typography>
-                {invoiceData.orders.length > 0 && (
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Tiền đồ ăn:{' '}
-                    <strong>
-                      {parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ
+                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                  <Typography variant="body1" sx={{ mb: 1, flex: '0 0 50%', borderRight: '1px solid #ccc' }}>
+                    Tiền bàn:{' '}
+                    <strong style={{ color: '#1976d2' }}>
+                      {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
                     </strong>
                   </Typography>
-                )}
-                <Typography variant="h6" sx={{ color: 'primary.main' }}>
-                  TỔNG CỘNG:{' '}
-                  <strong>
-                    {parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ
-                  </strong>
-                </Typography>
+                  {invoiceData.orders.length > 0 && (
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      Tiền đồ ăn:{' '}
+                      <strong style={{ color: '#1976d2' }}>
+                        {parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ
+                      </strong>
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ mt: 1, pt: 2, borderTop: '2px solid #1976d2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Typography variant="h6"  >
+                    TỔNG CỘNG:{' '}
+                    <strong style={{ color: '#1976d2' }}>
+                      {parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ
+                    </strong>
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </DialogContent>
