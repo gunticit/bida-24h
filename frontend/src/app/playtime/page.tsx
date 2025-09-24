@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Container,
@@ -43,6 +43,7 @@ import {
   TakeoutDining as TakeawayIcon,
   RestaurantMenu as RestaurantIcon,
   CloudDownload as CloudDownloadIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material'
 import { apiService } from '@/lib/api'
 import { StatisticsCards } from '@/components/playtime'
@@ -54,6 +55,7 @@ import timezone from 'dayjs/plugin/timezone'
 import SideBar from '@/app/SideBar'
 import usePlaytime from '@/hook/playtime'
 import Loading from '@/components/loading'
+import BasicModal from '@/components/modal'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -78,6 +80,8 @@ export default function PlaytimePage() {
     invoiceData,
     snackbar,
     viewMode,
+    openModel,
+    setOpenModel,
     setViewMode,
     loadUser,
     loadSessions,
@@ -107,7 +111,13 @@ export default function PlaytimePage() {
     setFoodFormData,
     recalculateFoodTotal,
     handleExportExcel,
+    handleDownloadReport,
+    reportLoading,
+    handlePrintReport,
   } = usePlaytime()
+
+  const [fromDate, setFromDate] = useState<string | null>(null)
+  const [toDate, setToDate] = useState<string | null>(null)
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -133,7 +143,7 @@ export default function PlaytimePage() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, position: 'relative'}}>
+    <Box sx={{ flexGrow: 1, position: 'relative' }}>
       <SideBar title="Quản lý Giờ chơi" href="/playtime" user={user} icon={<CalendarIcon />}>
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           <Box
@@ -599,35 +609,64 @@ export default function PlaytimePage() {
           <DialogTitle>Hóa đơn - Giờ chơi #{invoiceData.session?.id}</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
-              <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'space-between' }}>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+              <Box
+                sx={{
+                  mb: 3,
+                  p: 2,
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 1,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Bàn:</strong>{' '}
                   {tables.find((t) => t.id === invoiceData.session?.table_id)?.name || 'N/A'}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Giá/giờ:</strong>{' '}
                   {parseInt(invoiceData.session?.hour_price.toString() || '0').toLocaleString(
                     'vi-VN',
                   )}{' '}
                   đ
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Thời gian bắt đầu:</strong>{' '}
                   {invoiceData.session?.start_time
                     ? new Date(invoiceData.session.start_time).toLocaleString('vi-VN')
                     : 'N/A'}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Thời gian kết thúc:</strong>{' '}
                   {invoiceData.session?.end_time
                     ? new Date(invoiceData.session.end_time).toLocaleString('vi-VN')
                     : 'Đang chơi'}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Thời gian chơi:</strong>{' '}
                   {invoiceData.session ? calculatePlayTime(invoiceData.session) : 'N/A'}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
+                >
                   <strong>Tiền bàn:</strong>{' '}
                   {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
                 </Typography>
@@ -668,8 +707,18 @@ export default function PlaytimePage() {
               )}
 
               <Box sx={{ p: 2, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                  <Typography variant="body1" sx={{ mb: 1, flex: '0 0 50%', borderRight: '1px solid #ccc' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 1,
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{ mb: 1, flex: '0 0 50%', borderRight: '1px solid #ccc' }}
+                  >
                     Tiền bàn:{' '}
                     <strong style={{ color: '#1976d2' }}>
                       {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
@@ -684,8 +733,18 @@ export default function PlaytimePage() {
                     </Typography>
                   )}
                 </Box>
-                <Box sx={{ mt: 1, pt: 2, borderTop: '2px solid #1976d2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Typography variant="h6"  >
+                <Box
+                  sx={{
+                    mt: 1,
+                    pt: 2,
+                    borderTop: '2px solid #1976d2',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Typography variant="h6">
                     TỔNG CỘNG:{' '}
                     <strong style={{ color: '#1976d2' }}>
                       {parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ
@@ -730,16 +789,73 @@ export default function PlaytimePage() {
           </Alert>
         </Snackbar>
       </SideBar>
-      <Box sx={{ position: 'fixed', display: 'flex', flexDirection: 'column', bottom: '50%', right: 16, zIndex: 10, gap: 2 }}>
-        <Button 
-            variant="outlined"
-            onClick={handleExportExcel}
-            sx={{ width: { sm: 'auto', xs: '100%' }, p: 1 }}
-            title="Xuất Excel"
+      <Box
+        sx={{
+          position: 'fixed',
+          display: 'flex',
+          flexDirection: 'column',
+          bottom: '50%',
+          right: 16,
+          zIndex: 10,
+          gap: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={handleExportExcel}
+          sx={{ width: { sm: 'auto', xs: '100%' }, p: 1 }}
+          title="Xuất Excel"
         >
           <CloudDownloadIcon />
         </Button>
       </Box>
+      <BasicModal open={openModel} setOpen={setOpenModel}>
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            Tải báo cáo doanh thu
+          </Typography>
+        </Box>
+        <Box>
+          <TextField
+            label="Từ ngày"
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            sx={{ mr: 2, mb: 2 }}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Đến ngày"
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            sx={{ mb: 2 }}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Box>
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<DownloadIcon />}
+            sx={{ m: 3 }}
+            onClick={handleDownloadReport}
+            disabled={reportLoading || !fromDate || !toDate}
+          >
+            {reportLoading ? 'Đang tải...' : 'Tải báo cáo Excel'}
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<PrintIcon />}
+            sx={{ m: 3 }}
+            onClick={handlePrintReport}
+            disabled={reportLoading || !fromDate || !toDate}
+          >
+            In báo cáo
+          </Button>
+        </Box>
+      </BasicModal>
     </Box>
   )
 }

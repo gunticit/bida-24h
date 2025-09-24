@@ -287,117 +287,145 @@ export default function UserSettingPage() {
     <Box sx={{ flexGrow: 1 }}>
       {/* App Bar */}
       <SideBar title="Cài đặt hệ thống" href="/setting" user={user} icon={<PersonIcon />}>
+        {/* Main Content */}
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
+            <Typography variant="h4">Quản lý người dùng</Typography>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+              Thêm người dùng mới
+            </Button>
+          </Box>
 
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4">Quản lý người dùng</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-            Thêm người dùng mới
-          </Button>
-        </Box>
-
-        <Card>
-          <CardContent>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Tên</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Vai trò</TableCell>
-                    <TableCell>Ngày tạo</TableCell>
-                    <TableCell>Thao tác</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {users.map((userItem) => (
-                    <TableRow key={userItem.id}>
-                      <TableCell>{userItem.id}</TableCell>
-                      <TableCell>{userItem.name}</TableCell>
-                      <TableCell>{userItem.email}</TableCell>
-                      <TableCell>{getRoleChip(userItem.role || 'staff')}</TableCell>
-                      <TableCell>
-                        {new Date(userItem.created_at).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title="Sửa người dùng">
-                            <MuiIconButton
-                              size="small"
-                              color="primary"
-                              onClick={() => handleOpenDialog(userItem)}
-                            >
-                              <EditIcon />
-                            </MuiIconButton>
-                          </Tooltip>
-                          <Tooltip title="Xóa người dùng">
-                            <span>
+          <Card>
+            <CardContent>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>ID</TableCell>
+                      <TableCell>Tên</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Vai trò</TableCell>
+                      <TableCell>Ngày tạo</TableCell>
+                      <TableCell>Thao tác</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {users.map((userItem) => (
+                      <TableRow key={userItem.id}>
+                        <TableCell>{userItem.id}</TableCell>
+                        <TableCell>{userItem.name}</TableCell>
+                        <TableCell>{userItem.email}</TableCell>
+                        <TableCell>{getRoleChip(userItem.role || 'staff')}</TableCell>
+                        <TableCell>
+                          {new Date(userItem.created_at).toLocaleDateString('vi-VN')}
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Tooltip title="Sửa người dùng">
                               <MuiIconButton
                                 size="small"
-                                color="error"
-                                onClick={() => handleDeleteUser(userItem.id)}
-                                disabled={userItem.id === user?.id}
+                                color="primary"
+                                onClick={() => handleOpenDialog(userItem)}
                               >
-                                <DeleteIcon />
+                                <EditIcon />
                               </MuiIconButton>
-                            </span>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      </Container>
+                            </Tooltip>
+                            <Tooltip title="Xóa người dùng">
+                              <span>
+                                <MuiIconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => handleDeleteUser(userItem.id)}
+                                  disabled={userItem.id === user?.id}
+                                >
+                                  <DeleteIcon />
+                                </MuiIconButton>
+                              </span>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Container>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingUser ? 'Sửa người dùng' : 'Thêm người dùng mới'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Tên người dùng"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              fullWidth
-              required
-            />
+        {/* Add/Edit Dialog */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+          <DialogTitle>{editingUser ? 'Sửa người dùng' : 'Thêm người dùng mới'}</DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                label="Tên người dùng"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                fullWidth
+                required
+              />
 
-            <TextField
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              fullWidth
-              required
-            />
+              <TextField
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                fullWidth
+                required
+              />
 
-            <FormControl fullWidth>
-              <InputLabel>Vai trò</InputLabel>
-              <Select
-                value={formData.role}
-                label="Vai trò"
-                onChange={(e) => handleInputChange('role', e.target.value)}
-              >
-                <MenuItem value="staff">Nhân viên</MenuItem>
-                <MenuItem value="admin">Quản trị viên</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>Vai trò</InputLabel>
+                <Select
+                  value={formData.role}
+                  label="Vai trò"
+                  onChange={(e) => handleInputChange('role', e.target.value)}
+                >
+                  <MenuItem value="staff">Nhân viên</MenuItem>
+                  <MenuItem value="admin">Quản trị viên</MenuItem>
+                </Select>
+              </FormControl>
 
-            {!editingUser && (
-              <>
+              {!editingUser && (
+                <>
+                  <TextField
+                    label="Mật khẩu"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    fullWidth
+                    required
+                    InputProps={{
+                      endAdornment: (
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          {showPassword ? <HideIcon /> : <ViewIcon />}
+                        </IconButton>
+                      ),
+                    }}
+                  />
+
+                  <TextField
+                    label="Xác nhận mật khẩu"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password_confirmation}
+                    onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
+                    fullWidth
+                    required
+                  />
+                </>
+              )}
+
+              {editingUser && (
                 <TextField
-                  label="Mật khẩu"
+                  label="Mật khẩu mới (để trống nếu không thay đổi)"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   fullWidth
-                  required
                   InputProps={{
                     endAdornment: (
                       <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
@@ -406,62 +434,35 @@ export default function UserSettingPage() {
                     ),
                   }}
                 />
+              )}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
+              Hủy
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              startIcon={<SaveIcon />}
+              disabled={!formData.name || !formData.email}
+            >
+              {editingUser ? 'Cập nhật' : 'Thêm mới'}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-                <TextField
-                  label="Xác nhận mật khẩu"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password_confirmation}
-                  onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
-                  fullWidth
-                  required
-                />
-              </>
-            )}
-
-            {editingUser && (
-              <TextField
-                label="Mật khẩu mới (để trống nếu không thay đổi)"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                fullWidth
-                InputProps={{
-                  endAdornment: (
-                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                      {showPassword ? <HideIcon /> : <ViewIcon />}
-                    </IconButton>
-                  ),
-                }}
-              />
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
-            Hủy
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            startIcon={<SaveIcon />}
-            disabled={!formData.name || !formData.email}
-          >
-            {editingUser ? 'Cập nhật' : 'Thêm mới'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </SideBar>
     </Box>
   )

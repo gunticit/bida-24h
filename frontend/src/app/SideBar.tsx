@@ -152,8 +152,8 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                       backgroundColor: isActive ? 'rgba(25, 118, 210, 0.12)' : 'transparent',
                       color: isActive ? 'primary.main' : 'inherit',
                       '&:hover': {
-                        backgroundColor: isActive 
-                          ? 'rgba(25, 118, 210, 0.2)' 
+                        backgroundColor: isActive
+                          ? 'rgba(25, 118, 210, 0.2)'
                           : 'rgba(0, 0, 0, 0.04)',
                       },
                       borderRight: isActive ? `3px solid ${theme.palette.primary.main}` : 'none',
@@ -170,13 +170,13 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                     >
                       {item.icon}
                     </ListItemIcon>
-                    <ListItemText 
-                      primary={item.text} 
-                      sx={{ 
+                    <ListItemText
+                      primary={item.text}
+                      sx={{
                         opacity: isExpanded ? 1 : 0,
                         color: isActive ? 'primary.main' : 'inherit',
                         fontWeight: isActive ? 'bold' : 'normal',
-                      }} 
+                      }}
                     />
                   </ListItemButton>
                 </ListItem>

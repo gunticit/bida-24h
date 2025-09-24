@@ -441,7 +441,15 @@ export default function DineInPage() {
       <SideBar
         title="Bảng điều khiển"
         href="/dine-in"
-        user={user as { id: number; name: string; email: string; role?: string; [key: string]: unknown } | null}
+        user={
+          user as {
+            id: number
+            name: string
+            email: string
+            role?: string
+            [key: string]: unknown
+          } | null
+        }
         icon={<RestaurantIcon />}
       >
         {/*Date Range Filter and Download Buttons*/}

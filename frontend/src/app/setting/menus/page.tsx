@@ -48,6 +48,7 @@ import {
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import SideBar from '@/app/SideBar'
+import { formatMoney } from '@/utils/formatters'
 
 interface MenuItem {
   id: number
@@ -574,10 +575,10 @@ function MenuTable({
                   <TableCell>{menu.id}</TableCell>
                   <TableCell>{menu.name}</TableCell>
                   <TableCell>{getCategoryChip(menu.category)}</TableCell>
-                  <TableCell>{menu.price.toLocaleString('vi-VN')}</TableCell>
+                  <TableCell>{formatMoney(menu.price)}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">{costPrice.toLocaleString('vi-VN')}</Typography>
+                      <Typography variant="body2">{formatMoney(costPrice)}</Typography>
                       {!menu.cost_price && (
                         <Chip label="Tự động" size="small" variant="outlined" color="info" />
                       )}

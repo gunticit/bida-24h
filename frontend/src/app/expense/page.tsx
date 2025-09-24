@@ -35,6 +35,7 @@ import { apiService, User } from '@/lib/api'
 import { Expense, ExpenseSummary } from '@/types/api'
 import { useRouter } from 'next/navigation'
 import SideBar from '@/app/SideBar'
+import { formatMoney } from '@/utils/formatters'
 
 interface ApiError {
   message?: string
@@ -285,13 +286,6 @@ const ExpensePage = () => {
     setOpen(true)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount)
-  }
-
   const getCategoryLabel = (category: string) => {
     return categories.find((cat) => cat.value === category)?.label || category
   }
@@ -345,12 +339,7 @@ const ExpensePage = () => {
   }
 
   return (
-    <SideBar
-      title="Quản lý chi phí phát sinh"
-      href="/expense"
-      user={user}
-      icon={<BarChartIcon />}
-    >
+    <SideBar title="Quản lý chi phí phát sinh" href="/expense" user={user} icon={<BarChartIcon />}>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -402,7 +391,7 @@ const ExpensePage = () => {
                     Tổng cộng
                   </Typography>
                   <Typography variant="h6" component="div">
-                    {formatCurrency(summary.total)}
+                    {formatMoney(summary.total)}
                   </Typography>
                 </CardContent>
               </Card>
@@ -448,7 +437,7 @@ const ExpensePage = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" color="error">
-                        {formatCurrency(expense.amount)}
+                        {formatMoney(expense.amount)}
                       </Typography>
                     </TableCell>
                     <TableCell>{expense.description}</TableCell>

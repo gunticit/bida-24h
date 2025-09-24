@@ -44,6 +44,7 @@ const usePlaytime = (): IUserPlayTime => {
   const [openFoodDialog, setOpenFoodDialog] = useState<boolean>(false)
   const [openFoodListDialog, setOpenFoodListDialog] = useState<boolean>(false)
   const [selectedSession, setSelectedSession] = useState<GameSession | null>(null)
+  const [openModel, setOpenModel] = useState<boolean>(false)
   const [foodFormData, setFoodFormData] = useState<FoodData>({
     menu_id: 0,
     quantity: 1,
@@ -69,6 +70,46 @@ const usePlaytime = (): IUserPlayTime => {
   const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>(
     'playingOrLast7Days',
   )
+  const [reportLoading, setReportLoading] = useState<boolean>(false)
+
+  const handleDownloadReport = async (fromDate: string, toDate: string) => {
+    setReportLoading(true)
+    try {
+      const response = await apiService.downloadReport(fromDate, toDate)
+      const url = window.URL.createObjectURL(new Blob([response]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `report_${fromDate}_to_${toDate}.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+    } catch (error) {
+      console.error('Failed to download report:', error)
+      showSnackbar('Không thể tải báo cáo', 'error')
+    } finally {
+      setReportLoading(false)
+    }
+  }
+  
+  const handlePrintReport = async (fromDate: string, toDate: string) => {
+    setReportLoading(true)
+    try {
+      const response = await apiService.downloadReport(fromDate, toDate)
+      const url = window.URL.createObjectURL(new Blob([response]))
+      const printWindow = window.open(url, '_blank')
+      if (printWindow) {
+        printWindow.focus()
+        printWindow.print()
+      } else {
+        showSnackbar('Không thể mở cửa sổ in', 'error')
+      }
+    } catch (error) {
+      console.error('Failed to print report:', error)
+      showSnackbar('Không thể in báo cáo', 'error')
+    } finally {
+      setReportLoading(false)
+    }
+  }
 
   const loadUser = async () => {
     try {
@@ -460,7 +501,7 @@ const usePlaytime = (): IUserPlayTime => {
   }
 
   const handleExportExcel = () => {
-    
+    setOpenModel(true)
   }
 
   return {
@@ -482,6 +523,8 @@ const usePlaytime = (): IUserPlayTime => {
     invoiceData,
     snackbar,
     viewMode,
+    openModel,
+    setOpenModel,
     setViewMode,
     loadUser,
     loadSessions,
@@ -511,6 +554,9 @@ const usePlaytime = (): IUserPlayTime => {
     setFoodFormData,
     recalculateFoodTotal,
     handleExportExcel,
+    handleDownloadReport,
+    reportLoading,
+    handlePrintReport,
   }
 }
 

@@ -48,6 +48,8 @@ export type IUserPlayTime = {
   invoiceData: InvoiceData
   snackbar: { open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }
   viewMode: 'todayOrPlaying' | 'playingOrLast7Days'
+  openModel: boolean
+  setOpenModel: (open: boolean) => void
   setViewMode: (mode: 'todayOrPlaying' | 'playingOrLast7Days') => void
   loadUser: () => Promise<void>
   loadSessions: (mode?: viewModeType) => Promise<void>
