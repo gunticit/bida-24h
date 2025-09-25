@@ -37,10 +37,12 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   TableRestaurant as TableIcon,
+  QrCode2 as QrCodeIcon,
 } from '@mui/icons-material'
 import { apiService, User, Table } from '@/lib/api'
 import SideBar from '@/app/SideBar'
 import { formatMoney } from '@/utils/formatters'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface TableFormData {
   name: string
@@ -69,6 +71,8 @@ export default function TableSettingPage() {
     message: '',
     severity: 'info',
   })
+  const [qrDialogOpen, setQrDialogOpen] = useState(false)
+  const [qrTable, setQrTable] = useState<Table | null>(null)
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -150,16 +154,19 @@ export default function TableSettingPage() {
 
   const handleSubmit = async () => {
     try {
+      // Đảm bảo price_per_hour là number
+      const price = typeof formData.price_per_hour === 'string' ? parseInt(formData.price_per_hour) : formData.price_per_hour
+      const dataToSend = {
+        ...formData,
+        price_per_hour: price,
+      }
       if (editingTable) {
-        // Update existing table
-        await apiService.updateTable(editingTable.id, formData)
+        await apiService.updateTable(editingTable.id, dataToSend)
         showSnackbar('Cập nhật bàn thành công!', 'success')
       } else {
-        // Create new table
-        await apiService.createTable(formData)
+        await apiService.createTable(dataToSend)
         showSnackbar('Thêm bàn mới thành công!', 'success')
       }
-
       handleCloseDialog()
       loadTables()
     } catch (error) {
@@ -179,6 +186,15 @@ export default function TableSettingPage() {
         showSnackbar('Có lỗi xảy ra khi xóa bàn', 'error')
       }
     }
+  }
+
+  const handleShowQrCode = async (table: Table) => {
+    setQrTable(table)
+    setQrDialogOpen(true)
+  }
+  const handleCloseQrDialog = () => {
+    setQrDialogOpen(false)
+    setQrTable(null)
   }
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
@@ -289,6 +305,15 @@ export default function TableSettingPage() {
                                 <DeleteIcon />
                               </MuiIconButton>
                             </Tooltip>
+                            <Tooltip title="Mã QR bàn">
+                              <MuiIconButton
+                                size="small"
+                                color="success"
+                                onClick={() => handleShowQrCode(table)}
+                              >
+                                <QrCodeIcon />
+                              </MuiIconButton>
+                            </Tooltip>
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -349,10 +374,30 @@ export default function TableSettingPage() {
               onClick={handleSubmit}
               variant="contained"
               startIcon={<SaveIcon />}
-              disabled={!formData.name || formData.price_per_hour <= 0}
+              disabled={!formData.name || Number(formData.price_per_hour) <= 0}
             >
               {editingTable ? 'Cập nhật' : 'Thêm mới'}
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog hiển thị QR code */}
+        <Dialog open={qrDialogOpen} onClose={handleCloseQrDialog} maxWidth="xs" fullWidth>
+          <DialogTitle>Mã QR bàn: {qrTable?.name}</DialogTitle>
+          <DialogContent sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            {qrTable ? (
+              <QRCodeSVG
+                value={`mobile24hbilliards://booking?table=${qrTable.id}`}
+                size={256}
+                level="H"
+                includeMargin={true}
+              />
+            ) : (
+              <Typography>Đang tải mã QR...</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseQrDialog}>Đóng</Button>
           </DialogActions>
         </Dialog>
 

@@ -79,3 +79,6 @@ frontend/out/
 
 # Mysql
 mysql_data/
+
+# Mobile
+/mobile
