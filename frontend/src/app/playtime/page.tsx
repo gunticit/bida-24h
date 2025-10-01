@@ -57,6 +57,7 @@ import SideBar from '@/app/SideBar'
 import usePlaytime from '@/hook/playtime'
 import Loading from '@/components/loading'
 import BasicModal from '@/components/modal'
+import { useOptimizedViewMode, ViewMode } from '@/presentation/hooks/useOptimizedViewMode'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -119,6 +120,18 @@ export default function PlaytimePage() {
 
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
+
+  // Optimized view mode handling
+  const handleViewModeChange = useCallback((newMode: ViewMode) => {
+    setViewMode(newMode)
+    loadSessions(newMode)
+  }, [setViewMode, loadSessions])
+
+  const { buttonProps, commonButtonSx } = useOptimizedViewMode({
+    currentViewMode: viewMode as ViewMode,
+    loading,
+    onViewModeChange: handleViewModeChange
+  })
 
   // Helper function to set default datetime values
   const setDefaultDateRange = () => {
@@ -248,7 +261,7 @@ export default function PlaytimePage() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenDialog()}
-              >
+              >k
                 Tạo giờ chơi mới
               </Button>
             </Box>
@@ -257,24 +270,22 @@ export default function PlaytimePage() {
           {/* View Mode Toggle */}
           <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
             <Button
-              variant={viewMode === 'todayOrPlaying' ? 'contained' : 'outlined'}
-              onClick={() => {
-                setViewMode('todayOrPlaying')
-                loadSessions('todayOrPlaying')
-              }}
+              variant={buttonProps.todayOrPlaying.variant}
+              onClick={buttonProps.todayOrPlaying.onClick}
               size="small"
+              disabled={buttonProps.todayOrPlaying.disabled}
+              sx={commonButtonSx}
             >
-              Hôm nay + Đang chơi
+              {buttonProps.todayOrPlaying.text}
             </Button>
             <Button
-              variant={viewMode === 'playingOrLast7Days' ? 'contained' : 'outlined'}
-              onClick={() => {
-                setViewMode('playingOrLast7Days')
-                loadSessions('playingOrLast7Days')
-              }}
+              variant={buttonProps.playingOrLast7Days.variant}
+              onClick={buttonProps.playingOrLast7Days.onClick}
               size="small"
+              disabled={buttonProps.playingOrLast7Days.disabled}
+              sx={commonButtonSx}
             >
-              Đang chơi + 7 ngày qua
+              {buttonProps.playingOrLast7Days.text}
             </Button>
           </Box>
 

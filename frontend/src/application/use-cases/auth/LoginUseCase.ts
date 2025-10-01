@@ -25,6 +25,7 @@ export class LoginUseCase {
       
       return result;
     } catch (error) {
+      console.error('Login error:', error);
       throw new Error('Login failed: Invalid credentials');
     }
   }

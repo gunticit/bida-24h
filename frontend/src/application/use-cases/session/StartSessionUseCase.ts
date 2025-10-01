@@ -37,6 +37,7 @@ export class StartSessionUseCase {
     try {
       return await this.sessionRepository.startSession(data);
     } catch (error) {
+      console.error('Start session error:', error);
       throw new Error('Failed to start session');
     }
   }

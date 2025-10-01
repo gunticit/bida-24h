@@ -17,6 +17,7 @@ export class AuthApiRepository implements AuthRepositoryInterface {
     try {
       return await this.apiClient.get<UserResponseDTO>('/auth/user');
     } catch (error) {
+      console.error('Get current user error:', error);
       return null;
     }
   }
