@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Chip } from '@mui/material'
 import {
   Restaurant as FoodIcon,
@@ -72,6 +72,19 @@ const usePlaytime = (): IUserPlayTime => {
   const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>(
     'playingOrLast7Days',
   )
+  
+  // Use ref to track viewMode to avoid infinite loops in useCallback dependencies
+  const viewModeRef = useRef(viewMode)
+  viewModeRef.current = viewMode
+
+  // Define showSnackbar first to avoid circular dependencies
+  const showSnackbar = useCallback((message: string, severity: ISeverity) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    })
+  }, [])
 
   const handleDownloadReport = async (fromDate: string, toDate: string) => {
     setReportLoading(true)
@@ -100,7 +113,7 @@ const usePlaytime = (): IUserPlayTime => {
     }
   }
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
       const userData = await apiService.getCurrentUser()
       setUser(userData)
@@ -110,11 +123,11 @@ const usePlaytime = (): IUserPlayTime => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
 
-  const loadSessions = async (mode?: 'todayOrPlaying' | 'playingOrLast7Days') => {
+  const loadSessions = useCallback(async (mode?: 'todayOrPlaying' | 'playingOrLast7Days') => {
     try {
-      const currentMode = mode || viewMode
+      const currentMode = mode || viewModeRef.current
       let sessionsData
 
       if (currentMode === 'todayOrPlaying') {
@@ -128,9 +141,9 @@ const usePlaytime = (): IUserPlayTime => {
       console.error('Failed to load sessions:', error)
       showSnackbar('Không thể tải danh sách session', 'error')
     }
-  }
+  }, [showSnackbar])
 
-  const loadTables = async () => {
+  const loadTables = useCallback(async () => {
     try {
       const tablesData = await apiService.getTables()
       setTables(tablesData)
@@ -141,9 +154,9 @@ const usePlaytime = (): IUserPlayTime => {
       console.error('Failed to load tables:', error)
       showSnackbar('Không thể tải danh sách bàn', 'error')
     }
-  }
+  }, [showSnackbar])
 
-  const loadMenus = async () => {
+  const loadMenus = useCallback(async () => {
     try {
       const menusData = await apiService.getAvailableMenus()
       setMenus(menusData)
@@ -154,7 +167,7 @@ const usePlaytime = (): IUserPlayTime => {
       console.error('Failed to load menus:', error)
       showSnackbar('Không thể tải danh sách thực đơn', 'error')
     }
-  }
+  }, [showSnackbar])
 
   const handleOpenDialog = (session?: GameSession) => {
     if (session) {
@@ -471,14 +484,6 @@ const usePlaytime = (): IUserPlayTime => {
       console.error('Lỗi tạo hóa đơn:', error)
       showSnackbar('Không thể tạo hóa đơn', 'error')
     }
-  }
-
-  const showSnackbar = (message: string, severity: ISeverity) => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    })
   }
 
   const handleRedirectTakeAway = () => {
