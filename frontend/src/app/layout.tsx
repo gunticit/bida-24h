@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import ThemeRegistry from '@/components/providers/ThemeRegistry'
+import GlobalChatWidget from '@/components/chat/GlobalChatWidget'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,7 +34,10 @@ export default function RootLayout({
         <meta name="emotion-insertion-point" content="" />
       </head>
       <body className={inter.className}>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+          {children}
+          <GlobalChatWidget />
+        </ThemeRegistry>
       </body>
     </html>
   )

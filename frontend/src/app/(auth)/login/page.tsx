@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     setLoading(false)
-  }, [])
+  }, [setLoading])
 
   if (loading) {
     return (
@@ -206,16 +206,18 @@ export default function LoginPage() {
               }}
             >
               <Avatar
-                src="/fingerprint.jpg"
+                src="/logo.jpg"
                 alt="Login Image"
                 sx={{
                   borderRadius: '50%',
+                  p: '30px', 
                   width: '200px',
                   height: '200px',
                   boxShadow:
                     'rgb(209, 217, 230) 10px 10px 10px, rgb(249, 249, 249) -10px -10px 10px',
-                  border: '5px solid #589eff',
+                  border: '5px solid #ff0000',
                   color: 'rgb(249, 249, 249)',
+                  bgcolor: '#fff',
                 }}
               />
             </Box>

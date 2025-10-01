@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Playtime Report API</title>
+</head>
+<body>
+    <h1>Test Playtime Report Functionality</h1>
+    
+    <div>
+        <label>From Date: <input type="date" id="fromDate" value="2024-01-01"></label>
+        <label>To Date: <input type="date" id="toDate" value="2024-12-31"></label>
+    </div>
+    
+    <button onclick="testGetReport()">Test Get Report Data</button>
+    <button onclick="testDownloadReport()">Test Download Report</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        // Mock token for testing - replace with actual token
+        const MOCK_TOKEN = 'your_actual_token_here';
+        
+        async function testGetReport() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/sessions/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${MOCK_TOKEN}`
+                        }
+                    }
+                );
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = 
+                    `<h3>Get Report Response (${response.status}):</h3>
+                     <pre>${result}</pre>`;
+                     
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testDownloadReport() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/sessions/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'Authorization': `Bearer ${MOCK_TOKEN}`
+                        }
+                    }
+                );
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'playtime_report.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    document.getElementById('result').innerHTML = 
+                        `<p style="color: green;">Download successful!</p>`;
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('result').innerHTML = 
+                        `<h3>Download Error (${response.status}):</h3>
+                         <pre>${errorText}</pre>`;
+                }
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test without authentication first
+        async function testWithoutAuth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/sessions/report?from=2024-01-01&to=2024-12-31`);
+                const result = await response.text();
+                console.log('Without auth:', result);
+            } catch (error) {
+                console.error('Without auth error:', error);
+            }
+        }
+        
+        // Run basic test on load
+        testWithoutAuth();
+    </script>
+</body>
+</html>

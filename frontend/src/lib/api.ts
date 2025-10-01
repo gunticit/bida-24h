@@ -15,6 +15,7 @@ import type {
   TakeawayOrder,
   CreateTakeawayOrderData,
   TakeawayReportData,
+  PlaytimeReportData,
   Expense,
   ExpenseSummary,
   CreateExpenseData,
@@ -675,6 +676,40 @@ class ApiService {
       url += `?${params.join('&')}`
     }
     return this.request<CostBreakdownResponse>(url)
+  }
+
+  // Playtime session reports
+  async getPlaytimeReportData(fromDate: string, toDate: string): Promise<PlaytimeReportData> {
+    return this.request<PlaytimeReportData>(
+      `/sessions/report?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+    )
+  }
+
+  async downloadPlaytimeReport(fromDate: string, toDate: string): Promise<void> {
+    const response = await fetch(
+      `${API_BASE_URL}/sessions/report/download?from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.getToken()}`,
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      },
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `playtime-report-${fromDate}-${toDate}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   }
 }
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TakeawayOrderController;
 use App\Http\Controllers\Api\DineInOrderController;
 use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\RevenueController;
+use App\Http\Controllers\Api\SessionReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ExpenseController;
 
@@ -41,6 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sessions/playing-or-last7days', [SessionController::class, 'playingOrLast7Days']);
     Route::post('/sessions/{sessionId}/orders', [SessionController::class, 'addOrder']);
     Route::get('/sessions/today', [SessionController::class, 'today']);
+    
+    // Session report routes
+    Route::get('/sessions/report', [SessionReportController::class, 'report']);
+    Route::get('/sessions/report/download', [SessionReportController::class, 'downloadReport']);
+    
     Route::delete('/orders/{orderId}', [SessionController::class, 'removeOrder']);
     Route::put('/orders/{orderId}/quantity', [SessionController::class, 'updateOrderQuantity']);
     Route::apiResource('sessions', SessionController::class);

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Box, Typography, Card, CardContent, Grid, Button } from '@mui/material'
+
 import {
   Widgets as WidgetsIcon,
   Settings as SettingsIcon,
@@ -18,17 +19,8 @@ export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const token = apiService.getToken()
-    if (!token) {
-      router.push('/login')
-      return
-    }
-    loadUser()
-  }, [router])
-
-  const loadUser = async () => {
+  
+  const loadUser = useCallback(async () => {
     try {
       const userData = await apiService.getCurrentUser()
       setUser(userData)
@@ -38,7 +30,16 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    const token = apiService.getToken()
+    if (!token) {
+      router.push('/login')
+      return
+    }
+    loadUser()
+  }, [router, loadUser])
 
   if (loading) {
     return (

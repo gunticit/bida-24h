@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend API</title>
+</head>
+<body>
+    <h1>Test Playtime Report API</h1>
+    <button onclick="testReportAPI()">Test Report API</button>
+    <button onclick="testDownloadAPI()">Test Download API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testReportAPI() {
+            try {
+                const response = await fetch('http://localhost:8080/api/sessions/report?from_date=2024-01-01&to_date=2024-12-31', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        // Note: You'll need to add Authorization header with actual token
+                        // 'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testDownloadAPI() {
+            try {
+                const response = await fetch('http://localhost:8080/api/sessions/report/download?from_date=2024-01-01&to_date=2024-12-31', {
+                    method: 'GET',
+                    headers: {
+                        // Note: You'll need to add Authorization header with actual token
+                        // 'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'playtime_report.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                document.getElementById('result').innerHTML = '<p style="color: green;">Download started!</p>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -6,6 +6,7 @@ export interface User {
   role?: 'admin' | 'staff'
   created_at: string
   updated_at: string
+  [key: string]: unknown // Add index signature for compatibility
 }
 
 export interface LoginCredentials {
@@ -177,6 +178,42 @@ export interface TakeawayReportData {
   summary: {
     total_items_sold: number
     average_order_value: number
+  }
+}
+
+// Playtime Report interfaces
+export interface PlaytimeTableStats {
+  table_name: string
+  sessions_count: number
+  total_revenue: number
+  table_revenue: number
+  food_revenue: number
+  total_hours: number
+}
+
+export interface PlaytimeFoodStats {
+  menu_name: string
+  category: string
+  total_quantity: number
+  unit_price: number
+  total_amount: number
+}
+
+export interface PlaytimeReportData {
+  from_date: string
+  to_date: string
+  total_sessions: number
+  total_revenue: number
+  total_table_revenue: number
+  total_food_revenue: number
+  total_play_time: number // in minutes
+  table_stats: PlaytimeTableStats[]
+  food_stats: PlaytimeFoodStats[]
+  summary: {
+    avg_session_duration: number // in minutes
+    avg_revenue_per_session: number
+    total_play_hours: number
+    total_food_items_sold: number
   }
 }
 

@@ -4,6 +4,8 @@ export type CategoryChipInfo = {
   color: 'primary' | 'secondary' | 'warning' | 'info' | 'default'
 }
 
+import React from 'react'
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import type {
   User,
   GameSession,
@@ -30,7 +32,7 @@ export type SnackbarPrams = {
 }
 
 export type IUserPlayTime = {
-  router: any
+  router: AppRouterInstance
   user: User | null
   loading: boolean
   sessions: GameSession[]
@@ -88,6 +90,9 @@ export type IUserPlayTime = {
   handleRedirectDineIn: () => void
   setFormData: React.Dispatch<React.SetStateAction<CreateSessionData>>
   setFoodFormData: React.Dispatch<React.SetStateAction<FoodData>>
-  recalculateFoodTotal: (sessionId: number) => number
+  recalculateFoodTotal: (sessionId: number) => Promise<number>
   handleExportExcel: () => void
+  handleDownloadReport: (fromDate: string, toDate: string) => Promise<void>
+  reportLoading: boolean
+  handlePrintReport: (fromDate: string, toDate: string) => Promise<void>
 }

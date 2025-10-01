@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Box,
   Container,
@@ -116,8 +116,87 @@ export default function PlaytimePage() {
     handlePrintReport,
   } = usePlaytime()
 
-  const [fromDate, setFromDate] = useState<string | null>(null)
-  const [toDate, setToDate] = useState<string | null>(null)
+  const [fromDate, setFromDate] = useState<string>('')
+  const [toDate, setToDate] = useState<string>('')
+
+  // Helper function to set default datetime values
+  const setDefaultDateRange = () => {
+    const now = new Date()
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0)
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59)
+    
+    // Format to datetime-local format: YYYY-MM-DDTHH:MM
+    const formatDateTimeLocal = (date: Date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hour = String(date.getHours()).padStart(2, '0')
+      const minute = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day}T${hour}:${minute}`
+    }
+
+    setFromDate(formatDateTimeLocal(startOfDay))
+    setToDate(formatDateTimeLocal(endOfDay))
+  }
+
+  // Set quick date range presets
+  const setQuickDateRange = (type: 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth') => {
+    const now = new Date()
+    let startDate: Date
+    let endDate: Date
+
+    switch (type) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0)
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59)
+        break
+      case 'yesterday':
+        const yesterday = new Date(now)
+        yesterday.setDate(yesterday.getDate() - 1)
+        startDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0)
+        endDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59)
+        break
+      case 'thisWeek':
+        const startOfWeek = new Date(now)
+        startOfWeek.setDate(now.getDate() - now.getDay())
+        startDate = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate(), 0, 0)
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59)
+        break
+      case 'lastWeek':
+        const lastWeekStart = new Date(now)
+        lastWeekStart.setDate(now.getDate() - now.getDay() - 7)
+        const lastWeekEnd = new Date(lastWeekStart)
+        lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+        startDate = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate(), 0, 0)
+        endDate = new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate(), 23, 59)
+        break
+      case 'thisMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0)
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59)
+        break
+      default:
+        return
+    }
+
+    const formatDateTimeLocal = (date: Date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hour = String(date.getHours()).padStart(2, '0')
+      const minute = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day}T${hour}:${minute}`
+    }
+
+    setFromDate(formatDateTimeLocal(startDate))
+    setToDate(formatDateTimeLocal(endDate))
+  }
+
+  const initializeData = useCallback(() => {
+    loadUser()
+    loadSessions()
+    loadTables()
+    loadMenus()
+  }, [loadUser, loadSessions, loadTables, loadMenus])
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -126,11 +205,8 @@ export default function PlaytimePage() {
       return
     }
 
-    loadUser()
-    loadSessions()
-    loadTables()
-    loadMenus()
-  }, [router])
+    initializeData()
+  }, [router, initializeData])
 
   if (loading) {
     return (
@@ -814,33 +890,86 @@ export default function PlaytimePage() {
           <Typography variant="h6" gutterBottom>
             Tải báo cáo doanh thu
           </Typography>
+          
+          {/* Quick Date Range Buttons */}
+          <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setQuickDateRange('today')}
+            >
+              Hôm nay
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setQuickDateRange('yesterday')}
+            >
+              Hôm qua
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setQuickDateRange('thisWeek')}
+            >
+              Tuần này
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setQuickDateRange('lastWeek')}
+            >
+              Tuần trước
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setQuickDateRange('thisMonth')}
+            >
+              Tháng này
+            </Button>
+          </Box>
         </Box>
-        <Box>
-          <TextField
-            label="Từ ngày"
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            sx={{ mr: 2, mb: 2 }}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="Đến ngày"
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            sx={{ mb: 2 }}
-            InputLabelProps={{ shrink: true }}
-          />
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', mb: 2 }}>
+            <Button
+              size="small"
+              variant="text"
+              onClick={setDefaultDateRange}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              📅 Đặt mặc định (00:00 - 23:59 hôm nay)
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex' }}>
+            <TextField
+              label="Từ ngày và giờ"
+              type="datetime-local"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              sx={{ mr: 2, mb: 2 }}
+              InputLabelProps={{ shrink: true }}
+              helperText="Chọn ngày, giờ và phút bắt đầu"
+            />
+            <TextField
+              label="Đến ngày và giờ"
+              type="datetime-local"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              sx={{ mb: 2 }}
+              InputLabelProps={{ shrink: true }}
+              helperText="Chọn ngày, giờ và phút kết thúc"
+            />
+          </Box>
         </Box>
-        <Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
           <Button
             variant="contained"
             color="primary"
             startIcon={<DownloadIcon />}
-            sx={{ m: 3 }}
-            onClick={handleDownloadReport}
-            disabled={reportLoading || !fromDate || !toDate}
+            sx={{ m: 1, flexGrow: 1 }}
+            onClick={() => handleDownloadReport(fromDate, toDate)}
+            disabled={reportLoading || !fromDate.trim() || !toDate.trim() || new Date(fromDate) >= new Date(toDate)}
           >
             {reportLoading ? 'Đang tải...' : 'Tải báo cáo Excel'}
           </Button>
@@ -848,12 +977,27 @@ export default function PlaytimePage() {
             variant="outlined"
             color="primary"
             startIcon={<PrintIcon />}
-            sx={{ m: 3 }}
-            onClick={handlePrintReport}
-            disabled={reportLoading || !fromDate || !toDate}
+            sx={{ m: 1, flexGrow: 1 }}
+            onClick={() => handlePrintReport(fromDate, toDate)}
+            disabled={reportLoading || !fromDate.trim() || !toDate.trim() || new Date(fromDate) >= new Date(toDate)}
           >
             In báo cáo
           </Button>
+          
+          {/* Display selected range info */}
+          {fromDate && toDate && (
+            <Box sx={{ width: '100%', mt: 1, p: 1, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                📊 Báo cáo từ: <strong>{new Date(fromDate).toLocaleString('vi-VN')}</strong> 
+                {' '} đến: <strong>{new Date(toDate).toLocaleString('vi-VN')}</strong>
+              </Typography>
+              {new Date(fromDate) >= new Date(toDate) && (
+                <Typography variant="caption" color="error" sx={{ display: 'block' }}>
+                  ⚠️ Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc
+                </Typography>
+              )}
+            </Box>
+          )}
         </Box>
       </BasicModal>
     </Box>

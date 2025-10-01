@@ -19,6 +19,7 @@ import type {
 import { apiService } from '@/lib/api'
 import { generateInvoiceContent } from '@/utils/invoiceUtils'
 import { printInvoice } from '@/utils/printHelpers'
+import { printPlaytimeReport } from '@/utils/playtimeReportUtils'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -49,6 +50,7 @@ const usePlaytime = (): IUserPlayTime => {
     menu_id: 0,
     quantity: 1,
   })
+  const [reportLoading, setReportLoading] = useState<boolean>(false)
   const [sessionOrders, setSessionOrders] = useState<Order[]>([])
   const [openInvoiceDialog, setOpenInvoiceDialog] = useState<boolean>(false)
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
@@ -70,19 +72,12 @@ const usePlaytime = (): IUserPlayTime => {
   const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>(
     'playingOrLast7Days',
   )
-  const [reportLoading, setReportLoading] = useState<boolean>(false)
 
   const handleDownloadReport = async (fromDate: string, toDate: string) => {
     setReportLoading(true)
     try {
-      const response = await apiService.downloadReport(fromDate, toDate)
-      const url = window.URL.createObjectURL(new Blob([response]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `report_${fromDate}_to_${toDate}.xlsx`)
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode?.removeChild(link)
+      await apiService.downloadPlaytimeReport(fromDate, toDate)
+      showSnackbar('Tải báo cáo thành công!', 'success')
     } catch (error) {
       console.error('Failed to download report:', error)
       showSnackbar('Không thể tải báo cáo', 'error')
@@ -94,15 +89,9 @@ const usePlaytime = (): IUserPlayTime => {
   const handlePrintReport = async (fromDate: string, toDate: string) => {
     setReportLoading(true)
     try {
-      const response = await apiService.downloadReport(fromDate, toDate)
-      const url = window.URL.createObjectURL(new Blob([response]))
-      const printWindow = window.open(url, '_blank')
-      if (printWindow) {
-        printWindow.focus()
-        printWindow.print()
-      } else {
-        showSnackbar('Không thể mở cửa sổ in', 'error')
-      }
+      const reportData = await apiService.getPlaytimeReportData(fromDate, toDate)
+      printPlaytimeReport(reportData)
+      showSnackbar('In báo cáo thành công!', 'success')
     } catch (error) {
       console.error('Failed to print report:', error)
       showSnackbar('Không thể in báo cáo', 'error')
@@ -324,7 +313,7 @@ const usePlaytime = (): IUserPlayTime => {
   }
 
   // Hàm tính toán lại tổng tiền đồ ăn từ orders
-  const recalculateFoodTotal = async (sessionId: number): number => {
+  const recalculateFoodTotal = async (sessionId: number): Promise<number> => {
     try {
       const orders = await apiService.getOrders()
       const sessionOrders = orders.filter((order) => order.session_id === sessionId)
