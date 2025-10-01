@@ -46,6 +46,7 @@ import {
   Download as DownloadIcon,
 } from '@mui/icons-material'
 import { apiService } from '@/lib/api'
+import { MenuItem as MenuItemType } from '@/types/api'
 import { StatisticsCards } from '@/components/playtime'
 import { formatDateTime, formatMoney, calculatePlayTime, formatCurrency } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
@@ -495,13 +496,13 @@ export default function PlaytimePage() {
           <DialogTitle>Thêm món ăn cho giờ chơi #{selectedSession?.id}</DialogTitle>
           <DialogContent>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-              <Autocomplete
+              <Autocomplete<MenuItemType>
                 options={menus}
-                getOptionLabel={(option) =>
+                getOptionLabel={(option: MenuItemType) =>
                   `${option.name} - ${parseInt(option?.price?.toString()).toLocaleString('vi-VN')} đ`
                 }
                 value={menus.find((menu) => menu.id === foodFormData.menu_id) || null}
-                onChange={(_, newValue) => {
+                onChange={(_, newValue: MenuItemType | null) => {
                   setFoodFormData({
                     ...foodFormData,
                     menu_id: newValue ? newValue.id : 0,
@@ -510,7 +511,7 @@ export default function PlaytimePage() {
                 renderInput={(params) => (
                   <TextField {...params} label="Chọn món ăn" placeholder="Tìm kiếm món ăn..." />
                 )}
-                renderOption={(props, option) => {
+                renderOption={(props, option: MenuItemType) => {
                   const { key, ...otherProps } = props
                   return (
                     <Box component="li" key={key} {...otherProps}>
@@ -519,20 +520,20 @@ export default function PlaytimePage() {
                         <span style={{ flex: 1 }}>
                           {option.name} - {formatCurrency(option?.price)}
                         </span>
-                        {option.quantity <= 5 && (
+                        {option.quantity && (
                           <Chip
                             label={`Còn ${option.quantity}`}
                             size="small"
-                            color={option.quantity === 0 ? 'error' : 'warning'}
+                            color={option.quantity < 5 ? 'error' : option.quantity < 10 ? 'warning' : 'success'}
                           />
                         )}
                       </Box>
                     </Box>
                   )
                 }}
-                filterOptions={(options, { inputValue }) => {
+                filterOptions={(options: MenuItemType[], { inputValue }) => {
                   return options.filter(
-                    (option) =>
+                    (option: MenuItemType) =>
                       option.name.toLowerCase().includes(inputValue.toLowerCase()) ||
                       option.category.toLowerCase().includes(inputValue.toLowerCase()),
                   )
