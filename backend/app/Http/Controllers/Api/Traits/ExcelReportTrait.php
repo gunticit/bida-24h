@@ -12,6 +12,27 @@ use Carbon\Carbon;
 trait ExcelReportTrait
 {
     /**
+     * Clear all Excel files from reports directory
+     */
+    private function clearExcelFiles($directoryPath = null)
+    {
+        if (!$directoryPath) {
+            $directoryPath = storage_path('app/public/reports');
+        }
+        
+        if (!is_dir($directoryPath)) {
+            return;
+        }
+        
+        $files = glob($directoryPath . '/*.xlsx');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
+    /**
      * Format minutes to "X giờ Y phút" format
      */
     private function formatMinutesToHoursAndMinutes($totalMinutes)
@@ -36,6 +57,9 @@ trait ExcelReportTrait
      */
     private function createSessionExcelFile($reportData, $filePath)
     {
+        // Clear old Excel files before creating new one
+        $this->clearExcelFiles(dirname($filePath));
+        
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -181,6 +205,9 @@ trait ExcelReportTrait
      */
     private function createTakeawayExcelFile($reportData, $filePath)
     {
+        // Clear old Excel files before creating new one
+        $this->clearExcelFiles(dirname($filePath));
+        
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -273,6 +300,9 @@ trait ExcelReportTrait
      */
     private function createDineInExcelFile($reportData, $filePath)
     {
+        // Clear old Excel files before creating new one
+        $this->clearExcelFiles(dirname($filePath));
+        
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
