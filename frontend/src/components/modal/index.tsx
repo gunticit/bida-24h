@@ -30,6 +30,8 @@ export default function BasicModal({
     onClose={handleClose}
     aria-labelledby="modal-modal-title"
     aria-describedby="modal-modal-description"
+    disableEnforceFocus
+    disableAutoFocus
   >
     <Box sx={style}>
       {children}

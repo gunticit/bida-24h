@@ -48,7 +48,7 @@ import {
 import { apiService } from '@/lib/api'
 import { MenuItem as MenuItemType } from '@/types/api'
 import { StatisticsCards } from '@/components/playtime'
-import { formatDateTime, formatMoney, calculatePlayTime, formatCurrency } from '@/utils/formatters'
+import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -381,16 +381,16 @@ export default function PlaytimePage() {
                                   >
                                     <CancelIcon />
                                   </MuiIconButton>
-                                  <MuiIconButton
-                                    size="small"
-                                    color="info"
-                                    onClick={() => handleOpenFoodDialog(session)}
-                                    title="Thêm món ăn"
-                                  >
-                                    <FoodIcon />
-                                  </MuiIconButton>
                                 </>
                               )}
+                              {(session.status === 'playing' || user?.role === 'admin') && <MuiIconButton
+                                size="small"
+                                color="info"
+                                onClick={() => handleOpenFoodDialog(session)}
+                                title="Thêm món ăn"
+                              >
+                                <FoodIcon />
+                              </MuiIconButton>}
                               <MuiIconButton
                                 size="small"
                                 color="primary"
@@ -412,7 +412,14 @@ export default function PlaytimePage() {
         </Container>
 
         {/* Add/Edit Dialog */}
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <Dialog 
+          open={openDialog} 
+          onClose={handleCloseDialog} 
+          maxWidth="sm" 
+          fullWidth
+          disableEnforceFocus
+          disableAutoFocus
+        >
           <DialogTitle>{editingSession ? 'Chỉnh sửa giờ chơi' : 'Thêm giờ chơi mới'}</DialogTitle>
           <DialogContent>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
@@ -429,6 +436,10 @@ export default function PlaytimePage() {
                       table_id: tableId,
                       hour_price: selectedTable?.price_per_hour || formData.hour_price,
                     })
+                  }}
+                  MenuProps={{
+                    disablePortal: true,
+                    keepMounted: false,
                   }}
                 >
                   {tables.map((table) => (
@@ -492,14 +503,20 @@ export default function PlaytimePage() {
         </Dialog>
 
         {/* Add Food Dialog */}
-        <Dialog open={openFoodDialog} onClose={handleCloseFoodDialog} maxWidth="sm" fullWidth>
+        <Dialog 
+          open={openFoodDialog} 
+          onClose={handleCloseFoodDialog} 
+          maxWidth="sm" 
+          fullWidth
+          disableEnforceFocus
+        >
           <DialogTitle>Thêm món ăn cho giờ chơi #{selectedSession?.id}</DialogTitle>
           <DialogContent>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
               <Autocomplete<MenuItemType>
                 options={menus}
                 getOptionLabel={(option: MenuItemType) =>
-                  `${option.name} - ${parseInt(option?.price?.toString()).toLocaleString('vi-VN')} đ`
+                  `${option.name} - ${formatMoney(option?.price)}`
                 }
                 value={menus.find((menu) => menu.id === foodFormData.menu_id) || null}
                 onChange={(_, newValue: MenuItemType | null) => {
@@ -508,6 +525,7 @@ export default function PlaytimePage() {
                     menu_id: newValue ? newValue.id : 0,
                   })
                 }}
+                disablePortal
                 renderInput={(params) => (
                   <TextField {...params} label="Chọn món ăn" placeholder="Tìm kiếm món ăn..." />
                 )}
@@ -518,7 +536,7 @@ export default function PlaytimePage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                         {getCategoryChipLocal(option.category)}
                         <span style={{ flex: 1 }}>
-                          {option.name} - {formatCurrency(option?.price)}
+                          {option.name} - {formatMoney(option?.price)}
                         </span>
                         {option.quantity && (
                           <Chip
@@ -584,6 +602,7 @@ export default function PlaytimePage() {
           onClose={handleCloseFoodListDialog}
           maxWidth="md"
           fullWidth
+          disableEnforceFocus
         >
           <DialogTitle>Danh sách món ăn - Giờ chơi #{selectedSession?.id}</DialogTitle>
           <DialogContent>
@@ -622,7 +641,7 @@ export default function PlaytimePage() {
                           <TableCell>
                             {new Date(order.created_at).toLocaleString('vi-VN')}
                           </TableCell>
-                          <TableCell>
+                          {(selectedSession?.status === 'playing' || user?.role === 'admin') && <TableCell>
                             <MuiIconButton
                               size="small"
                               color="error"
@@ -631,7 +650,7 @@ export default function PlaytimePage() {
                             >
                               <DeleteIcon />
                             </MuiIconButton>
-                          </TableCell>
+                          </TableCell>}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -682,7 +701,13 @@ export default function PlaytimePage() {
         </Dialog>
 
         {/* Invoice Dialog */}
-        <Dialog open={openInvoiceDialog} onClose={handleCloseInvoiceDialog} maxWidth="md" fullWidth>
+        <Dialog 
+          open={openInvoiceDialog} 
+          onClose={handleCloseInvoiceDialog} 
+          maxWidth="md" 
+          fullWidth
+          disableEnforceFocus
+        >
           <DialogTitle>Hóa đơn - Giờ chơi #{invoiceData.session?.id}</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
@@ -745,7 +770,7 @@ export default function PlaytimePage() {
                   sx={{ mb: 1, flex: '0 0 48%', boxSizing: 'border-box' }}
                 >
                   <strong>Tiền bàn:</strong>{' '}
-                  {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
+                  {formatMoney(invoiceData.totalTableMoney)}
                 </Typography>
               </Box>
 
@@ -770,10 +795,10 @@ export default function PlaytimePage() {
                             </TableCell>
                             <TableCell>{order.quantity}</TableCell>
                             <TableCell>
-                              {parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')} đ
+                              {parseFloat(order.unit_price.toString()).toLocaleString('vi-VN')}
                             </TableCell>
                             <TableCell>
-                              {parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ
+                              {parseFloat(order.total_price.toString()).toLocaleString('vi-VN')}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -798,14 +823,14 @@ export default function PlaytimePage() {
                   >
                     Tiền bàn:{' '}
                     <strong style={{ color: '#1976d2' }}>
-                      {parseInt(invoiceData.totalTableMoney.toString()).toLocaleString('vi-VN')} đ
+                      {formatMoney(invoiceData.totalTableMoney)}
                     </strong>
                   </Typography>
                   {invoiceData.orders.length > 0 && (
                     <Typography variant="body1" sx={{ mb: 1 }}>
                       Tiền đồ ăn:{' '}
                       <strong style={{ color: '#1976d2' }}>
-                        {parseInt(invoiceData.totalFoodMoney.toString()).toLocaleString('vi-VN')} đ
+                        {formatMoney(invoiceData.totalFoodMoney)}
                       </strong>
                     </Typography>
                   )}
@@ -824,7 +849,7 @@ export default function PlaytimePage() {
                   <Typography variant="h6">
                     TỔNG CỘNG:{' '}
                     <strong style={{ color: '#1976d2' }}>
-                      {parseInt(invoiceData.totalMoney.toString()).toLocaleString('vi-VN')} đ
+                      {formatMoney(invoiceData.totalMoney)}
                     </strong>
                   </Typography>
                 </Box>

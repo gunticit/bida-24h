@@ -24,6 +24,7 @@ return [
         'http://localhost:3001',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
+        'http://127.0.2.2:3000',
         'http://24hbilliardscoffee.com',
         'https://24hbilliardscoffee.com',
         'http://api.24hbilliardscoffee.com',

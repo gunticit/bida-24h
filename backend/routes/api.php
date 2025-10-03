@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Session report routes
     Route::get('/sessions/report', [SessionReportController::class, 'report']);
     Route::get('/sessions/report/download', [SessionReportController::class, 'downloadReport']);
+    Route::post('/sessions/report/generate', [SessionReportController::class, 'generateReport']);
     
     Route::delete('/orders/{orderId}', [SessionController::class, 'removeOrder']);
     Route::put('/orders/{orderId}/quantity', [SessionController::class, 'updateOrderQuantity']);
@@ -67,12 +68,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/takeaway-orders/today', [TakeawayOrderController::class, 'todayOrders']);
     Route::get('/takeaway-orders/report', [TakeawayOrderController::class, 'report']);
     Route::get('/takeaway-orders/report/download', [TakeawayOrderController::class, 'downloadReport']);
+    Route::post('/takeaway-orders/report/generate', [TakeawayOrderController::class, 'generateReport']);
     Route::apiResource('takeaway-orders', TakeawayOrderController::class);
     
     // Dine-in Order management routes
     Route::get('/dine-in-orders/today', [DineInOrderController::class, 'todayOrders']);
     Route::get('/dine-in-orders/report', [DineInOrderController::class, 'report']);
     Route::get('/dine-in-orders/report/download', [DineInOrderController::class, 'downloadReport']);
+    Route::post('/dine-in-orders/report/generate', [DineInOrderController::class, 'generateReport']);
     Route::apiResource('dine-in-orders', DineInOrderController::class);
     
     // Table management routes

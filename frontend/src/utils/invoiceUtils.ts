@@ -121,9 +121,9 @@ export const generateInvoiceContent = async (
         </tr>
         <tr>
           <td>${tables.find((t) => t.id === session.table_id)?.name || 'N/A'}</td>
-          <td>${parseInt(session.hour_price.toString()).toLocaleString('vi-VN')} đ</td>
+          <td>${formatMoney(session.hour_price)}</td>
           <td>${calculatePlayTime(session)}</td>
-          <td>${totalTableMoney.toLocaleString('vi-VN')} đ</td>
+          <td>${formatMoney(totalTableMoney)}</td>
         </tr>
       </table>
       

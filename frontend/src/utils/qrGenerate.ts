@@ -1,3 +1,5 @@
+import { roundToThousand } from './formatters'
+
 // Tạo mã QR thanh toán VietinBank
 export const generateVietinBankQR = async (
   amount: number,
@@ -5,6 +7,9 @@ export const generateVietinBankQR = async (
   content?: string,
 ): Promise<string> => {
   try {
+    // Làm tròn amount đến hàng nghìn gần nhất
+    const roundedAmount = roundToThousand(amount)
+    
     // Sử dụng format VietQR chuẩn cho VietinBank
     // Format: 00020101021138580010A00000072701270006970415011504884214711020824H BILLIARDS COFFEE0303VND5405${amount}6304
 
@@ -13,7 +18,7 @@ export const generateVietinBankQR = async (
       accountNo: '104884214711',
       accountName: '24H BILLIARDS COFFEE',
       acqId: '970415', // VietinBank
-      amount: amount,
+      amount: roundedAmount,
       addInfo: `${content || 'DH'}${orderNumber}`,
       format: 'text',
       template: 'compact',

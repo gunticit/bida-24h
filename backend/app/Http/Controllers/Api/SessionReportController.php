@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\GameSession;
-use App\Models\Order;
-use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
+use App\Http\Controllers\Api\Traits\ExcelReportTrait;
+use App\Utils\DateHelper;
 
 class SessionReportController extends Controller
 {
+    use ExcelReportTrait;
     /**
      * Get playtime sessions report data for date range
      */
@@ -51,7 +51,7 @@ class SessionReportController extends Controller
                     'total_revenue' => $tableSessions->sum('total_money') ?? 0,
                     'table_revenue' => $tableSessions->sum('total_money_table') ?? 0,
                     'food_revenue' => $tableSessions->sum('total_money_food') ?? 0,
-                    'total_hours' => $tableSessions->sum('total_time') / 60, // Convert to hours
+                    'total_hours' => $tableSessions->sum('total_time') ?? 0,
                 ];
             })->values();
 
@@ -136,22 +136,22 @@ class SessionReportController extends Controller
         $toDate = $request->input('to');
 
         try {
-            // Get report data (reuse logic from report method)
+            // Get report data
             $reportRequest = new Request(['from' => $fromDate, 'to' => $toDate]);
             $reportResponse = $this->report($reportRequest);
             $reportData = json_decode($reportResponse->getContent(), true);
 
-            // Create Excel content using simple HTML table format
-            $filename = "bao-cao-gio-choi-tu-{$fromDate}-{$toDate}.xlsx";
-            
-            // Simple Excel export using HTML table
-            $html = $this->generateExcelHtml($reportData);
-            
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'max-age=0',
-            ]);
+            // Create temporary file
+            $tempFilePath = tempnam(sys_get_temp_dir(), 'session_report_') . '.xlsx';
+            $this->createSessionExcelFile($reportData, $tempFilePath);
+
+            // Format dates using DateHelper
+            $dateRange = DateHelper::formatDateRangeForFilename($fromDate, $toDate);
+            $filename = "Bao-Cao-Gio-Choi-{$dateRange}.xlsx";
+
+            return response()->download($tempFilePath, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -159,142 +159,54 @@ class SessionReportController extends Controller
     }
 
     /**
-     * Generate Excel HTML content
+     * Generate playtime report file and return download URL
      */
-    private function generateExcelHtml($reportData)
+    public function generateReport(Request $request)
     {
-        $fromDate = Carbon::parse($reportData['from_date'])->format('d/m/Y');
-        $toDate = Carbon::parse($reportData['to_date'])->format('d/m/Y');
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
 
-        $html = '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Báo cáo Giờ chơi</title>
-            <style>
-                body { font-family: Arial, sans-serif; }
-                table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; font-weight: bold; }
-                .summary { background-color: #e8f4fd; }
-                .text-right { text-align: right; }
-                .text-center { text-align: center; }
-                .header { text-align: center; margin-bottom: 20px; }
-                .total-row { background-color: #d4edda; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>BÁO CÁO GIỜ CHƠI BILLIARD</h2>
-                <p><strong>Khoảng thời gian:</strong> ' . $fromDate . ' - ' . $toDate . '</p>
-                <p><strong>Ngày xuất báo cáo:</strong> ' . date('d/m/Y H:i:s') . '</p>
-            </div>
-
-            <h3>TỔNG QUAN</h3>
-            <table>
-                <tr class="summary">
-                    <td><strong>Tổng số sessions</strong></td>
-                    <td class="text-right">' . number_format($reportData['total_sessions']) . '</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Tổng doanh thu</strong></td>
-                    <td class="text-right">' . number_format($reportData['total_revenue'], 0, ',', '.') . ' đ</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Doanh thu từ bàn</strong></td>
-                    <td class="text-right">' . number_format($reportData['total_table_revenue'], 0, ',', '.') . ' đ</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Doanh thu từ đồ ăn/uống</strong></td>
-                    <td class="text-right">' . number_format($reportData['total_food_revenue'], 0, ',', '.') . ' đ</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Tổng thời gian chơi</strong></td>
-                    <td class="text-right">' . number_format($reportData['summary']['total_play_hours'], 1) . ' giờ</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Thời gian trung bình/session</strong></td>
-                    <td class="text-right">' . number_format($reportData['summary']['avg_session_duration'], 1) . ' phút</td>
-                </tr>
-                <tr class="summary">
-                    <td><strong>Doanh thu trung bình/session</strong></td>
-                    <td class="text-right">' . number_format($reportData['summary']['avg_revenue_per_session'], 0, ',', '.') . ' đ</td>
-                </tr>
-            </table>
-
-            <h3>THỐNG KÊ THEO BÀN</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tên bàn</th>
-                        <th>Số sessions</th>
-                        <th>Tổng giờ chơi</th>
-                        <th>Doanh thu bàn</th>
-                        <th>Doanh thu đồ ăn</th>
-                        <th>Tổng doanh thu</th>
-                    </tr>
-                </thead>
-                <tbody>';
-
-        foreach ($reportData['table_stats'] as $table) {
-            $html .= '
-                    <tr>
-                        <td>' . htmlspecialchars($table['table_name']) . '</td>
-                        <td class="text-center">' . number_format($table['sessions_count']) . '</td>
-                        <td class="text-right">' . number_format($table['total_hours'], 1) . ' giờ</td>
-                        <td class="text-right">' . number_format($table['table_revenue'], 0, ',', '.') . ' đ</td>
-                        <td class="text-right">' . number_format($table['food_revenue'], 0, ',', '.') . ' đ</td>
-                        <td class="text-right">' . number_format($table['total_revenue'], 0, ',', '.') . ' đ</td>
-                    </tr>';
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $html .= '
-                </tbody>
-            </table>';
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
 
-        if (!empty($reportData['food_stats'])) {
-            $html .= '
-            <h3>THỐNG KÊ ĐỒ ĂN/UỐNG (CHỈ TRONG GIỜ CHƠI)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tên món</th>
-                        <th>Loại</th>
-                        <th>Số lượng bán</th>
-                        <th>Đơn giá</th>
-                        <th>Tổng tiền</th>
-                    </tr>
-                </thead>
-                <tbody>';
-
-            foreach ($reportData['food_stats'] as $food) {
-                $categoryText = $food['category'] == 'food' ? 'Đồ ăn' : ($food['category'] == 'drink' ? 'Đồ uống' : 'Thuốc lá');
-                $html .= '
-                    <tr>
-                        <td>' . htmlspecialchars($food['menu_name']) . '</td>
-                        <td>' . $categoryText . '</td>
-                        <td class="text-center">' . number_format($food['total_quantity']) . '</td>
-                        <td class="text-right">' . number_format($food['unit_price'], 0, ',', '.') . ' đ</td>
-                        <td class="text-right">' . number_format($food['total_amount'], 0, ',', '.') . ' đ</td>
-                    </tr>';
+        try {
+            // Generate unique filename using DateHelper
+            $timestamp = DateHelper::generateTimestampForFilename();
+            $dateRange = DateHelper::formatDateRangeForFilename($fromDate, $toDate);
+            $filename = "Bao-Cao-Gio-Choi-{$dateRange}-{$timestamp}.xlsx";
+            $filePath = storage_path("app/public/reports/{$filename}");
+            
+            // Ensure reports directory exists
+            $reportsDir = storage_path('app/public/reports');
+            if (!file_exists($reportsDir)) {
+                mkdir($reportsDir, 0755, true);
             }
 
-            $html .= '
-                    <tr class="total-row">
-                        <td colspan="2"><strong>TỔNG CỘNG</strong></td>
-                        <td class="text-center"><strong>' . number_format($reportData['summary']['total_food_items_sold']) . '</strong></td>
-                        <td></td>
-                        <td class="text-right"><strong>' . number_format($reportData['total_food_revenue'], 0, ',', '.') . ' đ</strong></td>
-                    </tr>
-                </tbody>
-            </table>';
+            // Get report data
+            $reportRequest = new Request(['from' => $fromDate, 'to' => $toDate]);
+            $reportResponse = $this->report($reportRequest);
+
+            $reportData = json_decode($reportResponse->getContent(), true);
+            
+            // Create Excel file using trait method
+            $this->createSessionExcelFile($reportData, $filePath);
+            
+            // Generate download URL
+            $downloadUrl = url("storage/reports/{$filename}");
+            
+            return response()->json([
+                'download_url' => $downloadUrl,
+                'message' => 'Báo cáo đã được tạo thành công'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $html .= '
-        </body>
-        </html>';
-
-        return $html;
     }
 }

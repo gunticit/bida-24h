@@ -395,6 +395,11 @@ export interface MessageResponse {
   message: string
 }
 
+export interface DownloadResponse {
+  download_url: string
+  message: string
+}
+
 export interface FoodData {
   menu_id: number
   quantity: number

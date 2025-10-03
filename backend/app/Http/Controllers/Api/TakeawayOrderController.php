@@ -9,9 +9,11 @@ use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Api\Traits\ExcelReportTrait;
 
 class TakeawayOrderController extends Controller
 {
+    use ExcelReportTrait;
     /**
      * Display a listing of the resource.
      */
@@ -304,22 +306,20 @@ class TakeawayOrderController extends Controller
         $toDate = $request->input('to');
 
         try {
-            // Get report data (reuse logic from report method)
+            // Get report data
             $reportRequest = new Request(['from' => $fromDate, 'to' => $toDate]);
             $reportResponse = $this->report($reportRequest);
             $reportData = json_decode($reportResponse->getContent(), true);
 
-            // Create Excel content using simple HTML table format
+            // Create temporary file
+            $tempFilePath = tempnam(sys_get_temp_dir(), 'takeaway_report_') . '.xlsx';
+            $this->createTakeawayExcelFile($reportData, $tempFilePath);
+
             $filename = "takeaway-report-{$fromDate}-{$toDate}.xlsx";
-            
-            // Simple Excel export using HTML table
-            $html = $this->generateExcelHtml($reportData);
-            
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'max-age=0',
-            ]);
+
+            return response()->download($tempFilePath, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -327,65 +327,52 @@ class TakeawayOrderController extends Controller
     }
 
     /**
-     * Generate HTML for Excel export
+     * Generate takeaway report file and return download URL
      */
-    private function generateExcelHtml($reportData)
+    public function generateReport(Request $request)
     {
-        $html = '
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; font-weight: bold; }
-                .text-right { text-align: right; }
-                .text-center { text-align: center; }
-            </style>
-        </head>
-        <body>
-            <h2>BÁO CÁO MUA MANG VỀ</h2>
-            <p><strong>Từ ngày:</strong> ' . $reportData['from_date'] . '</p>
-            <p><strong>Đến ngày:</strong> ' . $reportData['to_date'] . '</p>
-            <p><strong>Tổng đơn hàng:</strong> ' . $reportData['total_orders'] . '</p>
-            <p><strong>Tổng doanh thu:</strong> ' . number_format($reportData['total_amount'], 0, ',', '.') . ' VND</p>
-            <p><strong>Tổng sản phẩm bán:</strong> ' . $reportData['summary']['total_items_sold'] . '</p>
-            <br>
-            <table>
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên sản phẩm</th>
-                        <th class="text-center">Số lượng bán</th>
-                        <th class="text-right">Đơn giá</th>
-                        <th class="text-right">Thành tiền</th>
-                    </tr>
-                </thead>
-                <tbody>';
-                
-        foreach ($reportData['items'] as $index => $item) {
-            $html .= '
-                    <tr>
-                        <td class="text-center">' . ($index + 1) . '</td>
-                        <td>' . htmlspecialchars($item['menu_name']) . '</td>
-                        <td class="text-center">' . $item['total_quantity'] . '</td>
-                        <td class="text-right">' . number_format($item['unit_price'], 0, ',', '.') . '</td>
-                        <td class="text-right">' . number_format($item['total_amount'], 0, ',', '.') . '</td>
-                    </tr>';
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
-        
-        $html .= '
-                    <tr style="background-color: #e3f2fd; font-weight: bold;">
-                        <td colspan="2" class="text-center">TỔNG CỘNG</td>
-                        <td class="text-center">' . $reportData['summary']['total_items_sold'] . '</td>
-                        <td></td>
-                        <td class="text-right">' . number_format($reportData['total_amount'], 0, ',', '.') . '</td>
-                    </tr>
-                </tbody>
-            </table>
-        </body>
-        </html>';
-        
-        return $html;
+
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+
+        try {
+            // Generate unique filename
+            $timestamp = now()->format('Y-m-d-H-i-s');
+            $filename = "bao-cao-takeaway-{$fromDate}-{$toDate}-{$timestamp}.xlsx";
+            $filePath = storage_path("app/public/reports/{$filename}");
+            
+            // Ensure reports directory exists
+            $reportsDir = storage_path('app/public/reports');
+            if (!file_exists($reportsDir)) {
+                mkdir($reportsDir, 0755, true);
+            }
+
+            // Get report data
+            $reportRequest = new Request(['from' => $fromDate, 'to' => $toDate]);
+            $reportResponse = $this->report($reportRequest);
+            $reportData = json_decode($reportResponse->getContent(), true);
+            
+            // Create Excel file using trait method
+            $this->createTakeawayExcelFile($reportData, $filePath);
+            
+            // Generate download URL
+            $downloadUrl = url("storage/reports/{$filename}");
+            
+            return response()->json([
+                'download_url' => $downloadUrl,
+                'message' => 'Báo cáo takeaway đã được tạo thành công'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

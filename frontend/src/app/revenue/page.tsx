@@ -28,7 +28,7 @@ import {
 import { Restaurant, AccessTime, AttachMoney, BarChart, ShoppingBag } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import { RevenueCard } from '@/components/items/RevenueCard'
-import { formatCurrency } from '@/utils/formatters'
+import { formatMoney } from '@/utils/formatters'
 import SideBar from '@/app/SideBar'
 import Loading from '@/components/loading'
 
@@ -333,11 +333,11 @@ export default function RevenuePage() {
                           <TableCell>{session.start_time}</TableCell>
                           <TableCell>{session.end_time || '-'}</TableCell>
                           <TableCell>{session.total_time || '-'}</TableCell>
-                          <TableCell>{formatCurrency(session.table_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(session.food_revenue)}</TableCell>
+                          <TableCell>{formatMoney(session.table_revenue)}</TableCell>
+                          <TableCell>{formatMoney(session.food_revenue)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(session.total_revenue)}
+                              label={formatMoney(session.total_revenue)}
                               color="primary"
                               variant="outlined"
                             />
@@ -506,11 +506,11 @@ export default function RevenuePage() {
                           <TableCell>
                             <Chip label={table.table_name} color="primary" />
                           </TableCell>
-                          <TableCell>{formatCurrency(table.total_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(table.table_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(table.food_revenue)}</TableCell>
+                          <TableCell>{formatMoney(table.total_revenue)}</TableCell>
+                          <TableCell>{formatMoney(table.table_revenue)}</TableCell>
+                          <TableCell>{formatMoney(table.food_revenue)}</TableCell>
                           <TableCell>{table.session_count}</TableCell>
-                          <TableCell>{formatCurrency(table.avg_revenue_per_session)}</TableCell>
+                          <TableCell>{formatMoney(table.avg_revenue_per_session)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -542,13 +542,13 @@ export default function RevenuePage() {
                       {monthlyData.daily_breakdown.map((day: any, index: number) => (
                         <TableRow key={index}>
                           <TableCell>{day.date}</TableCell>
-                          <TableCell>{formatCurrency(day.total_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(day.table_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(day.food_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(day.total_expenses || 0)}</TableCell>
+                          <TableCell>{formatMoney(day.total_revenue)}</TableCell>
+                          <TableCell>{formatMoney(day.table_revenue)}</TableCell>
+                          <TableCell>{formatMoney(day.food_revenue)}</TableCell>
+                          <TableCell>{formatMoney(day.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(
+                              label={formatMoney(
                                 day.profit || day.total_revenue - (day.total_expenses || 0),
                               )}
                               color={
@@ -707,13 +707,13 @@ export default function RevenuePage() {
                       {yearlyData.monthly_breakdown.map((month: any, index: number) => (
                         <TableRow key={index}>
                           <TableCell>{month.month_name}</TableCell>
-                          <TableCell>{formatCurrency(month.total_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(month.table_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(month.food_revenue)}</TableCell>
-                          <TableCell>{formatCurrency(month.total_expenses || 0)}</TableCell>
+                          <TableCell>{formatMoney(month.total_revenue)}</TableCell>
+                          <TableCell>{formatMoney(month.table_revenue)}</TableCell>
+                          <TableCell>{formatMoney(month.food_revenue)}</TableCell>
+                          <TableCell>{formatMoney(month.total_expenses || 0)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={formatCurrency(
+                              label={formatMoney(
                                 month.profit || month.total_revenue - (month.total_expenses || 0),
                               )}
                               color={

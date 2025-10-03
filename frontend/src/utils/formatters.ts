@@ -3,12 +3,19 @@ export const formatDateTime = (dateTime: string) => {
   return new Date(dateTime).toLocaleString('vi-VN')
 }
 
+// Round to nearest thousand (29500 -> 30000, 29400 -> 29000)
+export const roundToThousand = (amount: number) => {
+  return Math.round(amount / 1000) * 1000
+}
+
+// Format money with rounding to nearest thousand
 export const formatMoney = (amount: number | null) => {
   if (amount === null) return '0 đ'
+  const roundedAmount = roundToThousand(amount)
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
-  }).format(amount)
+  }).format(roundedAmount);
 }
 
 export const calculatePlayTime = (session: { start_time: string; end_time?: string | null }) => {
@@ -34,8 +41,9 @@ export const formatTimeWithMinutes = (totalMinutes: number | null) => {
 }
 
 export const formatCurrency = (amount: number) => {
+  const roundedAmount = roundToThousand(amount)
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
-  }).format(amount)
+  }).format(roundedAmount)
 }
