@@ -123,7 +123,6 @@ trait ExcelReportTrait
                 $col++;
             }
             $currentRow++;
-
             // Data
             foreach ($reportData['food_stats'] as $stat) {
                 $sheet->setCellValue('A' . $currentRow, $stat['menu_name'] ?? '');
@@ -248,7 +247,7 @@ trait ExcelReportTrait
             foreach ($reportData['items'] as $item) {
                 $sheet->setCellValue('A' . $currentRow, $item['menu_name'] ?? '');
                 $sheet->setCellValue('B' . $currentRow, number_format($item['total_quantity'] ?? 0));
-                $sheet->setCellValue('C' . $currentRow, number_format($item['price'] ?? 0, 0, ',', '.') . ' đ');
+                $sheet->setCellValue('C' . $currentRow, number_format($item['unit_price'] ?? 0, 0, ',', '.') . ' đ');
                 $sheet->setCellValue('D' . $currentRow, number_format($item['total_amount'] ?? 0, 0, ',', '.') . ' đ');
                 $currentRow++;
             }
@@ -345,7 +344,7 @@ trait ExcelReportTrait
             foreach ($reportData['items'] as $item) {
                 $sheet->setCellValue('A' . $currentRow, $item['menu_name'] ?? '');
                 $sheet->setCellValue('B' . $currentRow, number_format($item['total_quantity'] ?? 0));
-                $sheet->setCellValue('C' . $currentRow, number_format($item['price'] ?? 0, 0, ',', '.') . ' đ');
+                $sheet->setCellValue('C' . $currentRow, number_format($item['unit_price'] ?? 0, 0, ',', '.') . ' đ');
                 $sheet->setCellValue('D' . $currentRow, number_format($item['total_amount'] ?? 0, 0, ',', '.') . ' đ');
                 $currentRow++;
             }
