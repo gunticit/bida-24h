@@ -114,7 +114,7 @@ export const generateInvoiceContent = async (
       <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
       <table class="table">
         <tr>
-          <th>Bàn</th>s
+          <th>Bàn</th>
           <th>Thời gian</th>
           <th>Tiền bàn</th>
         </tr>
