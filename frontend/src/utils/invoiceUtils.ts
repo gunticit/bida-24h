@@ -114,14 +114,12 @@ export const generateInvoiceContent = async (
       <h3 style="font-size:15px; margin:4px 0;">Thông tin giờ chơi:</h3>
       <table class="table">
         <tr>
-          <th>Bàn</th>
-          <th>Giá/giờ</th>
+          <th>Bàn</th>s
           <th>Thời gian</th>
           <th>Tiền bàn</th>
         </tr>
         <tr>
           <td>${tables.find((t) => t.id === session.table_id)?.name || 'N/A'}</td>
-          <td>${formatMoney(session.hour_price)}</td>
           <td>${calculatePlayTime(session)}</td>
           <td>${formatMoney(totalTableMoney)}</td>
         </tr>
