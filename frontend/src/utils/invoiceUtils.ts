@@ -165,7 +165,7 @@ export const generateInvoiceContent = async (
              ? `
             <div style="text-align: center; margin: 10px 0; border: 1px dashed #000; padding: 8px;">
                 <p style="font-size:13px; margin: 5px 0; font-weight: bold;">THANH TOÁN CHUYỂN KHOẢN</p>
-                <img src="${qrCodeDataURL}" style="width: 120px; height: 120px; display: block; margin: 5px auto;" alt="QR Code"/>
+                <img src="${qrCodeDataURL}" style="width: 200px; height: 200px; display: block; margin: 5px auto;" alt="QR Code"/>
                 <p style="font-size:12px; margin: 2px 0; font-weight: bold;">VietinBank</p>
                 <p style="font-size:12px; margin: 2px 0;">STK: 104884214711</p>
                 <p style="font-size:12px; margin: 2px 0;">Chủ TK: TRUONG THI THANH HIEU</p>
