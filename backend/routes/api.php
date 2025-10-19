@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\DineInOrderController;
 use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\SessionReportController;
+use App\Http\Controllers\Api\QRTableController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ExpenseController;
 
@@ -27,6 +29,10 @@ use App\Http\Controllers\Api\ExpenseController;
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+// QR Table routes (public access for scanning)
+Route::get('/qr/table/{tableId}', [QRTableController::class, 'scanTable']);
+Route::post('/qr/table/{tableId}/request-booking', [QRTableController::class, 'requestBooking']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -81,6 +87,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Table management routes
     Route::apiResource('tables', TableController::class);
     
+    // QR Table routes (authenticated)
+    Route::post('/qr/table/{tableId}/auto-book', [QRTableController::class, 'autoBookTable']);
+    
+    // Booking Request management (admin/staff only)
+    Route::get('/booking-requests', [QRTableController::class, 'getBookingRequests']);
+    Route::post('/booking-requests/{requestId}/handle', [QRTableController::class, 'handleBookingRequest']);
+    
     // Revenue statistics routes
     Route::prefix('revenue')->group(function () {
         Route::get('/daily', [RevenueController::class, 'getDailyRevenue']);
@@ -93,4 +106,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Expense management routes
     Route::get('/expenses-summary', [ExpenseController::class, 'summary']);
     Route::apiResource('expenses', ExpenseController::class);
+    
+    // Notification routes (admin/staff only)
+    Route::get('/notifications', [NotificationController::class, 'getNotifications']);
+    Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications', [NotificationController::class, 'clearAll']);
 });

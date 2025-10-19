@@ -504,15 +504,60 @@ class ApiService {
   }
 
   // Expense management methods
-  async getExpenses(
-    filter: { start_date?: string; end_date?: string; category?: string },
-    page: number = 1,
-  ): Promise<ExpenseListResponse> {
+  async getExpenses(page: number = 1): Promise<ExpenseListResponse> {
+    return this.request<ExpenseListResponse>(`/expenses?page=${page}`)
+  }
+
+  // QR Table scanning methods
+  async scanQRTable(tableId: number): Promise<QRTableScanResponse> {
+    return this.request<QRTableScanResponse>(`/qr/table/${tableId}`)
+  }
+
+  async autoBookTable(tableId: number): Promise<AutoBookTableResponse> {
+    return this.request<AutoBookTableResponse>(`/qr/table/${tableId}/auto-book`, {
+      method: 'POST',
+    })
+  }
+
+  async requestTableBooking(tableId: number): Promise<BookingRequestResponse> {
+    return this.request<BookingRequestResponse>(`/qr/table/${tableId}/request-booking`, {
+      method: 'POST',
+    })
+  }
+
+  // Notification methods
+  async getNotifications(): Promise<NotificationListResponse> {
+    return this.request<NotificationListResponse>('/notifications')
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<MessageResponse> {
+    return this.request<MessageResponse>(`/notifications/${notificationId}/read`, {
+      method: 'POST',
+    })
+  }
+
+  async clearAllNotifications(): Promise<MessageResponse> {
+    return this.request<MessageResponse>('/notifications', {
+      method: 'DELETE',
+    })
+  }
+
+  async getBookingRequests(status?: string, today?: boolean): Promise<BookingRequestListResponse> {
     const params = new URLSearchParams()
-    if (filter.start_date) params.append('start_date', filter.start_date)
-    if (filter.end_date) params.append('end_date', filter.end_date)
-    if (filter.category) params.append('category', filter.category)
-    return this.request<ExpenseListResponse>(`/expenses?page=${page}&${params.toString()}`)
+    if (status) params.append('status', status)
+    if (today) params.append('today', '1')
+    
+    return this.request<BookingRequestListResponse>(`/booking-requests?${params.toString()}`)
+  }
+
+  async handleBookingRequest(requestId: number, action: 'approve' | 'reject', adminNotes?: string): Promise<BookingRequestResponse> {
+    return this.request<BookingRequestResponse>(`/booking-requests/${requestId}/handle`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        admin_notes: adminNotes,
+      }),
+    })
   }
 
   async getExpenseSummary(start_date: string, end_date: string): Promise<ExpenseSummary> {

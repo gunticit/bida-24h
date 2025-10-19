@@ -6,7 +6,7 @@ export interface User {
   role?: 'admin' | 'staff'
   created_at: string
   updated_at: string
-  [key: string]: unknown // Add index signature for compatibility
+  [key: string]: unknown
 }
 
 export interface LoginCredentials {
@@ -103,25 +103,107 @@ export interface Order {
   session_id: number
   menu_id: number
   quantity: number
-  unit_price: number
-  total_price: number
+  price: number
+  total: number
   created_at: string
   updated_at: string
   menu?: MenuItem
 }
 
 export interface CreateOrderData {
-  session_id: number | null
   menu_id: number
   quantity: number
-  unit_price: number
-  total_price: number
 }
 
 export interface CreateOrderResponse {
   order: Order
   message: string
   remaining_quantity: number
+}
+
+// QR Table interfaces
+export interface QRTableScanResponse {
+  table: {
+    id: number
+    name: string
+    status: 'available' | 'playing' | 'maintenance'
+    price_per_hour: number
+  }
+  is_available: boolean
+  active_session?: {
+    id: number
+    start_time: string
+    duration_minutes: number
+  }
+  user?: {
+    id: number
+    name: string
+    role: string
+  }
+  can_auto_book?: boolean
+  can_request_booking?: boolean
+}
+
+export interface AutoBookTableResponse {
+  message: string
+  session: {
+    id: number
+    table_id: number
+    start_time: string
+    hour_price: number
+    status: string
+  }
+  table: {
+    id: number
+    name: string
+    status: string
+  }
+}
+
+// Booking Request interfaces
+export interface BookingRequest {
+  id: number
+  table_id: number
+  table_name?: string
+  request_ip: string
+  user_agent: string
+  status: 'pending' | 'approved' | 'rejected'
+  requested_at: string
+  handled_at?: string
+  handled_by?: number
+  admin_notes?: string
+}
+
+export interface BookingRequestResponse {
+  message: string
+  booking_request: {
+    id: number
+    table_id: number
+    table_name: string
+    status: 'pending' | 'approved' | 'rejected'
+    requested_at: string
+  }
+}
+
+export interface BookingRequestListResponse {
+  data: BookingRequest[]
+  meta?: unknown
+}
+
+// Notification interfaces
+export interface NotificationData {
+  id: number
+  type: 'booking_request'
+  table_id: number
+  table_name: string
+  message: string
+  requested_at: string
+  status: 'pending'
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationData[]
+  count: number
 }
 
 // Takeaway Order interfaces
@@ -151,19 +233,18 @@ export interface TakeawayOrderItem {
 }
 
 export interface CreateTakeawayOrderData {
-  customer_name?: string
-  customer_phone?: string
+  customer_name: string
+  customer_phone: string
   notes?: string
   items: {
     menu_id: number
     quantity: number
   }[]
-  status?: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 }
 
-// Takeaway Report interfaces
 export interface TakeawayReportItem {
   menu_name: string
+  category: string
   total_quantity: number
   unit_price: number
   total_amount: number
@@ -202,195 +283,91 @@ export interface PlaytimeFoodStats {
 export interface PlaytimeReportData {
   from_date: string
   to_date: string
-  total_sessions: number
-  total_revenue: number
-  total_table_revenue: number
-  total_food_revenue: number
-  total_play_time: number // in minutes
+  summary: {
+    total_sessions: number
+    total_revenue: number
+    total_table_revenue: number
+    total_food_revenue: number
+    total_hours_played: number
+    average_session_duration: number
+  }
   table_stats: PlaytimeTableStats[]
   food_stats: PlaytimeFoodStats[]
-  summary: {
-    avg_session_duration: number // in minutes
-    avg_revenue_per_session: number
-    total_play_hours: number
-    total_food_items_sold: number
-  }
 }
 
 // Expense interfaces
 export interface Expense {
   id: number
-  expense_date: string
-  amount: number
-  description: string
+  date: string
   category: string
-  user: {
-    id: number
-    name: string
-  }
+  description: string
+  amount: number
   created_at: string
-}
-
-export interface ExpenseSummary {
-  total: number
-  today: number
-  this_month: number
-  this_year: number
-  by_category: { [key: string]: number }
+  updated_at: string
 }
 
 export interface CreateExpenseData {
-  expense_date: string
-  amount: number
-  description: string
+  date: string
   category: string
+  description: string
+  amount: number
 }
 
 export interface UpdateExpenseData {
-  expense_date: string
-  amount: number
-  description: string
-  category: string
+  date?: string
+  category?: string
+  description?: string
+  amount?: number
+}
+
+export interface ExpenseSummary {
+  total_expenses: number
+  expenses_by_category: Record<string, number>
+  recent_expenses: Expense[]
 }
 
 export interface ExpenseListResponse {
   data: Expense[]
-  current_page: number
-  last_page: number
-  total: number
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
+    from: number
+    to: number
+  }
 }
 
 // Revenue interfaces
-export interface RevenueBreakdownItem {
+export interface DailyRevenueReport {
   date: string
-  total_revenue: number
-  table_revenue: number
-  food_revenue: number
-  takeaway_revenue: number
-  total_expenses: number
-  profit: number
-  session_count: number
-}
-
-export interface MonthlyRevenueBreakdownItem {
-  year: number
-  month: number
-  month_name: string
-  total_revenue: number
-  table_revenue: number
-  food_revenue: number
-  takeaway_revenue: number
-  total_expenses: number
-  profit: number
-  session_count: number
-}
-
-export interface DailyRevenueResponse {
-  total_revenue: number
-  table_revenue: number
-  food_revenue: number
-  takeaway_revenue: number
-  total_expenses: number
-  profit: number
-  session_count: number
-  date: string
-  sessions: GameSession[]
+  revenue: number
+  sessions: number
 }
 
 export interface MonthlyRevenueResponse {
-  total_revenue: number
-  table_revenue: number
-  food_revenue: number
-  takeaway_revenue: number
-  total_expenses: number
-  profit: number
-  session_count: number
-  year: number
-  month: number
-  month_name: string
-  daily_breakdown: RevenueBreakdownItem[]
+  month: string
+  revenue: number
+  sessions: number
+  avg_session_value: number
 }
 
 export interface YearlyRevenueResponse {
-  total_revenue: number
-  table_revenue: number
-  food_revenue: number
-  takeaway_revenue: number
-  total_expenses: number
-  profit: number
-  session_count: number
   year: number
-  monthly_breakdown: MonthlyRevenueBreakdownItem[]
-}
-
-// New Revenue System Interfaces
-export interface RevenueData {
   revenue: number
-  cost_of_goods_sold: number
-  expenses: number
-  profit: number
-  profit_margin: number
-}
-
-export interface DailyRevenueData {
-  date: string
-  revenue: number
-  cost_of_goods_sold: number
-  expenses: number
-  profit: number
-  profit_margin: number
-}
-
-export interface DailyRevenueReport {
-  period: {
-    start_date: string
-    end_date: string
-  }
-  daily_data: DailyRevenueData[]
-  summary: {
-    total_revenue: number
-    total_cost_of_goods_sold: number
-    total_expenses: number
-    total_profit: number
-  }
-}
-
-export interface CostBreakdownItem {
-  product_name: string
-  category: string
-  total_quantity: number
-  total_cost: number
-  avg_cost_per_unit: number
+  sessions: number
+  months: MonthlyRevenueResponse[]
 }
 
 export interface CostBreakdownResponse {
-  period: {
-    start_date?: string
-    end_date?: string
-  }
-  order_costs: CostBreakdownItem[]
-  takeaway_costs: CostBreakdownItem[]
-  total_order_cost: number
-  total_takeaway_cost: number
-  grand_total: number
+  total_revenue: number
+  total_cost: number
+  profit: number
+  profit_margin: number
+  cost_by_category: Record<string, number>
 }
 
-// API Response interfaces
-export interface ApiResponse<T> {
-  data: T
-  message?: string
-}
-
-export interface PaginatedResponse<T> {
-  data: T[]
-  current_page: number
-  last_page: number
-  per_page: number
-  total: number
-  from: number
-  to: number
-}
-
+// Utility interfaces
 export interface MessageResponse {
   message: string
 }
@@ -399,28 +376,3 @@ export interface DownloadResponse {
   download_url: string
   message: string
 }
-
-export interface FoodData {
-  menu_id: number
-  quantity: number
-}
-
-// Category types
-export type MenuCategory = 'food' | 'drink' | 'tobacco' | 'takeaway'
-export type TableStatus = 'available' | 'playing' | 'maintenance'
-export type SessionStatus = 'playing' | 'finished' | 'canceled'
-export type TakeawayStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
-export type UserRole = 'admin' | 'staff'
-export type ExpenseCategory =
-  | 'food'
-  | 'utilities'
-  | 'rent'
-  | 'staff'
-  | 'equipment'
-  | 'marketing'
-  | 'maintenance'
-  | 'other'
-
-// Utility types
-export type CreateData<T> = Omit<T, 'id' | 'created_at' | 'updated_at'>
-export type UpdateData<T> = Partial<Omit<T, 'id' | 'created_at' | 'updated_at'>>

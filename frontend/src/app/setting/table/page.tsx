@@ -387,7 +387,7 @@ export default function TableSettingPage() {
           <DialogContent sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             {qrTable ? (
               <QRCodeSVG
-                value={`mobile24hbilliards://booking?table=${qrTable.id}`}
+                value={`${window.location.origin}/qr-scanner?table=${qrTable.id}`}
                 size={256}
                 level="H"
                 includeMargin={true}

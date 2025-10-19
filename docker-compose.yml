@@ -24,15 +24,25 @@ services:
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
-      - APP_URL=https://tinhtien.24hbilliardscoffee.com
+      - APP_URL=http://localhost
       - DB_CONNECTION=mysql
       - DB_HOST=24h_billiard_mysql
       - DB_PORT=3306
       - DB_DATABASE=24h_billiard
       - DB_USERNAME=backend_usr
       - DB_PASSWORD=Lrv@2025
+      - REDIS_CLIENT=predis
+      - REDIS_HOST=24h_billiard_redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=Redis@2025
+      - BROADCAST_CONNECTION=redis
+      - BROADCAST_DRIVER=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
     depends_on:
       - mysql
+      - redis
 
     networks:
       - 24h_network
@@ -50,7 +60,18 @@ services:
     volumes:
       - ./mysql_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - 24h_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: 24h_billiard_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass "Redis@2025"
     networks:
       - 24h_network
 
@@ -92,6 +113,7 @@ services:
 
 volumes:
   mysql_data:
+  redis_data:
 
 networks:
   24h_network:
