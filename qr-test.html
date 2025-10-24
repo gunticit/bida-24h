@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Test - Table 2</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; padding: 50px; font-family: Arial;">
+    <h1>QR Code for Table 2</h1>
+    <div id="qrcode"></div>
+    <p style="margin-top: 20px;">Scan this QR code with the QR Scanner page</p>
+    <p><a href="http://localhost:3001/qr-scanner" target="_blank">Open QR Scanner</a></p>
+    
+    <script>
+        // Create QR code for table 2
+        const qr = qrcode(0, 'M');
+        qr.addData('table_2');
+        qr.make();
+        
+        // Display QR code
+        document.getElementById('qrcode').innerHTML = qr.createImgTag(5);
+    </script>
+</body>
+</html>
