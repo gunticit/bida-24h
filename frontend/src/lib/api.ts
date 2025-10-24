@@ -31,7 +31,7 @@ import type {
 
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_API_URL || 'http://tinhtien.24hbilliardscoffee.com/api'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://thanhtoan.24hbilliardscoffee.com/api'
     : 'http://localhost:8001/api'
 
 class ApiService {

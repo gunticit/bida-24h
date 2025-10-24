@@ -29,8 +29,8 @@ return [
         'https://24hbilliardscoffee.com',
         'http://api.24hbilliardscoffee.com',
         'https://api.24hbilliardscoffee.com',
-        'http://tinhtien.24hbilliardscoffee.com',
-        'https://tinhtien.24hbilliardscoffee.com',
+        'http://thanhtoan.24hbilliardscoffee.com',
+        'https://thanhtoan.24hbilliardscoffee.com',
     ],
 
     'allowed_origins_patterns' => [],
