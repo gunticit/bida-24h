@@ -1,0 +1,9 @@
+# API Configuration
+NEXT_PUBLIC_API_URL=https://thanhtoan.24hbilliardscoffee.com/api
+
+# Next.js Configuration
+NEXT_PUBLIC_APP_NAME="Phần mềm quản lý 24h Billiard App"
+NEXT_PUBLIC_APP_DESCRIPTION="Fullstack application with Laravel backend and Next.js frontend"
+
+# Development
+NODE_ENV=production
