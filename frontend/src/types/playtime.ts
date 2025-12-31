@@ -24,7 +24,7 @@ export type InvoiceData = {
   totalMoney: number
 }
 
-export type viewModeType = 'todayOrPlaying' | 'playingOrLast7Days'
+export type viewModeType = 'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth'
 export type ISeverity = 'success' | 'error' | 'info'
 export type SnackbarPrams = {
   message: string
@@ -49,12 +49,17 @@ export type IUserPlayTime = {
   openInvoiceDialog: boolean
   invoiceData: InvoiceData
   snackbar: { open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }
-  viewMode: 'todayOrPlaying' | 'playingOrLast7Days'
+  viewMode: 'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth'
   openModel: boolean
+  selectedMonth: number
+  selectedYear: number
   setOpenModel: (open: boolean) => void
-  setViewMode: (mode: 'todayOrPlaying' | 'playingOrLast7Days') => void
+  setViewMode: (mode: 'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth') => void
+  setSelectedMonth: React.Dispatch<React.SetStateAction<number>>
+  setSelectedYear: React.Dispatch<React.SetStateAction<number>>
   loadUser: () => Promise<void>
   loadSessions: (mode?: viewModeType) => Promise<void>
+  loadSessionsByMonth: (month: number, year: number) => Promise<void>
   loadTables: () => Promise<void>
   loadMenus: () => Promise<void>
   handleOpenDialog: (session?: GameSession) => void

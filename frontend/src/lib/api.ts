@@ -69,9 +69,9 @@ class ApiService {
   }
 
   private async generateAndDownloadReport(
-    endpoint: string, 
-    fromDate: string, 
-    toDate: string, 
+    endpoint: string,
+    fromDate: string,
+    toDate: string,
     reportType: string
   ): Promise<void> {
     try {
@@ -90,9 +90,9 @@ class ApiService {
       // Create filename with timestamp to avoid conflicts
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
       const filename = `${reportType}-report-${fromDate}-${toDate}-${timestamp}.xlsx`
-      
+
       await this.downloadFromUrl(response.download_url, filename)
-      
+
       console.log(`${reportType} report download completed successfully`)
     } catch (error) {
       console.error(`${reportType} report download failed:`, error)
@@ -208,6 +208,10 @@ class ApiService {
 
   async getSessionsToday(): Promise<GameSession[]> {
     return this.request<GameSession[]>('/sessions/today')
+  }
+
+  async getSessionsByDateRange(from: string, to: string): Promise<GameSession[]> {
+    return this.request<GameSession[]>(`/sessions/by-date-range?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
   }
 
   async getSession(id: number): Promise<GameSession> {

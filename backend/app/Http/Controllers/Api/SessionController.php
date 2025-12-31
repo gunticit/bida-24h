@@ -57,6 +57,26 @@ class SessionController extends Controller
         }
     }
 
+    /**
+     * Get sessions by date range (for monthly filtering)
+     */
+    public function byDateRange(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'from' => 'required|date',
+                'to' => 'required|date|after_or_equal:from',
+            ]);
+
+            $gameSessions = $this->service->getByDateRange($validated['from'], $validated['to']);
+            return response()->json($gameSessions);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Không thể tải danh sách giờ chơi theo khoảng thời gian'], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         try {

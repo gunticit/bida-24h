@@ -69,10 +69,12 @@ const usePlaytime = (): IUserPlayTime => {
     message: '',
     severity: 'info',
   })
-  const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days'>(
+  const [viewMode, setViewMode] = useState<'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth'>(
     'playingOrLast7Days',
   )
-  
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+
   // Use ref to track viewMode to avoid infinite loops in useCallback dependencies
   const viewModeRef = useRef(viewMode)
   viewModeRef.current = viewMode
@@ -98,7 +100,7 @@ const usePlaytime = (): IUserPlayTime => {
       setReportLoading(false)
     }
   }
-  
+
   const handlePrintReport = async (fromDate: string, toDate: string) => {
     setReportLoading(true)
     try {
@@ -125,13 +127,16 @@ const usePlaytime = (): IUserPlayTime => {
     }
   }, [router])
 
-  const loadSessions = useCallback(async (mode?: 'todayOrPlaying' | 'playingOrLast7Days') => {
+  const loadSessions = useCallback(async (mode?: 'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth') => {
     try {
       const currentMode = mode || viewModeRef.current
       let sessionsData
 
       if (currentMode === 'todayOrPlaying') {
         sessionsData = await apiService.getSessionsTodayOrPlaying()
+      } else if (currentMode === 'byMonth') {
+        // This case is handled by loadSessionsByMonth
+        sessionsData = await apiService.getSessionsPlayingOrLast7Days()
       } else {
         sessionsData = await apiService.getSessionsPlayingOrLast7Days()
       }
@@ -140,6 +145,34 @@ const usePlaytime = (): IUserPlayTime => {
     } catch (error) {
       console.error('Failed to load sessions:', error)
       showSnackbar('Không thể tải danh sách session', 'error')
+    }
+  }, [showSnackbar])
+
+  const loadSessionsByMonth = useCallback(async (month: number, year: number) => {
+    try {
+      // Calculate date range for the selected month
+      const startDate = new Date(year, month - 1, 1, 0, 0, 0)
+      const endDate = new Date(year, month, 0, 23, 59, 59)
+
+      const formatDate = (date: Date) => {
+        const y = date.getFullYear()
+        const m = String(date.getMonth() + 1).padStart(2, '0')
+        const d = String(date.getDate()).padStart(2, '0')
+        const h = String(date.getHours()).padStart(2, '0')
+        const min = String(date.getMinutes()).padStart(2, '0')
+        return `${y}-${m}-${d}T${h}:${min}`
+      }
+
+      const from = formatDate(startDate)
+      const to = formatDate(endDate)
+
+      const sessionsData = await apiService.getSessionsByDateRange(from, to)
+      setSessions(sessionsData)
+      setSelectedMonth(month)
+      setSelectedYear(year)
+    } catch (error) {
+      console.error('Failed to load sessions by month:', error)
+      showSnackbar('Không thể tải danh sách session theo tháng', 'error')
     }
   }, [showSnackbar])
 
@@ -518,10 +551,15 @@ const usePlaytime = (): IUserPlayTime => {
     snackbar,
     viewMode,
     openModel,
+    selectedMonth,
+    selectedYear,
     setOpenModel,
     setViewMode,
+    setSelectedMonth,
+    setSelectedYear,
     loadUser,
     loadSessions,
+    loadSessionsByMonth,
     loadTables,
     loadMenus,
     handleOpenDialog,

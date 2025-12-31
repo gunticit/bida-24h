@@ -14,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Dialog,
   DialogTitle,
@@ -44,10 +45,11 @@ import {
   RestaurantMenu as RestaurantIcon,
   CloudDownload as CloudDownloadIcon,
   Download as DownloadIcon,
+  CalendarMonth as CalendarMonthIcon,
 } from '@mui/icons-material'
 import { apiService } from '@/lib/api'
 import { MenuItem as MenuItemType } from '@/types/api'
-import { StatisticsCards } from '@/components/playtime'
+import { StatisticsCards, MonthlyStatisticsDialog } from '@/components/playtime'
 import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
 import dayjs from 'dayjs'
@@ -82,10 +84,15 @@ export default function PlaytimePage() {
     snackbar,
     viewMode,
     openModel,
+    selectedMonth,
+    selectedYear,
     setOpenModel,
     setViewMode,
+    setSelectedMonth,
+    setSelectedYear,
     loadUser,
     loadSessions,
+    loadSessionsByMonth,
     loadTables,
     loadMenus,
     handleOpenDialog,
@@ -119,13 +126,33 @@ export default function PlaytimePage() {
 
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
+  const [openMonthlyStats, setOpenMonthlyStats] = useState<boolean>(false)
+
+  // Pagination states
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  // Paginated sessions
+  const paginatedSessions = sessions.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  )
 
   // Helper function to set default datetime values
   const setDefaultDateRange = () => {
     const now = new Date()
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0)
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59)
-    
+
     // Format to datetime-local format: YYYY-MM-DDTHH:MM
     const formatDateTimeLocal = (date: Date) => {
       const year = date.getFullYear()
@@ -255,7 +282,7 @@ export default function PlaytimePage() {
           </Box>
 
           {/* View Mode Toggle */}
-          <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
             <Button
               variant={viewMode === 'todayOrPlaying' ? 'contained' : 'outlined'}
               onClick={() => {
@@ -276,6 +303,63 @@ export default function PlaytimePage() {
             >
               Đang chơi + 7 ngày qua
             </Button>
+            <Button
+              variant={viewMode === 'byMonth' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setViewMode('byMonth')
+                loadSessionsByMonth(selectedMonth, selectedYear)
+              }}
+              size="small"
+            >
+              Theo tháng
+            </Button>
+
+            {/* Month/Year Selector - Show when byMonth mode is active */}
+            {viewMode === 'byMonth' && (
+              <>
+                <FormControl size="small" sx={{ minWidth: 100 }}>
+                  <InputLabel>Tháng</InputLabel>
+                  <Select
+                    value={selectedMonth}
+                    label="Tháng"
+                    onChange={(e) => {
+                      const month = e.target.value as number
+                      setSelectedMonth(month)
+                      loadSessionsByMonth(month, selectedYear)
+                    }}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month) => (
+                      <MenuItem key={month} value={month}>
+                        Tháng {month}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 90 }}>
+                  <InputLabel>Năm</InputLabel>
+                  <Select
+                    value={selectedYear}
+                    label="Năm"
+                    onChange={(e) => {
+                      const year = e.target.value as number
+                      setSelectedYear(year)
+                      loadSessionsByMonth(selectedMonth, year)
+                    }}
+                  >
+                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Chip
+                  label={`Tháng ${selectedMonth}/${selectedYear}`}
+                  color="primary"
+                  size="small"
+                />
+              </>
+            )}
           </Box>
 
           {/* Statistics Cards */}
@@ -311,7 +395,7 @@ export default function PlaytimePage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      sessions.map((session) => (
+                      paginatedSessions.map((session) => (
                         <TableRow key={session.id}>
                           <TableCell>{session.id}</TableCell>
                           <TableCell>{session.table?.name || `Bàn ${session.table_id}`}</TableCell>
@@ -407,15 +491,28 @@ export default function PlaytimePage() {
                   </TableBody>
                 </MuiTable>
               </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                component="div"
+                count={sessions.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số dòng mỗi trang:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
+                }
+              />
             </CardContent>
           </Card>
         </Container>
 
         {/* Add/Edit Dialog */}
-        <Dialog 
-          open={openDialog} 
-          onClose={handleCloseDialog} 
-          maxWidth="sm" 
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          maxWidth="sm"
           fullWidth
           disableEnforceFocus
           disableAutoFocus
@@ -464,15 +561,15 @@ export default function PlaytimePage() {
                 value={
                   formData.start_time
                     ? (() => {
-                        // Nếu là dạng ISO, chuyển sang yyyy-MM-ddTHH:mm
-                        const d = new Date(formData.start_time)
-                        const year = d.getFullYear()
-                        const month = String(d.getMonth() + 1).padStart(2, '0')
-                        const day = String(d.getDate()).padStart(2, '0')
-                        const hour = String(d.getHours()).padStart(2, '0')
-                        const minute = String(d.getMinutes()).padStart(2, '0')
-                        return `${year}-${month}-${day}T${hour}:${minute}`
-                      })()
+                      // Nếu là dạng ISO, chuyển sang yyyy-MM-ddTHH:mm
+                      const d = new Date(formData.start_time)
+                      const year = d.getFullYear()
+                      const month = String(d.getMonth() + 1).padStart(2, '0')
+                      const day = String(d.getDate()).padStart(2, '0')
+                      const hour = String(d.getHours()).padStart(2, '0')
+                      const minute = String(d.getMinutes()).padStart(2, '0')
+                      return `${year}-${month}-${day}T${hour}:${minute}`
+                    })()
                     : ''
                 }
                 onChange={(e) =>
@@ -503,10 +600,10 @@ export default function PlaytimePage() {
         </Dialog>
 
         {/* Add Food Dialog */}
-        <Dialog 
-          open={openFoodDialog} 
-          onClose={handleCloseFoodDialog} 
-          maxWidth="sm" 
+        <Dialog
+          open={openFoodDialog}
+          onClose={handleCloseFoodDialog}
+          maxWidth="sm"
           fullWidth
           disableEnforceFocus
         >
@@ -701,10 +798,10 @@ export default function PlaytimePage() {
         </Dialog>
 
         {/* Invoice Dialog */}
-        <Dialog 
-          open={openInvoiceDialog} 
-          onClose={handleCloseInvoiceDialog} 
-          maxWidth="md" 
+        <Dialog
+          open={openInvoiceDialog}
+          onClose={handleCloseInvoiceDialog}
+          maxWidth="md"
           fullWidth
           disableEnforceFocus
         >
@@ -910,13 +1007,29 @@ export default function PlaytimePage() {
         >
           <CloudDownloadIcon />
         </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => setOpenMonthlyStats(true)}
+          sx={{ width: { sm: 'auto', xs: '100%' }, p: 1 }}
+          title="Thống kê tháng"
+        >
+          <CalendarMonthIcon />
+        </Button>
       </Box>
+
+      {/* Monthly Statistics Dialog */}
+      <MonthlyStatisticsDialog
+        open={openMonthlyStats}
+        onClose={() => setOpenMonthlyStats(false)}
+        showSnackbar={showSnackbar}
+      />
       <BasicModal open={openModel} setOpen={setOpenModel}>
         <Box>
           <Typography variant="h6" gutterBottom>
             Tải báo cáo doanh thu
           </Typography>
-          
+
           {/* Quick Date Range Buttons */}
           <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             <Button
@@ -1009,12 +1122,12 @@ export default function PlaytimePage() {
           >
             In báo cáo
           </Button>
-          
+
           {/* Display selected range info */}
           {fromDate && toDate && (
             <Box sx={{ width: '100%', mt: 1, p: 1, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
               <Typography variant="caption" color="text.secondary">
-                📊 Báo cáo từ: <strong>{new Date(fromDate).toLocaleString('vi-VN')}</strong> 
+                📊 Báo cáo từ: <strong>{new Date(fromDate).toLocaleString('vi-VN')}</strong>
                 {' '} đến: <strong>{new Date(toDate).toLocaleString('vi-VN')}</strong>
               </Typography>
               {new Date(fromDate) >= new Date(toDate) && (

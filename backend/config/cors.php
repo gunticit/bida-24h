@@ -31,6 +31,11 @@ return [
         'https://api.24hbilliardscoffee.com',
         'http://thanhtoan.24hbilliardscoffee.com',
         'https://thanhtoan.24hbilliardscoffee.com',
+        // Docker internal domains
+        'http://frontend:3000',
+        'http://24h_billiard_frontend:3000',
+        'http://localhost:81',
+        'http://127.0.0.1:81',
     ],
 
     'allowed_origins_patterns' => [],
