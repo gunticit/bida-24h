@@ -88,7 +88,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`revenue-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   )
 }
@@ -206,20 +206,42 @@ export default function RevenuePage() {
 
   const renderDailyTab = () => (
     <Box>
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={2}
+        mb={3}
+        sx={{
+          p: 2,
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,248,220,0.95) 100%)',
+          borderRadius: '12px',
+          border: '2px solid #FFD700',
+        }}
+      >
         <TextField
           label="Chọn ngày"
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          sx={{ height: 56 }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              height: 45
+            }
+          }}
         />
         <Button
           variant="contained"
           onClick={loadDailyRevenue}
           disabled={loading}
-          sx={{ height: 56 }}
+          sx={{
+            height: 45,
+            background: 'linear-gradient(45deg, #DC143C 0%, #FF4500 100%)',
+            fontWeight: 'bold',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #8B0000 0%, #DC143C 100%)',
+            },
+          }}
         >
           Tải lại
         </Button>
@@ -308,27 +330,46 @@ export default function RevenuePage() {
             )}
           </Box>
           {dailyData.sessions && dailyData.sessions.length > 0 && (
-            <Card>
+            <Card
+              sx={{
+                border: '2px solid #FFD700',
+                borderRadius: '16px',
+                overflow: 'hidden',
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#8B0000',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    pb: 1,
+                    borderBottom: '2px solid #FFD700',
+                  }}
+                >
                   Chi tiết ngày {selectedDate}
                 </Typography>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
                   <Table>
                     <TableHead>
-                      <TableRow>
-                        <TableCell>Bàn</TableCell>
-                        <TableCell>Thời gian bắt đầu</TableCell>
-                        <TableCell>Thời gian kết thúc</TableCell>
-                        <TableCell>Thời gian chơi (phút)</TableCell>
-                        <TableCell>Tiền bàn</TableCell>
-                        <TableCell>Tiền thức ăn</TableCell>
-                        <TableCell>Tổng tiền</TableCell>
+                      <TableRow
+                        sx={{
+                          background: 'linear-gradient(90deg, #8B0000 0%, #DC143C 100%)',
+                        }}
+                      >
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Bàn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian bắt đầu</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian kết thúc</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian chơi (phút)</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tiền bàn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tiền thức ăn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tổng tiền</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {dailyData.sessions.map((session: any) => (
-                        <TableRow key={session.id}>
+                        <TableRow key={session.id} sx={{ '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.05)' } }}>
                           <TableCell>{session.table_name}</TableCell>
                           <TableCell>{session.start_time}</TableCell>
                           <TableCell>{session.end_time || '-'}</TableCell>
@@ -338,8 +379,11 @@ export default function RevenuePage() {
                           <TableCell>
                             <Chip
                               label={formatMoney(session.total_revenue)}
-                              color="primary"
-                              variant="outlined"
+                              sx={{
+                                backgroundColor: '#DC143C',
+                                color: '#FFF',
+                                fontWeight: 'bold',
+                              }}
                             />
                           </TableCell>
                         </TableRow>
@@ -357,14 +401,26 @@ export default function RevenuePage() {
 
   const renderMonthlyTab = () => (
     <Box>
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
-        <FormControl sx={{ minWidth: 120, height: 56 }}>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={2}
+        mb={3}
+        flexWrap="wrap"
+        sx={{
+          p: 2,
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,248,220,0.95) 100%)',
+          borderRadius: '12px',
+          border: '2px solid #FFD700',
+        }}
+      >
+        <FormControl sx={{ minWidth: 120, height: 45 }}>
           <InputLabel>Năm</InputLabel>
           <Select
             value={selectedYear}
             label="Năm"
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            sx={{ height: 56 }}
+            sx={{ height: 40 }}
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
               <MenuItem key={year} value={year}>
@@ -373,13 +429,13 @@ export default function RevenuePage() {
             ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ minWidth: 120, height: 56 }}>
+        <FormControl sx={{ minWidth: 120, height: 45 }}>
           <InputLabel>Tháng</InputLabel>
           <Select
             value={selectedMonth}
             label="Tháng"
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            sx={{ height: 56 }}
+            sx={{ height: 40 }}
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
               <MenuItem key={month} value={month}>
@@ -392,7 +448,14 @@ export default function RevenuePage() {
           variant="contained"
           onClick={loadMonthlyRevenue}
           disabled={loading}
-          sx={{ height: 56 }}
+          sx={{
+            height: 45,
+            background: 'linear-gradient(45deg, #DC143C 0%, #FF4500 100%)',
+            fontWeight: 'bold',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #8B0000 0%, #DC143C 100%)',
+            },
+          }}
         >
           Tải lại
         </Button>
@@ -483,30 +546,57 @@ export default function RevenuePage() {
 
           {/* Top Tables Section */}
           {topTables.length > 0 && (
-            <Card sx={{ mt: 3 }}>
+            <Card
+              sx={{
+                mt: 3,
+                border: '2px solid #FFD700',
+                borderRadius: '16px',
+                overflow: 'hidden',
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#8B0000',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    pb: 1,
+                    borderBottom: '2px solid #FFD700',
+                  }}
+                >
                   Top 5 bàn có doanh thu cao nhất tháng này
                 </Typography>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
                   <Table>
                     <TableHead>
-                      <TableRow>
-                        <TableCell>Bàn</TableCell>
-                        <TableCell>Tổng doanh thu</TableCell>
-                        <TableCell>Doanh thu bàn</TableCell>
-                        <TableCell>Doanh thu thức ăn</TableCell>
-                        <TableCell>Số lần đặt bàn</TableCell>
-                        <TableCell>Doanh thu TB/session</TableCell>
+                      <TableRow
+                        sx={{
+                          background: 'linear-gradient(90deg, #8B0000 0%, #DC143C 100%)',
+                        }}
+                      >
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Bàn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tổng doanh thu</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Doanh thu bàn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Doanh thu thức ăn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Số lần đặt bàn</TableCell>
+                        <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Doanh thu TB/session</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {topTables.map((table: any) => (
-                        <TableRow key={table.table_id}>
+                        <TableRow key={table.table_id} sx={{ '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.05)' } }}>
                           <TableCell>
-                            <Chip label={table.table_name} color="primary" />
+                            <Chip
+                              label={table.table_name}
+                              sx={{
+                                backgroundColor: '#DC143C',
+                                color: '#FFF',
+                                fontWeight: 'bold',
+                              }}
+                            />
                           </TableCell>
-                          <TableCell>{formatMoney(table.total_revenue)}</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold', color: '#8B0000' }}>{formatMoney(table.total_revenue)}</TableCell>
                           <TableCell>{formatMoney(table.table_revenue)}</TableCell>
                           <TableCell>{formatMoney(table.food_revenue)}</TableCell>
                           <TableCell>{table.session_count}</TableCell>
@@ -576,13 +666,13 @@ export default function RevenuePage() {
   const renderYearlyTab = () => (
     <Box>
       <Box display="flex" alignItems="center" gap={2} mb={3}>
-        <FormControl sx={{ minWidth: 120, height: 56 }}>
+        <FormControl sx={{ minWidth: 120, height: 45 }}>
           <InputLabel>Năm</InputLabel>
           <Select
             value={selectedYearForYearly}
             label="Năm"
             onChange={(e) => setSelectedYearForYearly(Number(e.target.value))}
-            sx={{ height: 56 }}
+            sx={{ height: 45 }}
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
               <MenuItem key={year} value={year}>
@@ -595,7 +685,7 @@ export default function RevenuePage() {
           variant="contained"
           onClick={loadYearlyRevenue}
           disabled={loading}
-          sx={{ height: 56 }}
+          sx={{ height: 45 }}
         >
           Tải lại
         </Button>
@@ -742,7 +832,14 @@ export default function RevenuePage() {
   if (loading) {
     return (
       <Box
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: 2,
+        }}
       >
         <Loading />
       </Box>
@@ -752,14 +849,48 @@ export default function RevenuePage() {
       <Box sx={{ flexGrow: 1 }}>
         <SideBar title="Thống kê doanh thu" href="/revenue" user={user} icon={<BarChart />}>
           <Box sx={{ p: 3 }}>
+
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert
+                severity="error"
+                sx={{
+                  mb: 2,
+                  border: '1px solid #DC143C',
+                  borderRadius: '12px',
+                }}
+              >
                 {error}
               </Alert>
             )}
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={tabValue} onChange={handleTabChange} aria-label="revenue tabs">
+            <Box
+              sx={{
+                borderBottom: 2,
+                borderColor: '#FFD700',
+                mb: 2,
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,248,220,0.95) 100%)',
+                borderRadius: '12px 12px 0 0',
+                overflow: 'hidden',
+              }}
+            >
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="revenue tabs"
+                sx={{
+                  '& .MuiTab-root': {
+                    fontWeight: 'bold',
+                    color: '#8B0000',
+                    '&.Mui-selected': {
+                      color: '#DC143C',
+                    },
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#DC143C',
+                    height: 3,
+                  },
+                }}
+              >
                 <Tab label="Doanh thu ngày" />
                 <Tab label="Doanh thu tháng" />
                 <Tab label="Doanh thu năm" />
@@ -769,7 +900,7 @@ export default function RevenuePage() {
             <TabPanel value={tabValue} index={0}>
               {loading ? (
                 <Box display="flex" justifyContent="center" p={3}>
-                  <CircularProgress />
+                  <CircularProgress sx={{ color: '#DC143C' }} />
                 </Box>
               ) : (
                 renderDailyTab()
@@ -779,7 +910,7 @@ export default function RevenuePage() {
             <TabPanel value={tabValue} index={1}>
               {loading ? (
                 <Box display="flex" justifyContent="center" p={3}>
-                  <CircularProgress />
+                  <CircularProgress sx={{ color: '#DC143C' }} />
                 </Box>
               ) : (
                 renderMonthlyTab()
@@ -789,7 +920,7 @@ export default function RevenuePage() {
             <TabPanel value={tabValue} index={2}>
               {loading ? (
                 <Box display="flex" justifyContent="center" p={3}>
-                  <CircularProgress />
+                  <CircularProgress sx={{ color: '#DC143C' }} />
                 </Box>
               ) : (
                 renderYearlyTab()

@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material'
 import { apiService, User } from '@/lib/api'
 import SideBar from '@/app/SideBar'
+import ConfirmDialog from '@/components/playtime/ConfirmDialog'
 
 interface UserFormData {
   name: string
@@ -83,6 +84,19 @@ export default function UserSettingPage() {
     open: false,
     message: '',
     severity: 'info',
+  })
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+    severity?: 'warning' | 'error' | 'info'
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    severity: 'warning',
   })
 
   useEffect(() => {
@@ -236,16 +250,33 @@ export default function UserSettingPage() {
       return
     }
 
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      try {
-        await apiService.deleteUser(userId)
-        showSnackbar('Xóa người dùng thành công!', 'success')
-        loadUsers()
-      } catch (error) {
-        console.error('Failed to delete user:', error)
-        showSnackbar('Có lỗi xảy ra khi xóa người dùng', 'error')
-      }
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Xác nhận xóa người dùng',
+      message: 'Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.',
+      severity: 'error',
+      onConfirm: async () => {
+        try {
+          await apiService.deleteUser(userId)
+          showSnackbar('Xóa người dùng thành công!', 'success')
+          loadUsers()
+        } catch (error) {
+          console.error('Failed to delete user:', error)
+          showSnackbar('Có lỗi xảy ra khi xóa người dùng', 'error')
+        }
+        closeConfirmDialog()
+      },
+    })
+  }
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      open: false,
+      title: '',
+      message: '',
+      onConfirm: () => { },
+      severity: 'warning',
+    })
   }
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' | 'warning') => {
@@ -463,6 +494,16 @@ export default function UserSettingPage() {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          open={confirmDialog.open}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          severity={confirmDialog.severity}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
       </SideBar>
     </Box>
   )

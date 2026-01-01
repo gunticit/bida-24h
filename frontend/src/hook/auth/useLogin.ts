@@ -25,8 +25,13 @@ const useLogin = () => {
 
     try {
       const response = await apiService.login(formData)
-      apiService.setToken(response.token)
-      router.push('/dashboard')
+
+      if (response.token) {
+        apiService.setToken(response.token)
+        router.push('/dashboard')
+      } else {
+        setError('Không nhận được token từ server')
+      }
     } catch (err) {
       let message = 'Đăng nhập thất bại'
       if (

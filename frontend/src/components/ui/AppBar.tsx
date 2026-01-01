@@ -12,6 +12,7 @@ import {
   ListItemIcon,
   Divider,
   Box,
+  Typography,
 } from '@mui/material'
 import {
   Widgets as WidgetsIcon,
@@ -50,6 +51,9 @@ const CustomAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<StyledAppBarProps>(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
+  background: 'linear-gradient(90deg, #8B0000 0%, #DC143C 50%, #FF4500 100%)',
+  borderBottom: '3px solid #FFD700',
+  boxShadow: '0 4px 20px rgba(139, 0, 0, 0.3)',
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -99,36 +103,104 @@ export default function AppBar({
           edge="start"
           sx={{
             marginRight: 5,
-            borderRight: '1px',
-            borderColor: '#fff',
-            borderStyle: 'solid',
+            borderRight: '2px solid #FFD700',
+            borderColor: '#FFD700',
+            pr: 2,
+            '&:hover': {
+              backgroundColor: 'rgba(255, 215, 0, 0.2)',
+            },
             ...(open && { display: 'none' }),
           }}
         >
-          <MenuIcon />
+          <MenuIcon sx={{ color: '#FFD700' }} />
         </IconButton>
         <Link
           href={href}
           sx={{
-            color: '#fff',
+            color: '#FFD700',
             flexGrow: 1,
             display: 'flex',
             alignItems: 'center',
             textDecoration: 'none',
+            fontWeight: 'bold',
+            fontSize: '1.1rem',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+            '&:hover': {
+              color: '#FFF',
+            },
           }}
         >
-          {icon && <Box sx={{ mr: 2 }}>{icon}</Box>}
-          {title}
+          {icon && <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>{icon}</Box>}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <span>🏮</span>
+            <span>{title}</span>
+            <span>🏮</span>
+          </Box>
         </Link>
-        <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
-          <Avatar sx={{ width: 32, height: 32 }}>{user?.name?.charAt(0) || 'U'}</Avatar>
+
+        {/* Tet greeting - hidden on mobile */}
+
+        <IconButton
+          size="large"
+          edge="end"
+          color="inherit"
+          onClick={handleMenuOpen}
+          sx={{
+            '&:hover': {
+              backgroundColor: 'rgba(255, 215, 0, 0.2)',
+            },
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 36,
+              height: 36,
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              border: '2px solid #FFD700',
+              color: '#8B0000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(255, 215, 0, 0.5)',
+            }}
+          >
+            {user?.name?.charAt(0) || 'U'}
+          </Avatar>
         </IconButton>
-        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={() => router.push('/dashboard')}>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              background: 'linear-gradient(145deg, #FFF 0%, #FFF8DC 100%)',
+              border: '2px solid #FFD700',
+              borderRadius: '12px',
+              boxShadow: 'unset',
+              minWidth: 200,
+              paddingTop: '0 !important'
+            },
+          }}
+        >
+          {/* User info header */}
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle2" sx={{ color: '#8B0000', fontWeight: 'bold' }}>
+              👋 Xin chào, {user?.name}!
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#666' }}>
+              {user?.email}
+            </Typography>
+          </Box>
+          <Divider sx={{ backgroundColor: '#FFD700' }} />
+
+          <MenuItem
+            onClick={() => router.push('/dashboard')}
+            sx={{
+              '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.1)' },
+            }}
+          >
             <ListItemIcon>
-              <WidgetsIcon fontSize="small" />
+              <WidgetsIcon fontSize="small" sx={{ color: '#fffff' }} />
             </ListItemIcon>
-            Bảng điều khiển
+            <Typography sx={{ color: '#8B0000' }}>Bảng điều khiển</Typography>
           </MenuItem>
           {user?.role === 'admin' && (
             <MenuItem
@@ -136,11 +208,14 @@ export default function AppBar({
                 handleMenuClose()
                 router.push('/revenue')
               }}
+              sx={{
+                '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.1)' },
+              }}
             >
               <ListItemIcon>
-                <BarChartIcon fontSize="small" />
+                <BarChartIcon fontSize="small" sx={{ color: '#FF4500' }} />
               </ListItemIcon>
-              Thống kê doanh thu
+              <Typography sx={{ color: '#8B0000' }}>Thống kê doanh thu</Typography>
             </MenuItem>
           )}
           <MenuItem
@@ -148,27 +223,41 @@ export default function AppBar({
               handleMenuClose()
               router.push('/setting/profile')
             }}
+            sx={{
+              '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.1)' },
+            }}
           >
             <ListItemIcon>
-              <PersonIcon fontSize="small" />
+              <PersonIcon fontSize="small" sx={{ color: '#8B4513' }} />
             </ListItemIcon>
-            Hồ sơ
+            <Typography sx={{ color: '#8B0000' }}>Hồ sơ</Typography>
           </MenuItem>
-          <MenuItem onClick={() => router.push('/setting')}>
+          <MenuItem
+            onClick={() => router.push('/setting')}
+            sx={{
+              '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.1)' },
+            }}
+          >
             <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+              <SettingsIcon fontSize="small" sx={{ color: '#666' }} />
             </ListItemIcon>
-            Cài đặt
+            <Typography sx={{ color: '#8B0000' }}>Cài đặt</Typography>
           </MenuItem>
-          <Divider />
-          <MenuItem onClick={handleLogout}>
+          <Divider sx={{ backgroundColor: '#FFD700' }} />
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              '&:hover': { backgroundColor: 'rgba(220, 20, 60, 0.15)' },
+            }}
+          >
             <ListItemIcon>
-              <LogoutIcon fontSize="small" />
+              <LogoutIcon fontSize="small" sx={{ color: '#DC143C' }} />
             </ListItemIcon>
-            Đăng xuất
+            <Typography sx={{ color: '#DC143C', fontWeight: 'bold' }}>Đăng xuất</Typography>
           </MenuItem>
         </Menu>
       </Toolbar>
     </CustomAppBar>
   )
 }
+

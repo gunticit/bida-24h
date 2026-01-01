@@ -24,7 +24,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { useRouter } from 'next/navigation'
-import { IUserPlayTime, InvoiceData, ISeverity, CategoryChipInfo } from '@/types/playtime'
+import { IUserPlayTime, InvoiceData, ISeverity, CategoryChipInfo, ConfirmDialogState } from '@/types/playtime'
 
 const usePlaytime = (): IUserPlayTime => {
   dayjs.extend(utc)
@@ -74,6 +74,13 @@ const usePlaytime = (): IUserPlayTime => {
   )
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    severity: 'warning',
+  })
 
   // Use ref to track viewMode to avoid infinite loops in useCallback dependencies
   const viewModeRef = useRef(viewMode)
@@ -249,16 +256,23 @@ const usePlaytime = (): IUserPlayTime => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa session này?')) {
-      try {
-        await apiService.deleteSession(id)
-        showSnackbar('Xóa session thành công', 'success')
-        loadSessions()
-      } catch (error) {
-        console.error('Failed to delete session:', error)
-        showSnackbar('Không thể xóa session', 'error')
-      }
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Xác nhận xóa session',
+      message: 'Bạn có chắc chắn muốn xóa session này? Hành động này không thể hoàn tác.',
+      severity: 'error',
+      onConfirm: async () => {
+        try {
+          await apiService.deleteSession(id)
+          showSnackbar('Xóa session thành công', 'success')
+          loadSessions()
+        } catch (error) {
+          console.error('Failed to delete session:', error)
+          showSnackbar('Không thể xóa session', 'error')
+        }
+        closeConfirmDialog()
+      },
+    })
   }
 
   const handleStatusChange = async (
@@ -394,7 +408,7 @@ const usePlaytime = (): IUserPlayTime => {
       case 'playing':
         return 'success'
       case 'finished':
-        return 'primary'
+        return 'default'
       case 'cancelled':
         return 'error'
       default:
@@ -433,27 +447,34 @@ const usePlaytime = (): IUserPlayTime => {
 
   // Hàm xóa món ăn và cập nhật tổng tiền
   const handleDeleteFood = async (orderId: number, sessionId: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
-      try {
-        await apiService.deleteOrder(orderId)
+    setConfirmDialog({
+      open: true,
+      title: 'Xác nhận xóa món ăn',
+      message: 'Bạn có chắc chắn muốn xóa món ăn này?',
+      severity: 'warning',
+      onConfirm: async () => {
+        try {
+          await apiService.deleteOrder(orderId)
 
-        // Tính toán lại tổng tiền đồ ăn sau khi xóa
-        await recalculateFoodTotal(sessionId)
+          // Tính toán lại tổng tiền đồ ăn sau khi xóa
+          await recalculateFoodTotal(sessionId)
 
-        showSnackbar('Xóa món ăn thành công!', 'success')
+          showSnackbar('Xóa món ăn thành công!', 'success')
 
-        // Reload dữ liệu
-        loadSessions()
-        if (selectedSession && selectedSession.id === sessionId) {
-          const orders = await apiService.getOrders()
-          const sessionOrders = orders.filter((order) => order.session_id === sessionId)
-          setSessionOrders(sessionOrders)
+          // Reload dữ liệu
+          loadSessions()
+          if (selectedSession && selectedSession.id === sessionId) {
+            const orders = await apiService.getOrders()
+            const sessionOrders = orders.filter((order) => order.session_id === sessionId)
+            setSessionOrders(sessionOrders)
+          }
+        } catch (error) {
+          console.error('Failed to delete food:', error)
+          showSnackbar('Không thể xóa món ăn', 'error')
         }
-      } catch (error) {
-        console.error('Failed to delete food:', error)
-        showSnackbar('Không thể xóa món ăn', 'error')
-      }
-    }
+        closeConfirmDialog()
+      },
+    })
   }
 
   // Hàm mở dialog in hóa đơn
@@ -531,6 +552,16 @@ const usePlaytime = (): IUserPlayTime => {
     setOpenModel(true)
   }
 
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      open: false,
+      title: '',
+      message: '',
+      onConfirm: () => { },
+      severity: 'warning',
+    })
+  }
+
   return {
     router,
     user,
@@ -589,6 +620,8 @@ const usePlaytime = (): IUserPlayTime => {
     handleDownloadReport,
     reportLoading,
     handlePrintReport,
+    confirmDialog,
+    closeConfirmDialog,
   }
 }
 

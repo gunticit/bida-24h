@@ -43,6 +43,7 @@ import { apiService, User, Table } from '@/lib/api'
 import SideBar from '@/app/SideBar'
 import { formatMoney } from '@/utils/formatters'
 import { QRCodeSVG } from 'qrcode.react'
+import ConfirmDialog from '@/components/playtime/ConfirmDialog'
 
 interface TableFormData {
   name: string
@@ -73,6 +74,19 @@ export default function TableSettingPage() {
   })
   const [qrDialogOpen, setQrDialogOpen] = useState(false)
   const [qrTable, setQrTable] = useState<Table | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+    severity?: 'warning' | 'error' | 'info'
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    severity: 'warning',
+  })
 
   useEffect(() => {
     const token = apiService.getToken()
@@ -176,16 +190,33 @@ export default function TableSettingPage() {
   }
 
   const handleDeleteTable = async (tableId: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bàn này?')) {
-      try {
-        await apiService.deleteTable(tableId)
-        showSnackbar('Xóa bàn thành công!', 'success')
-        loadTables()
-      } catch (error) {
-        console.error('Failed to delete table:', error)
-        showSnackbar('Có lỗi xảy ra khi xóa bàn', 'error')
-      }
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Xác nhận xóa bàn',
+      message: 'Bạn có chắc chắn muốn xóa bàn này? Hành động này không thể hoàn tác.',
+      severity: 'error',
+      onConfirm: async () => {
+        try {
+          await apiService.deleteTable(tableId)
+          showSnackbar('Xóa bàn thành công!', 'success')
+          loadTables()
+        } catch (error) {
+          console.error('Failed to delete table:', error)
+          showSnackbar('Có lỗi xảy ra khi xóa bàn', 'error')
+        }
+        closeConfirmDialog()
+      },
+    })
+  }
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      open: false,
+      title: '',
+      message: '',
+      onConfirm: () => { },
+      severity: 'warning',
+    })
   }
 
   const handleShowQrCode = async (table: Table) => {
@@ -412,6 +443,16 @@ export default function TableSettingPage() {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          open={confirmDialog.open}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          severity={confirmDialog.severity}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
       </SideBar>
     </Box>
   )

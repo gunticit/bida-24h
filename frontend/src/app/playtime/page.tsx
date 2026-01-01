@@ -50,6 +50,7 @@ import {
 import { apiService } from '@/lib/api'
 import { MenuItem as MenuItemType } from '@/types/api'
 import { StatisticsCards, MonthlyStatisticsDialog } from '@/components/playtime'
+import ConfirmDialog from '@/components/playtime/ConfirmDialog'
 import { formatDateTime, formatMoney, calculatePlayTime } from '@/utils/formatters'
 import { getStatusText } from '@/utils/sessionHelpers'
 import dayjs from 'dayjs'
@@ -122,6 +123,8 @@ export default function PlaytimePage() {
     handleDownloadReport,
     reportLoading,
     handlePrintReport,
+    confirmDialog,
+    closeConfirmDialog,
   } = usePlaytime()
 
   const [fromDate, setFromDate] = useState<string>('')
@@ -322,6 +325,9 @@ export default function PlaytimePage() {
                   <Select
                     value={selectedMonth}
                     label="Tháng"
+                    sx={{
+                      height: 30
+                    }}
                     onChange={(e) => {
                       const month = e.target.value as number
                       setSelectedMonth(month)
@@ -340,6 +346,9 @@ export default function PlaytimePage() {
                   <Select
                     value={selectedYear}
                     label="Năm"
+                    sx={{
+                      height: 30
+                    }}
                     onChange={(e) => {
                       const year = e.target.value as number
                       setSelectedYear(year)
@@ -356,7 +365,7 @@ export default function PlaytimePage() {
                 <Chip
                   label={`Tháng ${selectedMonth}/${selectedYear}`}
                   color="primary"
-                  size="small"
+                  size="medium"
                 />
               </>
             )}
@@ -368,21 +377,25 @@ export default function PlaytimePage() {
           {/* Sessions Table */}
           <Card>
             <CardContent sx={{ p: 0, m: 0, pb: '0!important' }}>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
                 <MuiTable>
                   <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>Bàn</TableCell>
-                      <TableCell>Thời gian bắt đầu</TableCell>
-                      <TableCell>Thời gian kết thúc</TableCell>
-                      <TableCell>Thời gian chơi</TableCell>
-                      <TableCell>Giá/giờ</TableCell>
-                      <TableCell>Tiền bàn</TableCell>
-                      <TableCell>Tiền đồ ăn</TableCell>
-                      <TableCell>Tổng tiền</TableCell>
-                      <TableCell>Trạng thái</TableCell>
-                      <TableCell>Thao tác</TableCell>
+                    <TableRow
+                      sx={{
+                        background: 'linear-gradient(90deg, #8B0000 0%, #DC143C 100%)',
+                      }}
+                    >
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>ID</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Bàn</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian bắt đầu</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian kết thúc</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thời gian chơi</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Giá/giờ</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tiền bàn</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tiền đồ ăn</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Tổng tiền</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Trạng thái</TableCell>
+                      <TableCell sx={{ color: '#FFD700', fontWeight: 'bold' }}>Thao tác</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1139,6 +1152,16 @@ export default function PlaytimePage() {
           )}
         </Box>
       </BasicModal>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        severity={confirmDialog.severity}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={closeConfirmDialog}
+      />
     </Box>
   )
 }

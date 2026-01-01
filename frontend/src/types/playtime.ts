@@ -26,6 +26,14 @@ export type InvoiceData = {
 
 export type viewModeType = 'todayOrPlaying' | 'playingOrLast7Days' | 'byMonth'
 export type ISeverity = 'success' | 'error' | 'info'
+
+export type ConfirmDialogState = {
+  open: boolean
+  title: string
+  message: string
+  onConfirm: () => void
+  severity?: 'warning' | 'error' | 'info'
+}
 export type SnackbarPrams = {
   message: string
   severity: ISeverity
@@ -100,4 +108,6 @@ export type IUserPlayTime = {
   handleDownloadReport: (fromDate: string, toDate: string) => Promise<void>
   reportLoading: boolean
   handlePrintReport: (fromDate: string, toDate: string) => Promise<void>
+  confirmDialog: ConfirmDialogState
+  closeConfirmDialog: () => void
 }

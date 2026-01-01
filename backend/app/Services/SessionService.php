@@ -53,10 +53,11 @@ class SessionService
     public function getByDateRange($from, $to)
     {
         return GameSession::with('table')
-            ->where(function ($query) use ($from, $to) {
-                $query->whereBetween('start_time', [$from, $to])
-                    ->orWhere('status', 'playing');
-            })
+            // ->where(function ($query) use ($from, $to) {
+            //     $query->whereBetween('start_time', [$from, $to])
+            //         ->orWhere('status', 'playing');
+            // })
+            ->whereBetween('start_time', [$from, $to])
             ->orderByRaw("CASE WHEN status = 'playing' THEN 0 ELSE 1 END")
             ->orderBy('start_time', 'desc')
             ->orderBy('id', 'desc')

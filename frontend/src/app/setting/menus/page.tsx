@@ -49,6 +49,7 @@ import {
 import { apiService, User } from '@/lib/api'
 import SideBar from '@/app/SideBar'
 import { formatMoney } from '@/utils/formatters'
+import ConfirmDialog from '@/components/playtime/ConfirmDialog'
 
 interface MenuItem {
   id: number
@@ -117,6 +118,19 @@ export default function MenuSettingPage() {
     open: false,
     message: '',
     severity: 'info',
+  })
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+    severity?: 'warning' | 'error' | 'info'
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    severity: 'warning',
   })
 
   const showSnackbar = useCallback(
@@ -254,16 +268,33 @@ export default function MenuSettingPage() {
   }
 
   const handleDeleteMenu = async (menuId: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
-      try {
-        await apiService.deleteMenu(menuId)
-        showSnackbar('Xóa món ăn thành công!', 'success')
-        loadMenus()
-      } catch (error) {
-        console.error('Failed to delete menu:', error)
-        showSnackbar('Có lỗi xảy ra khi xóa món ăn', 'error')
-      }
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Xác nhận xóa món ăn',
+      message: 'Bạn có chắc chắn muốn xóa món ăn này? Hành động này không thể hoàn tác.',
+      severity: 'error',
+      onConfirm: async () => {
+        try {
+          await apiService.deleteMenu(menuId)
+          showSnackbar('Xóa món ăn thành công!', 'success')
+          loadMenus()
+        } catch (error) {
+          console.error('Failed to delete menu:', error)
+          showSnackbar('Có lỗi xảy ra khi xóa món ăn', 'error')
+        }
+        closeConfirmDialog()
+      },
+    })
+  }
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      open: false,
+      title: '',
+      message: '',
+      onConfirm: () => { },
+      severity: 'warning',
+    })
   }
 
   const handleCloseSnackbar = () => {
@@ -517,6 +548,16 @@ export default function MenuSettingPage() {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          open={confirmDialog.open}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          severity={confirmDialog.severity}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
       </SideBar>
     </Box>
   )

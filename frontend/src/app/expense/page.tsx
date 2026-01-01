@@ -36,6 +36,7 @@ import { Expense, ExpenseSummary } from '@/types/api'
 import { useRouter } from 'next/navigation'
 import SideBar from '@/app/SideBar'
 import { formatMoney } from '@/utils/formatters'
+import Loading from '@/components/loading/index'
 
 interface ApiError {
   message?: string
@@ -332,9 +333,16 @@ const ExpensePage = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography>Đang tải...</Typography>
-      </Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Loading />
+      </Box>
     )
   }
 
