@@ -31,6 +31,8 @@ return [
         'https://api.24hbilliardscoffee.com',
         'http://thanhtoan.24hbilliardscoffee.com',
         'https://thanhtoan.24hbilliardscoffee.com',
+        'http://tinhtien.24hbilliardscoffee.com',
+        'https://tinhtien.24hbilliardscoffee.com',
         // Docker internal domains
         'http://frontend:3000',
         'http://24h_billiard_frontend:3000',
