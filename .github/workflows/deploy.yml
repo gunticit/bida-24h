@@ -1,0 +1,90 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Pre-setup directories
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            mkdir -p /var/www/bida-24h
+            # Install unzip/zip if missing (needed for composer/deployment)
+            if ! command -v unzip &> /dev/null; then
+                apt-get update && apt-get install -y unzip zip
+            fi
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          source: "backend,frontend,docker-compose.yml,scripts"
+          target: "/var/www/bida-24h"
+          rm: false
+          strip_components: 0
+
+      - name: Execute remote commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            # Make setup script executable and run it (if needed)
+            chmod +x /var/www/bida-24h/scripts/setup-vps.sh
+            # We can run the setup script here to ensure environment is ready
+            # Note: This might take a while on first run
+            bash /var/www/bida-24h/scripts/setup-vps.sh
+
+            # 1. Setup Backend
+            echo "Deploying Backend..."
+            cd /var/www/bida-24h/backend
+            
+            # Ensure .env exists (copy from example if not) - User should configure this manually for production security
+            if [ ! -f .env ]; then
+                cp .env.example .env
+                php artisan key:generate
+            fi
+
+            # Install dependencies
+            composer install --no-dev --optimize-autoloader
+            
+            # Fix permissions
+            chmod -R 775 storage bootstrap/cache
+            chown -R www-data:www-data storage bootstrap/cache
+            
+            # Run migrations and optimizations
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # 2. Setup Frontend
+            echo "Deploying Frontend..."
+            cd /var/www/bida-24h/frontend
+            
+            # Install dependencies
+            npm install
+            
+            # Build Next.js
+            npm run build
+            
+            # Restart PM2
+            pm2 restart bida-24h-frontend || pm2 start ecosystem.config.js
