@@ -92,38 +92,42 @@ class AuthController extends Controller
     public function updateProfile(Request $request)
     {
         $user = $request->user();
-        
+
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:8|confirmed',
-            'current_password' => 'required_with:password|string',
+            'current_password' => 'required_with:password|current_password',
+            'password' => 'sometimes|string|min:8|confirmed|different:current_password',
+        ], [
+            'current_password.required_with' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'current_password.current_password' => 'Mật khẩu hiện tại không chính xác.',
+            'password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'password.different' => 'Mật khẩu mới phải khác mật khẩu hiện tại.',
         ]);
 
-        // Kiểm tra mật khẩu hiện tại nếu có thay đổi mật khẩu
-        if ($request->has('password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                throw ValidationException::withMessages([
-                    'current_password' => ['Mật khẩu hiện tại không chính xác.'],
-                ]);
-            }
-        }
-
         $updateData = [];
-        
-        if ($request->has('name')) {
+
+        if ($request->filled('name')) {
             $updateData['name'] = $request->name;
         }
-        
-        if ($request->has('email')) {
+
+        if ($request->filled('email')) {
             $updateData['email'] = $request->email;
         }
-        
-        if ($request->has('password')) {
+
+        $passwordChanged = $request->filled('password');
+        if ($passwordChanged) {
             $updateData['password'] = Hash::make($request->password);
         }
 
         $user->update($updateData);
+
+        // Thu hồi các token khác sau khi đổi mật khẩu, giữ lại token hiện tại
+        if ($passwordChanged) {
+            $currentTokenId = $request->user()->currentAccessToken()->id;
+            $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+        }
 
         return response()->json([
             'message' => 'Cập nhật thông tin thành công',
