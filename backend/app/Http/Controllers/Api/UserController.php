@@ -29,12 +29,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'role' => 'sometimes|in:admin,staff',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'staff',
         ]);
 
         return new UserResource($user);
@@ -67,9 +69,10 @@ class UserController extends Controller
                 Rule::unique('users')->ignore($user->id),
             ],
             'password' => 'sometimes|required|string|min:8',
+            'role' => 'sometimes|in:admin,staff',
         ]);
 
-        $user->update($request->only(['name', 'email']));
+        $user->update($request->only(['name', 'email', 'role']));
 
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);

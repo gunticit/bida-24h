@@ -205,6 +205,11 @@ export default function UserSettingPage() {
       return
     }
 
+    if (formData.password && formData.password.length < 8) {
+      showSnackbar('Mật khẩu phải có ít nhất 8 ký tự', 'error')
+      return
+    }
+
     if (formData.password && formData.password !== formData.password_confirmation) {
       showSnackbar('Mật khẩu xác nhận không khớp', 'error')
       return
@@ -240,7 +245,8 @@ export default function UserSettingPage() {
       loadUsers()
     } catch (error) {
       console.error('Failed to save user:', error)
-      showSnackbar('Có lỗi xảy ra khi lưu người dùng', 'error')
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra khi lưu người dùng'
+      showSnackbar(message, 'error')
     }
   }
 
@@ -421,49 +427,46 @@ export default function UserSettingPage() {
                 </Select>
               </FormControl>
 
-              {!editingUser && (
-                <>
-                  <TextField
-                    label="Mật khẩu"
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    fullWidth
-                    required
-                    InputProps={{
-                      endAdornment: (
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <HideIcon /> : <ViewIcon />}
-                        </IconButton>
-                      ),
-                    }}
-                  />
+              <TextField
+                label={editingUser ? 'Mật khẩu mới (để trống nếu không thay đổi)' : 'Mật khẩu'}
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                fullWidth
+                required={!editingUser}
+                error={!!formData.password && formData.password.length < 8}
+                helperText={
+                  formData.password && formData.password.length < 8
+                    ? 'Mật khẩu phải có ít nhất 8 ký tự'
+                    : ' '
+                }
+                InputProps={{
+                  endAdornment: (
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      {showPassword ? <HideIcon /> : <ViewIcon />}
+                    </IconButton>
+                  ),
+                }}
+              />
 
-                  <TextField
-                    label="Xác nhận mật khẩu"
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password_confirmation}
-                    onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
-                    fullWidth
-                    required
-                  />
-                </>
-              )}
-
-              {editingUser && (
+              {(!editingUser || formData.password) && (
                 <TextField
-                  label="Mật khẩu mới (để trống nếu không thay đổi)"
+                  label="Xác nhận mật khẩu"
                   type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  value={formData.password_confirmation}
+                  onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
                   fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                        {showPassword ? <HideIcon /> : <ViewIcon />}
-                      </IconButton>
-                    ),
-                  }}
+                  required
+                  error={
+                    !!formData.password_confirmation &&
+                    formData.password !== formData.password_confirmation
+                  }
+                  helperText={
+                    formData.password_confirmation &&
+                    formData.password !== formData.password_confirmation
+                      ? 'Mật khẩu xác nhận không khớp'
+                      : ' '
+                  }
                 />
               )}
             </Box>
