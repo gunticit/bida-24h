@@ -28,6 +28,14 @@ use App\Http\Controllers\Api\ExpenseController;
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
+// Public QR ordering routes (rate limited to prevent abuse)
+Route::prefix('public')->middleware('throttle:30,1')->group(function () {
+    Route::get('/tables/{token}', [\App\Http\Controllers\Api\QrOrderingController::class, 'getTableByToken']);
+    Route::get('/menus', [\App\Http\Controllers\Api\QrOrderingController::class, 'getMenus']);
+    Route::post('/tables/{token}/orders', [\App\Http\Controllers\Api\QrOrderingController::class, 'placeOrder'])
+        ->middleware('throttle:5,1'); // Max 5 orders per minute per IP
+});
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -51,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::delete('/orders/{orderId}', [SessionController::class, 'removeOrder']);
     Route::put('/orders/{orderId}/quantity', [SessionController::class, 'updateOrderQuantity']);
+    Route::put('/orders/{orderId}/status', [SessionController::class, 'updateOrderStatus']);
     Route::apiResource('sessions', SessionController::class);
     
     // Menu management routes

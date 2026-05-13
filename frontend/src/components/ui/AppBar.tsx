@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Toolbar,
@@ -13,6 +13,11 @@ import {
   Divider,
   Box,
   Typography,
+  Badge,
+  Tooltip,
+  Snackbar,
+  Popover,
+  Alert,
 } from '@mui/material'
 import {
   Widgets as WidgetsIcon,
@@ -21,6 +26,7 @@ import {
   Person as PersonIcon,
   BarChart as BarChartIcon,
   Menu as MenuIcon,
+  Notifications as NotificationsIcon,
 } from '@mui/icons-material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 
@@ -93,6 +99,80 @@ export default function AppBar({
     onLogout()
   }
 
+  // === Notification polling for new QR orders ===
+  const [pendingCount, setPendingCount] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  const [notifToast, setNotifToast] = useState({ open: false, msg: '' });
+  const [notifAnchor, setNotifAnchor] = useState<null | HTMLElement>(null);
+  const prevCountRef = useRef(0);
+
+  const playNotificationSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const playBeep = (startTime: number, freq: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+        osc.start(startTime);
+        osc.stop(startTime + 0.3);
+      };
+      playBeep(ctx.currentTime, 880);
+      playBeep(ctx.currentTime + 0.35, 1100);
+      playBeep(ctx.currentTime + 0.7, 1320);
+    } catch (e) { console.warn('Audio not supported', e); }
+  }, []);
+
+  useEffect(() => {
+    const API_BASE = process.env.NODE_ENV === 'production'
+      ? process.env.NEXT_PUBLIC_API_URL || 'https://api.24hbilliardscoffee.com/api'
+      : 'http://localhost:8001/api';
+
+    const checkOrders = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        if (!token) return;
+        const res = await fetch(`${API_BASE}/orders`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+        });
+        if (!res.ok) return;
+        const orders = await res.json();
+        const pending = (orders as any[]).filter((o: any) => o.status === 'pending');
+        const newCount = pending.length;
+
+        if (newCount > prevCountRef.current && prevCountRef.current >= 0) {
+          const diff = newCount - prevCountRef.current;
+          if (prevCountRef.current > 0 || pendingCount > 0) {
+            playNotificationSound();
+            setNotifToast({ open: true, msg: `🔔 Có ${diff} đơn hàng mới từ khách! Vui lòng kiểm tra.` });
+          }
+        }
+        prevCountRef.current = newCount;
+        setPendingCount(newCount);
+        setPendingOrders(pending);
+      } catch (e) { /* ignore */ }
+    };
+
+    checkOrders();
+    const interval = setInterval(checkOrders, 10000);
+    return () => clearInterval(interval);
+  }, [playNotificationSound]);
+
+  const handleNotifOpen = (e: React.MouseEvent<HTMLElement>) => setNotifAnchor(e.currentTarget);
+  const handleNotifClose = () => setNotifAnchor(null);
+
+  // Group pending orders by session_id
+  const groupedOrders = pendingOrders.reduce((acc: Record<number, any[]>, o: any) => {
+    const sid = o.session_id;
+    if (!acc[sid]) acc[sid] = [];
+    acc[sid].push(o);
+    return acc;
+  }, {} as Record<number, any[]>);
+
   return (
     <CustomAppBar position="fixed" open={open}>
       <Toolbar>
@@ -139,6 +219,112 @@ export default function AppBar({
         </Link>
 
         {/* Tet greeting - hidden on mobile */}
+
+        {/* Notification Bell */}
+        <Tooltip title={pendingCount > 0 ? `${pendingCount} đơn hàng chờ xác nhận` : 'Không có thông báo'}>
+          <IconButton
+            color="inherit"
+            onClick={handleNotifOpen}
+            sx={{ mr: 1, '&:hover': { backgroundColor: 'rgba(255, 215, 0, 0.2)' } }}
+          >
+            <Badge
+              badgeContent={pendingCount}
+              sx={{
+                '& .MuiBadge-badge': {
+                  background: pendingCount > 0 ? '#ff1744' : 'transparent',
+                  color: '#fff',
+                  fontWeight: 700,
+                  ...(pendingCount > 0 && {
+                    animation: 'pulse 1.5s infinite',
+                  }),
+                },
+                '@keyframes pulse': {
+                  '0%': { transform: 'scale(1)' },
+                  '50%': { transform: 'scale(1.15)' },
+                  '100%': { transform: 'scale(1)' },
+                },
+              }}
+            >
+              <NotificationsIcon sx={{ color: '#FFD700', fontSize: 26 }} />
+            </Badge>
+          </IconButton>
+        </Tooltip>
+
+        {/* Notification Popover */}
+        <Popover
+          open={Boolean(notifAnchor)}
+          anchorEl={notifAnchor}
+          onClose={handleNotifClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          PaperProps={{
+            sx: {
+              width: 360,
+              maxHeight: 420,
+              borderRadius: 3,
+              border: '2px solid #FFD700',
+              boxShadow: '0 8px 32px rgba(0,0,0,.2)',
+              overflow: 'hidden',
+            },
+          }}
+        >
+          <Box sx={{ px: 2, py: 1.5, background: 'linear-gradient(90deg, #8B0000, #DC143C)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography sx={{ color: '#FFD700', fontWeight: 700, fontSize: 15 }}>🔔 Thông báo đơn hàng</Typography>
+            <Typography sx={{ color: 'rgba(255,215,0,.7)', fontSize: 12 }}>{pendingCount} đang chờ</Typography>
+          </Box>
+          <Box sx={{ maxHeight: 340, overflowY: 'auto' }}>
+            {pendingCount === 0 ? (
+              <Box sx={{ py: 4, textAlign: 'center' }}>
+                <NotificationsIcon sx={{ fontSize: 40, color: '#ddd', mb: 1 }} />
+                <Typography sx={{ color: '#999', fontSize: 14 }}>Không có đơn hàng nào đang chờ</Typography>
+              </Box>
+            ) : (
+              Object.entries(groupedOrders).map(([sessionId, orders]) => {
+                const firstOrder = (orders as any[])[0];
+                const tableName = firstOrder?.session?.table?.name || `Bàn ?`;
+                const createdAt = firstOrder?.created_at ? new Date(firstOrder.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
+                return (
+                  <Box
+                    key={sessionId}
+                    onClick={() => { handleNotifClose(); router.push('/playtime'); }}
+                    sx={{
+                      px: 2, py: 1.5,
+                      borderBottom: '1px solid #f0f0f0',
+                      cursor: 'pointer',
+                      '&:hover': { background: 'rgba(220,20,60,.05)' },
+                      transition: 'background .15s',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: .5 }}>
+                      <Typography sx={{ fontWeight: 700, fontSize: 14, color: '#8B0000' }}>
+                        🍽 {tableName} - Giờ chơi #{sessionId}
+                      </Typography>
+                      <Typography sx={{ fontSize: 11, color: '#999' }}>{createdAt}</Typography>
+                    </Box>
+                    {(orders as any[]).map((o: any) => (
+                      <Box key={o.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pl: 1, py: .3 }}>
+                        <Typography sx={{ fontSize: 13, color: '#333' }}>
+                          {o.menu?.name || `Món #${o.menu_id}`} <span style={{ color: '#999' }}>x{o.quantity}</span>
+                        </Typography>
+                        <Typography sx={{ fontSize: 11, color: '#ff9800', fontWeight: 600, background: 'rgba(255,152,0,.1)', px: 1, py: .2, borderRadius: 1 }}>Chờ</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                );
+              })
+            )}
+          </Box>
+          {pendingCount > 0 && (
+            <Box sx={{ borderTop: '1px solid #eee', px: 2, py: 1 }}>
+              <Typography
+                onClick={() => { handleNotifClose(); router.push('/playtime'); }}
+                sx={{ color: '#DC143C', fontWeight: 600, fontSize: 13, textAlign: 'center', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+              >
+                Xem tất cả tại trang Giờ chơi →
+              </Typography>
+            </Box>
+          )}
+        </Popover>
 
         <IconButton
           size="large"
@@ -257,6 +443,24 @@ export default function AppBar({
           </MenuItem>
         </Menu>
       </Toolbar>
+
+      {/* Notification Toast */}
+      <Snackbar
+        open={notifToast.open}
+        autoHideDuration={6000}
+        onClose={() => setNotifToast({ ...notifToast, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{ mt: 7 }}
+      >
+        <Alert
+          onClose={() => setNotifToast({ ...notifToast, open: false })}
+          severity="info"
+          variant="filled"
+          sx={{ fontWeight: 600, fontSize: 14, borderRadius: 3 }}
+        >
+          {notifToast.msg}
+        </Alert>
+      </Snackbar>
     </CustomAppBar>
   )
 }

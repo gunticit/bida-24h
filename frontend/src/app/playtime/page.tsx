@@ -64,6 +64,33 @@ import BasicModal from '@/components/modal'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+// --- Live timer components for playing sessions ---
+
+function LiveTimeCell({ startTime, hourPrice }: { startTime: string; hourPrice: number }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  const ms = Math.max(0, now.getTime() - new Date(startTime).getTime());
+  const totalMin = Math.floor(ms / 60000);
+  return <Typography sx={{ fontSize: 'inherit', fontWeight: 600, color: '#2e7d32' }}>{Math.floor(totalMin / 60)}h {totalMin % 60}p</Typography>;
+}
+
+function LiveTableCostCell({ startTime, hourPrice }: { startTime: string; hourPrice: number }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  const ms = Math.max(0, now.getTime() - new Date(startTime).getTime());
+  const cost = Math.round((ms / 3600000) * hourPrice);
+  return <Typography sx={{ fontSize: 'inherit', fontWeight: 600, color: '#2e7d32' }}>{formatMoney(cost)}</Typography>;
+}
+
+function LiveTotalCell({ startTime, hourPrice, foodMoney }: { startTime: string; hourPrice: number; foodMoney: number }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  const ms = Math.max(0, now.getTime() - new Date(startTime).getTime());
+  const tableCost = Math.round((ms / 3600000) * hourPrice);
+  const total = tableCost + (foodMoney || 0);
+  return <Typography sx={{ fontSize: 'inherit', fontWeight: 700, color: '#c62828' }}>{formatMoney(total)}</Typography>;
+}
+
 export default function PlaytimePage() {
   const {
     router,
@@ -110,6 +137,7 @@ export default function PlaytimePage() {
     getStatusColorLocal,
     getCategoryChipLocal,
     handleDeleteFood,
+    handleUpdateOrderStatus,
     handleOpenInvoiceDialog,
     handleCloseInvoiceDialog,
     handlePrintInvoice,
@@ -237,7 +265,17 @@ export default function PlaytimePage() {
     }
 
     initializeData()
-  }, [router, initializeData])
+
+    // Fallback polling for realtime updates every 15 seconds
+    const intervalId = setInterval(() => {
+      // Only poll if there's no open dialog to avoid layout shifts or interruptions
+      if (!openDialog && !openFoodDialog && !openFoodListDialog && !openInvoiceDialog && !openModel && !confirmDialog.open) {
+        loadSessions();
+      }
+    }, 15000);
+
+    return () => clearInterval(intervalId);
+  }, [router, initializeData, openDialog, openFoodDialog, openFoodListDialog, openInvoiceDialog, openModel, confirmDialog.open, loadSessions])
 
   if (loading) {
     return (
@@ -417,14 +455,30 @@ export default function PlaytimePage() {
                             {session.end_time ? formatDateTime(session.end_time) : '-'}
                           </TableCell>
                           <TableCell>
-                            {session.total_time
-                              ? `${Math.floor(session.total_time / 60)}h ${session.total_time % 60}p`
-                              : '-'}
+                            {session.status === 'playing' ? (
+                              <LiveTimeCell startTime={session.start_time} hourPrice={session.hour_price} />
+                            ) : (
+                              session.total_time
+                                ? `${Math.floor(session.total_time / 60)}h ${session.total_time % 60}p`
+                                : '-'
+                            )}
                           </TableCell>
                           <TableCell>{formatMoney(session.hour_price)}</TableCell>
-                          <TableCell>{formatMoney(session.total_money_table)}</TableCell>
+                          <TableCell>
+                            {session.status === 'playing' ? (
+                              <LiveTableCostCell startTime={session.start_time} hourPrice={session.hour_price} />
+                            ) : (
+                              formatMoney(session.total_money_table)
+                            )}
+                          </TableCell>
                           <TableCell>{formatMoney(session.total_money_food)}</TableCell>
-                          <TableCell>{formatMoney(session.total_money)}</TableCell>
+                          <TableCell>
+                            {session.status === 'playing' ? (
+                              <LiveTotalCell startTime={session.start_time} hourPrice={session.hour_price} foodMoney={parseFloat(session.total_money_food?.toString() || '0')} />
+                            ) : (
+                              formatMoney(session.total_money)
+                            )}
+                          </TableCell>
                           <TableCell>
                             <Chip
                               label={getStatusText(session.status)}
@@ -730,6 +784,7 @@ export default function PlaytimePage() {
                         <TableCell>Số lượng</TableCell>
                         <TableCell>Đơn giá</TableCell>
                         <TableCell>Tổng tiền</TableCell>
+                        <TableCell>Trạng thái</TableCell>
                         <TableCell>Thời gian đặt</TableCell>
                         <TableCell>Thao tác</TableCell>
                       </TableRow>
@@ -747,6 +802,27 @@ export default function PlaytimePage() {
                           </TableCell>
                           <TableCell>
                             {parseFloat(order.total_price.toString()).toLocaleString('vi-VN')} đ
+                          </TableCell>
+                          <TableCell>
+                            {(selectedSession?.status === 'playing' || user?.role === 'admin') ? (
+                              <Select
+                                size="small"
+                                value={order.status || 'done'}
+                                onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value as string, order.session_id)}
+                                sx={{ minWidth: 120, height: 32 }}
+                              >
+                                <MenuItem value="pending">Chờ xác nhận</MenuItem>
+                                <MenuItem value="preparing">Đang làm</MenuItem>
+                                <MenuItem value="done">Đã giao</MenuItem>
+                                <MenuItem value="cancelled">Đã hủy</MenuItem>
+                              </Select>
+                            ) : (
+                              <Chip 
+                                label={order.status === 'pending' ? 'Chờ xác nhận' : order.status === 'preparing' ? 'Đang làm' : order.status === 'cancelled' ? 'Đã hủy' : 'Đã giao'} 
+                                color={order.status === 'pending' ? 'warning' : order.status === 'preparing' ? 'info' : order.status === 'cancelled' ? 'error' : 'success'}
+                                size="small"
+                              />
+                            )}
                           </TableCell>
                           <TableCell>
                             {new Date(order.created_at).toLocaleString('vi-VN')}
@@ -777,6 +853,7 @@ export default function PlaytimePage() {
                     Tổng tiền đồ ăn:{' '}
                     <strong>
                       {sessionOrders
+                        .filter(order => !order.status || ['preparing', 'done'].includes(order.status))
                         .reduce((sum, order) => sum + parseFloat(order.total_price.toString()), 0)
                         .toLocaleString('vi-VN')}{' '}
                       đ

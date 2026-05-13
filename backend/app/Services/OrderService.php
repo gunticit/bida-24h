@@ -11,7 +11,7 @@ class OrderService
 {
     public function getAll()
     {
-        return Order::all();
+        return Order::with(['menu', 'session.table'])->get();
     }
 
     public function getById($id)

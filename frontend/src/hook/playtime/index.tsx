@@ -278,16 +278,33 @@ const usePlaytime = (): IUserPlayTime => {
   const handleStatusChange = async (
     session: GameSession,
     newStatus: 'playing' | 'finished' | 'canceled',
+    forceCheckout = false
   ) => {
     try {
-      const updateData: UpdateSessionData = { status: newStatus }
+      const updateData: UpdateSessionData & { force_checkout?: boolean } = { status: newStatus }
       if (newStatus === 'finished' && !session.end_time) {
         updateData.end_time = dayjs().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm')
+      }
+      if (forceCheckout) {
+        updateData.force_checkout = true;
       }
       await apiService.updateSession(session.id, updateData)
       showSnackbar('Cập nhật trạng thái thành công', 'success')
       loadSessions()
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message && error.message.includes('đang chờ hoặc đang làm')) {
+         setConfirmDialog({
+           open: true,
+           title: 'Cảnh báo thanh toán',
+           message: 'Bàn này còn món ăn đang chờ hoặc đang làm. Bạn có muốn bỏ qua và tính tiền luôn không?',
+           severity: 'warning',
+           onConfirm: () => {
+             handleStatusChange(session, newStatus, true);
+             closeConfirmDialog();
+           }
+         });
+         return;
+      }
       console.error('Failed to update status:', error)
       showSnackbar('Không thể cập nhật trạng thái', 'error')
     }
@@ -377,10 +394,13 @@ const usePlaytime = (): IUserPlayTime => {
     try {
       const orders = await apiService.getOrders()
       const sessionOrders = orders.filter((order) => order.session_id === sessionId)
-      const totalFoodMoney = sessionOrders.reduce(
-        (sum, order) => sum + parseFloat(order.total_price.toString()),
-        0,
-      )
+      const validStatuses = ['preparing', 'done'];
+      const totalFoodMoney = sessionOrders
+        .filter(order => !order.status || validStatuses.includes(order.status))
+        .reduce(
+          (sum, order) => sum + parseFloat(order.total_price.toString()),
+          0,
+        )
 
       // Cập nhật session với tổng tiền đồ ăn mới
       const session = sessions.find((s) => s.id === sessionId)
@@ -477,12 +497,37 @@ const usePlaytime = (): IUserPlayTime => {
     })
   }
 
+  const handleUpdateOrderStatus = async (orderId: number, status: string, sessionId: number) => {
+    try {
+      await apiService.updateOrderStatus(orderId, status);
+      
+      // Cập nhật local state ngay lập tức để UI phản hồi nhanh
+      setSessionOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status } : order
+      ));
+      
+      await recalculateFoodTotal(sessionId);
+      showSnackbar(`Cập nhật trạng thái thành công: ${status === 'pending' ? 'Chờ xác nhận' : status === 'preparing' ? 'Đang làm' : status === 'done' ? 'Đã giao' : 'Đã hủy'}`, 'success');
+      
+      loadSessions();
+    } catch (error: any) {
+      console.error('Failed to update order status:', error);
+      showSnackbar(error?.message || 'Không thể cập nhật trạng thái món ăn', 'error');
+      // Reload lại nếu lỗi để đồng bộ state
+      if (selectedSession) {
+        const orders = await apiService.getOrders();
+        setSessionOrders(orders.filter((order) => order.session_id === sessionId));
+      }
+    }
+  };
+
   // Hàm mở dialog in hóa đơn
   const handleOpenInvoiceDialog = async (session: GameSession) => {
     try {
       // Lấy danh sách orders của session này
       const orders = await apiService.getOrders()
-      const sessionOrders = orders.filter((order) => order.session_id === session.id)
+      const validStatuses = ['preparing', 'done'];
+      const sessionOrders = orders.filter((order) => order.session_id === session.id && (!order.status || validStatuses.includes(order.status)))
 
       // Tính toán tổng tiền
       const totalFoodMoney = sessionOrders.reduce(
@@ -607,6 +652,7 @@ const usePlaytime = (): IUserPlayTime => {
     getStatusColorLocal,
     getCategoryChipLocal,
     handleDeleteFood,
+    handleUpdateOrderStatus,
     handleOpenInvoiceDialog,
     handleCloseInvoiceDialog,
     handlePrintInvoice,

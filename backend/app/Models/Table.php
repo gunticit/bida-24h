@@ -13,6 +13,7 @@ class Table extends Model
         'name',
         'status',
         'price_per_hour',
+        'qr_token',
     ];
 
     protected $casts = [
@@ -20,6 +21,16 @@ class Table extends Model
     ];
 
     // Relationships
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->qr_token)) {
+                $model->qr_token = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     public function sessions()
     {
         return $this->hasMany(GameSession::class);

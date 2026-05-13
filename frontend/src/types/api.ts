@@ -74,12 +74,12 @@ export interface UpdateSessionData {
   total_money?: number
 }
 
-// Table interfaces
 export interface Table {
   id: number
   name: string
   status: 'available' | 'playing' | 'maintenance'
   price_per_hour: number
+  qr_token?: string
   created_at: string
   updated_at: string
 }
@@ -97,7 +97,6 @@ export interface MenuItem {
   updated_at: string
 }
 
-// Order interfaces
 export interface Order {
   id: number
   session_id: number
@@ -105,6 +104,7 @@ export interface Order {
   quantity: number
   unit_price: number
   total_price: number
+  status?: 'pending' | 'preparing' | 'done' | 'cancelled'
   created_at: string
   updated_at: string
   menu?: MenuItem

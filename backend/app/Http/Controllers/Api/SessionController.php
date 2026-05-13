@@ -124,6 +124,17 @@ class SessionController extends Controller
                 'total_money_table' => 'sometimes|numeric|min:0',
             ]);
 
+            if (isset($validated['status']) && $validated['status'] === 'finished') {
+                $gameSession = $this->service->getById($id);
+                $hasPendingOrders = $gameSession->orders()->whereIn('status', ['pending', 'preparing'])->exists();
+                if ($hasPendingOrders && !$request->has('force_checkout')) {
+                    return response()->json([
+                        'message' => 'Bàn này còn món ăn đang chờ hoặc đang làm. Vui lòng xử lý trước khi thanh toán.',
+                        'error_code' => 'HAS_PENDING_ORDERS'
+                    ], 400);
+                }
+            }
+
             $gameSession = $this->service->update($id, $validated);
             return response()->json($gameSession);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -184,6 +195,22 @@ class SessionController extends Controller
             ]);
 
             $order = $this->service->updateOrderQuantity($orderId, $validated['quantity']);
+            return response()->json($order);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function updateOrderStatus(Request $request, $orderId)
+    {
+        try {
+            $validated = $request->validate([
+                'status' => ['required', Rule::in(['pending', 'preparing', 'done', 'cancelled'])]
+            ]);
+
+            $order = $this->service->updateOrderStatus($orderId, $validated['status']);
             return response()->json($order);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Dữ liệu không hợp lệ', 'errors' => $e->errors()], 422);

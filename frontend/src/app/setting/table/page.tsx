@@ -417,12 +417,19 @@ export default function TableSettingPage() {
           <DialogTitle>Mã QR bàn: {qrTable?.name}</DialogTitle>
           <DialogContent sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             {qrTable ? (
-              <QRCodeSVG
-                value={`mobile24hbilliards://booking?table=${qrTable.id}`}
-                size={256}
-                level="H"
-                includeMargin={true}
-              />
+              <Box sx={{ textAlign: 'center' }}>
+                <QRCodeSVG
+                  value={`${typeof window !== 'undefined' ? window.location.origin : ''}/qr/${qrTable.qr_token}`}
+                  size={256}
+                  level="H"
+                  includeMargin={true}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  <a href={`/qr/${qrTable.qr_token}`} target="_blank" rel="noopener noreferrer">
+                    Nhấp vào đây để mở trang đặt món (Test trên máy tính)
+                  </a>
+                </Typography>
+              </Box>
             ) : (
               <Typography>Đang tải mã QR...</Typography>
             )}

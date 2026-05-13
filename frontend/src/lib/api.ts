@@ -259,6 +259,13 @@ class ApiService {
     })
   }
 
+  async updateOrderStatus(orderId: number, status: string): Promise<Order> {
+    return this.request<Order>(`/orders/${orderId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    })
+  }
+
   // Table management methods
   async getTables(): Promise<Table[]> {
     return this.request<Table[]>('/tables')

@@ -94,7 +94,8 @@ export type IUserPlayTime = {
     }>
   >
   getCategoryChipLocal: (category: string) => React.ReactElement
-  handleDeleteFood: (orderId: number, sessionId: number) => void
+  handleDeleteFood: (orderId: number, sessionId: number) => Promise<void>
+  handleUpdateOrderStatus: (orderId: number, status: string, sessionId: number) => Promise<void>
   handleOpenInvoiceDialog: (session: GameSession) => Promise<void>
   handleCloseInvoiceDialog: () => void
   handlePrintInvoice: () => void

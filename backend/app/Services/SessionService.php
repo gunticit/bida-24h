@@ -113,7 +113,7 @@ class SessionService
         $gameSession->save();
     }
 
-    public function addOrderToSession($sessionId, $menuId, $quantity)
+    public function addOrderToSession($sessionId, $menuId, $quantity, $status = 'done')
     {
         $gameSession = GameSession::findOrFail($sessionId);
         $menu = Menu::findOrFail($menuId);
@@ -130,6 +130,7 @@ class SessionService
             'quantity' => $quantity,
             'unit_price' => $menu->price,
             'total_price' => $quantity * $menu->price,
+            'status' => $status,
         ]);
 
         // Trừ số lượng tồn kho
@@ -190,9 +191,39 @@ class SessionService
         return $order;
     }
 
+    public function updateOrderStatus($orderId, $status)
+    {
+        $order = Order::findOrFail($orderId);
+        $gameSession = $order->session;
+
+        if ($order->status === $status) {
+            return $order;
+        }
+
+        // Nếu chuyển sang cancelled, có thể cần hoàn trả số lượng món nếu muốn,
+        // nhưng hiện tại chỉ xoá order mới hoàn trả tồn kho. 
+        // Tuy nhiên, theo quy trình nếu huỷ món, ta nên hoàn trả tồn kho.
+        if ($status === 'cancelled' && $order->status !== 'cancelled') {
+            $order->menu->increaseQuantity($order->quantity);
+        } elseif ($order->status === 'cancelled' && $status !== 'cancelled') {
+            // Từ huỷ sang trạng thái khác -> trừ lại tồn kho
+            if (!$order->menu->hasEnoughQuantity($order->quantity)) {
+                throw new \Exception("Không đủ số lượng tồn kho cho món: {$order->menu->name}");
+            }
+            $order->menu->decreaseQuantity($order->quantity);
+        }
+
+        $order->status = $status;
+        $order->save();
+
+        $this->updateSessionFoodTotal($gameSession);
+
+        return $order;
+    }
+
     private function updateSessionFoodTotal(GameSession $gameSession)
     {
-        $totalFoodMoney = $gameSession->orders()->sum('total_price');
+        $totalFoodMoney = $gameSession->orders()->whereIn('status', ['preparing', 'done'])->sum('total_price');
         $gameSession->total_money_food = $totalFoodMoney;
         $gameSession->total_money = ($gameSession->total_money_table ?? 0) + $totalFoodMoney;
         $gameSession->save();
