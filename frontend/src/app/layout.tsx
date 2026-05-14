@@ -1,16 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import ThemeRegistry from '@/components/providers/ThemeRegistry'
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-  weight: ['400', '500', '600', '700'],
-  preload: true,
-  adjustFontFallback: false,
-})
 
 export const metadata: Metadata = {
   title: 'Phần mềm quản lý 24h Billiard App',
@@ -28,11 +18,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="vi" className={inter.variable}>
+    <html lang="vi">
       <head>
         <meta name="emotion-insertion-point" content="" />
       </head>
-      <body className={inter.className}>
+      <body>
         <ThemeRegistry>
           {children}
         </ThemeRegistry>
