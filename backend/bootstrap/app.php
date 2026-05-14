@@ -22,5 +22,21 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Return JSON for API rate limit (429) errors instead of HTML
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Bạn đang gửi yêu cầu quá nhanh. Vui lòng thử lại sau.',
+                ], 429);
+            }
+        });
+
+        // Return JSON for all HTTP exceptions on API routes
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'Có lỗi xảy ra',
+                ], $e->getStatusCode());
+            }
+        });
     })->create();

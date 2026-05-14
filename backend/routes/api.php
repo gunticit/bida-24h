@@ -29,11 +29,11 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 // Public QR ordering routes (rate limited to prevent abuse)
-Route::prefix('public')->middleware('throttle:30,1')->group(function () {
+Route::prefix('public')->middleware('throttle:60,1')->group(function () {
     Route::get('/tables/{token}', [\App\Http\Controllers\Api\QrOrderingController::class, 'getTableByToken']);
     Route::get('/menus', [\App\Http\Controllers\Api\QrOrderingController::class, 'getMenus']);
     Route::post('/tables/{token}/orders', [\App\Http\Controllers\Api\QrOrderingController::class, 'placeOrder'])
-        ->middleware('throttle:5,1'); // Max 5 orders per minute per IP
+        ->middleware('throttle:15,1'); // Max 15 orders per minute per IP
 });
 
 // Protected routes
