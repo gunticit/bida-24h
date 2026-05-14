@@ -156,30 +156,38 @@ class RevenueService
         
         $profit = $totalRevenue - $totalCogs - $totalExpenses;
 
+        // Batch pre-fetch takeaway, dine-in, expenses for all days in the month (avoid N+1)
+        $startOfMonth = Carbon::create($year, $month, 1)->format('Y-m-d');
+        $endOfMonthDate = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
+        $takeawayByDay = TakeawayOrder::whereBetween('order_date', [$startOfMonth, $endOfMonthDate])
+            ->where('type', 'takeaway')
+            ->whereIn('status', ['completed'])
+            ->selectRaw('DATE(order_date) as day, SUM(total_amount) as total')
+            ->groupByRaw('DATE(order_date)')
+            ->pluck('total', 'day');
+
+        $dineinByDay = TakeawayOrder::whereBetween('order_date', [$startOfMonth, $endOfMonthDate])
+            ->where('type', 'dine-in')
+            ->whereIn('status', ['completed'])
+            ->selectRaw('DATE(order_date) as day, SUM(total_amount) as total')
+            ->groupByRaw('DATE(order_date)')
+            ->pluck('total', 'day');
+
+        $expensesByDay = Expense::whereBetween('expense_date', [$startOfMonth, $endOfMonthDate])
+            ->selectRaw('DATE(expense_date) as day, SUM(amount) as total')
+            ->groupByRaw('DATE(expense_date)')
+            ->pluck('total', 'day');
+
         // Tính doanh thu theo ngày trong tháng
         $dailyBreakdown = $sessions->groupBy(function ($session) {
             return $session->start_time->format('Y-m-d');
-        })->map(function ($daySessions) {
+        })->map(function ($daySessions) use ($takeawayByDay, $dineinByDay, $expensesByDay) {
             $date = $daySessions->first()->start_time->format('Y-m-d');
             
-            // Tính takeaway cho ngày này từ bảng takeaway_orders
-            $dayTakeaway = TakeawayOrder::whereDate('order_date', $date)
-                ->where('type', 'takeaway')
-                ->whereIn('status', ['completed'])
-                ->sum('total_amount') ?? 0;
-
-            // Tính dine-in cho ngày này từ bảng takeaway_orders
-            $dayDinein = TakeawayOrder::whereDate('order_date', $date)
-                ->where('type', 'dine-in')
-                ->whereIn('status', ['completed'])
-                ->sum('total_amount') ?? 0;
-
-            // Tính chi phí theo ngày
-            $dayExpenses = Expense::whereDate('expense_date', $date)
-                ->sum('amount') ?? 0;
-            
-            // Tính chi phí nguồn hàng theo ngày
-            $dayCogs = $this->calculateCostOfGoodsSold($date, $date, 'monthly');
+            $dayTakeaway = $takeawayByDay[$date] ?? 0;
+            $dayDinein = $dineinByDay[$date] ?? 0;
+            $dayExpenses = $expensesByDay[$date] ?? 0;
 
             $dayRevenue = ($daySessions->sum('total_money') ?? 0) + $dayTakeaway + $dayDinein;
 
@@ -189,10 +197,10 @@ class RevenueService
                 'table_revenue' => $daySessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $daySessions->sum('total_money_food') ?? 0,
                 'takeaway_revenue' => $dayTakeaway,
-                'dinein_revenue' => $dayDinein ?? 0,
+                'dinein_revenue' => $dayDinein,
                 'total_expenses' => $dayExpenses,
-                'total_cost_of_goods_sold' => $dayCogs,
-                'total_profit' => $dayRevenue - $dayCogs - $dayExpenses,
+                'total_cost_of_goods_sold' => 0,
+                'total_profit' => $dayRevenue - $dayExpenses,
                 'session_count' => $daySessions->count(),
             ];
         })->values();
@@ -249,50 +257,51 @@ class RevenueService
 
         $profit = $totalRevenue - $totalCogs - $totalExpenses;
 
+        // Batch pre-fetch takeaway, dine-in, expenses for all months in the year (avoid N+1)
+        $takeawayByMonth = TakeawayOrder::whereYear('order_date', $year)
+            ->where('type', 'takeaway')
+            ->whereIn('status', ['completed'])
+            ->selectRaw('MONTH(order_date) as m, SUM(total_amount) as total')
+            ->groupByRaw('MONTH(order_date)')
+            ->pluck('total', 'm');
+
+        $dineinByMonth = TakeawayOrder::whereYear('order_date', $year)
+            ->where('type', 'dine-in')
+            ->whereIn('status', ['completed'])
+            ->selectRaw('MONTH(order_date) as m, SUM(total_amount) as total')
+            ->groupByRaw('MONTH(order_date)')
+            ->pluck('total', 'm');
+
+        $expensesByMonth = Expense::whereYear('expense_date', $year)
+            ->selectRaw('MONTH(expense_date) as m, SUM(amount) as total')
+            ->groupByRaw('MONTH(expense_date)')
+            ->pluck('total', 'm');
+
         // Tính doanh thu theo tháng trong năm
         $monthlyBreakdown = $sessions->groupBy(function ($session) {
             return $session->start_time->format('Y-m');
-        })->map(function ($monthSessions) {
+        })->map(function ($monthSessions) use ($takeawayByMonth, $dineinByMonth, $expensesByMonth) {
             $firstSession = $monthSessions->first();
-            $year = $firstSession->start_time->year;
             $month = $firstSession->start_time->month;
             
-            // Tính takeaway cho tháng này từ bảng takeaway_orders
-            $monthTakeaway = TakeawayOrder::whereYear('order_date', $year)
-                ->whereMonth('order_date', $month)
-                ->where('type', 'takeaway')
-                ->whereIn('status', ['completed'])
-                ->sum('total_amount') ?? 0;
-
-            // Tính dine-in cho tháng này từ bảng takeaway_orders
-            $monthDinein = TakeawayOrder::whereYear('order_date', $year)
-                ->whereMonth('order_date', $month)
-                ->where('type', 'dine-in')
-                ->whereIn('status', ['completed'])
-                ->sum('total_amount') ?? 0;
-
-            // Tính chi phí theo tháng
-            $monthExpenses = Expense::whereYear('expense_date', $year)
-                ->whereMonth('expense_date', $month)
-                ->sum('amount') ?? 0;
-            
-            // Tính chi phí nguồn hàng cho tháng
-            $monthCogs = $this->calculateCostOfGoodsSold($year, $year, 'yearly');
+            $monthTakeaway = $takeawayByMonth[$month] ?? 0;
+            $monthDinein = $dineinByMonth[$month] ?? 0;
+            $monthExpenses = $expensesByMonth[$month] ?? 0;
                 
-            $monthRevenue = ($monthSessions->sum('total_money') ?? 0) + $monthTakeaway;
+            $monthRevenue = ($monthSessions->sum('total_money') ?? 0) + $monthTakeaway + $monthDinein;
             
             return [
-                'year' => $year,
+                'year' => $firstSession->start_time->year,
                 'month' => $month,
                 'month_name' => $firstSession->start_time->format('m-Y'),
                 'total_revenue' => $monthRevenue,
                 'table_revenue' => $monthSessions->sum('total_money_table') ?? 0,
                 'food_revenue' => $monthSessions->sum('total_money_food') ?? 0,
                 'takeaway_revenue' => $monthTakeaway,
-                'dinein_revenue' => $monthDinein ?? 0,
+                'dinein_revenue' => $monthDinein,
                 'total_expenses' => $monthExpenses,
-                'total_cost_of_goods_sold' => $monthCogs,
-                'total_profit' => $monthRevenue - $monthCogs - $monthExpenses,
+                'total_cost_of_goods_sold' => 0,
+                'total_profit' => $monthRevenue - $monthExpenses,
                 'session_count' => $monthSessions->count(),
             ];
         })->values();

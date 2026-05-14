@@ -81,17 +81,43 @@ class RevenueController extends Controller
                     if ($period === 'this_month') {
                         $year = Carbon::now()->year;
                         $month = Carbon::now()->month;
+                        $startDate = Carbon::create($year, $month, 1)->format('Y-m-d');
+                        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
                         $daysInMonth = Carbon::create($year, $month)->daysInMonth;
                         
+                        // Batch: get all session revenue grouped by day
+                        $sessionsByDay = DB::table('game_sessions')
+                            ->where('status', 'finished')
+                            ->whereBetween('start_time', [$startDate, $endDate . ' 23:59:59'])
+                            ->selectRaw('DATE(start_time) as day, SUM(total_money) as total, SUM(total_money_table) as table_rev, SUM(total_money_food) as food_rev')
+                            ->groupByRaw('DATE(start_time)')
+                            ->get()
+                            ->keyBy('day');
+
+                        // Batch: get all takeaway revenue grouped by day
+                        $takeawayByDay = DB::table('takeaway_orders')
+                            ->whereBetween('order_date', [$startDate, $endDate])
+                            ->whereIn('status', ['completed'])
+                            ->selectRaw('DATE(order_date) as day, SUM(total_amount) as total')
+                            ->groupByRaw('DATE(order_date)')
+                            ->pluck('total', 'day');
+
                         for ($day = 1; $day <= $daysInMonth; $day++) {
                             $date = Carbon::create($year, $month, $day);
-                            $dailyRevenue = $this->revenueService->getDailyRevenue($date);
+                            $dateStr = $date->format('Y-m-d');
+                            $session = $sessionsByDay[$dateStr] ?? null;
+                            $takeaway = $takeawayByDay[$dateStr] ?? 0;
+                            
+                            $tableRev = $session->table_rev ?? 0;
+                            $foodRev = $session->food_rev ?? 0;
+                            $totalRev = ($session->total ?? 0) + $takeaway;
+                            
                             $chartData[] = [
-                                'date' => $date->format('Y-m-d'),
+                                'date' => $dateStr,
                                 'label' => $date->format('d/m'),
-                                'total_revenue' => $dailyRevenue['total_revenue'],
-                                'table_revenue' => $dailyRevenue['table_revenue'],
-                                'food_revenue' => $dailyRevenue['food_revenue'],
+                                'total_revenue' => $totalRev,
+                                'table_revenue' => $tableRev,
+                                'food_revenue' => $foodRev,
                             ];
                         }
                     }
@@ -100,14 +126,34 @@ class RevenueController extends Controller
                 case 'monthly':
                     if ($period === 'this_year') {
                         $year = Carbon::now()->year;
+                        
+                        // Batch: get all session revenue grouped by month
+                        $sessionsByMonth = DB::table('game_sessions')
+                            ->where('status', 'finished')
+                            ->whereYear('start_time', $year)
+                            ->selectRaw('MONTH(start_time) as m, SUM(total_money) as total, SUM(total_money_table) as table_rev, SUM(total_money_food) as food_rev')
+                            ->groupByRaw('MONTH(start_time)')
+                            ->get()
+                            ->keyBy('m');
+
+                        // Batch: get all takeaway revenue grouped by month
+                        $takeawayByMonth = DB::table('takeaway_orders')
+                            ->whereYear('order_date', $year)
+                            ->whereIn('status', ['completed'])
+                            ->selectRaw('MONTH(order_date) as m, SUM(total_amount) as total')
+                            ->groupByRaw('MONTH(order_date)')
+                            ->pluck('total', 'm');
+
                         for ($month = 1; $month <= 12; $month++) {
-                            $monthlyRevenue = $this->revenueService->getMonthlyRevenue($year, $month);
+                            $session = $sessionsByMonth[$month] ?? null;
+                            $takeaway = $takeawayByMonth[$month] ?? 0;
+                            
                             $chartData[] = [
                                 'month' => $month,
                                 'label' => Carbon::create($year, $month)->format('M'),
-                                'total_revenue' => $monthlyRevenue['total_revenue'],
-                                'table_revenue' => $monthlyRevenue['table_revenue'],
-                                'food_revenue' => $monthlyRevenue['food_revenue'],
+                                'total_revenue' => ($session->total ?? 0) + $takeaway,
+                                'table_revenue' => $session->table_rev ?? 0,
+                                'food_revenue' => $session->food_rev ?? 0,
                             ];
                         }
                     }
