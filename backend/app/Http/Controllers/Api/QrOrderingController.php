@@ -91,7 +91,8 @@ class QrOrderingController extends Controller
                     // Server-side: verify menu is active, not takeaway, has stock
                     $menu = Menu::find($item['menu_id']);
                     if (!$menu || !$menu->is_active) {
-                        throw new \Exception("Món '{$menu->name ?? $item['menu_id']}' không khả dụng");
+                        $menuName = $menu ? $menu->name : $item['menu_id'];
+                        throw new \Exception("Món '{$menuName}' không khả dụng");
                     }
                     if ($menu->category === 'takeaway') {
                         throw new \Exception("Không thể đặt món mang về qua QR");
