@@ -47,7 +47,8 @@ interface AppBarProps {
   handleDrawerOpen: () => void
 }
 import { styled } from '@mui/material/styles'
-const drawerWidth = 240
+const collapsedWidth = 72
+const expandedWidth = 260
 
 interface StyledAppBarProps extends MuiAppBarProps {
   open?: boolean
@@ -56,22 +57,20 @@ interface StyledAppBarProps extends MuiAppBarProps {
 const CustomAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<StyledAppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
+  zIndex: theme.zIndex.drawer - 1,
   background: 'linear-gradient(90deg, #8B0000 0%, #DC143C 50%, #FF4500 100%)',
   borderBottom: '3px solid #FFD700',
   boxShadow: '0 4px 20px rgba(139, 0, 0, 0.3)',
+  marginLeft: open ? expandedWidth : collapsedWidth,
+  width: `calc(100% - ${open ? expandedWidth : collapsedWidth}px)`,
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
+    duration: theme.transitions.duration.enteringScreen,
   }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
+  [theme.breakpoints.down('md')]: {
+    marginLeft: 0,
+    width: '100%',
+  },
 }))
 
 export default function AppBar({
