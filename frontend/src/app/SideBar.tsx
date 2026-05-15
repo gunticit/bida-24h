@@ -107,8 +107,8 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
-            background: 'linear-gradient(195deg, #1a0a0a 0%, #2d0e0e 40%, #1a0a0a 100%)',
-            borderRight: '1px solid rgba(255, 215, 0, 0.15)',
+            background: '#fff',
+            borderRight: '1px solid #e8e8e8',
           },
         }}
       >
@@ -118,7 +118,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
             minHeight: '64px !important',
             px: isExpanded ? 2 : 1,
             justifyContent: isExpanded ? 'space-between' : 'center',
-            borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
+            borderBottom: '1px solid #e8e8e8',
           }}
         >
           {isExpanded && (
@@ -128,12 +128,12 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                   width: 36,
                   height: 36,
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 100%)',
+                  background: 'linear-gradient(135deg, #DC143C 0%, #8B0000 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '18px',
-                  boxShadow: '0 2px 12px rgba(255, 215, 0, 0.3)',
+                  boxShadow: '0 2px 8px rgba(220, 20, 60, 0.25)',
                   flexShrink: 0,
                 }}
               >
@@ -142,7 +142,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
               <Box sx={{ overflow: 'hidden' }}>
                 <Typography
                   sx={{
-                    color: '#FFD700',
+                    color: '#8B0000',
                     fontWeight: 800,
                     fontSize: '14px',
                     letterSpacing: '0.5px',
@@ -154,7 +154,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                 </Typography>
                 <Typography
                   sx={{
-                    color: 'rgba(255, 215, 0, 0.5)',
+                    color: '#999',
                     fontSize: '10px',
                     fontWeight: 500,
                     letterSpacing: '2px',
@@ -170,10 +170,10 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
           <IconButton
             onClick={handleDrawerClose}
             sx={{
-              color: 'rgba(255, 215, 0, 0.6)',
+              color: '#999',
               '&:hover': {
-                color: '#FFD700',
-                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                color: '#8B0000',
+                backgroundColor: 'rgba(220, 20, 60, 0.05)',
               },
             }}
           >
@@ -212,7 +212,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                       // Active state
                       ...(isActive
                         ? {
-                            background: 'linear-gradient(135deg, rgba(220, 20, 60, 0.25) 0%, rgba(255, 69, 0, 0.15) 100%)',
+                            background: 'linear-gradient(135deg, rgba(220, 20, 60, 0.08) 0%, rgba(255, 69, 0, 0.04) 100%)',
                             '&::before': {
                               content: '""',
                               position: 'absolute',
@@ -222,14 +222,14 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                               width: '3px',
                               height: '60%',
                               borderRadius: '0 4px 4px 0',
-                              background: 'linear-gradient(180deg, #FFD700 0%, #FF8C00 100%)',
+                              background: 'linear-gradient(180deg, #DC143C 0%, #8B0000 100%)',
                             },
                           }
                         : {}),
                       '&:hover': {
                         backgroundColor: isActive
-                          ? 'rgba(220, 20, 60, 0.3)'
-                          : 'rgba(255, 255, 255, 0.05)',
+                          ? 'rgba(220, 20, 60, 0.12)'
+                          : 'rgba(0, 0, 0, 0.03)',
                       },
                       transition: 'all 0.2s ease',
                     }}
@@ -239,7 +239,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                         minWidth: 0,
                         justifyContent: 'center',
                         mr: isExpanded ? 2 : 0,
-                        color: isActive ? '#FFD700' : 'rgba(255, 255, 255, 0.5)',
+                        color: isActive ? '#DC143C' : '#888',
                         transition: 'color 0.2s ease',
                         '& .MuiSvgIcon-root': {
                           fontSize: 22,
@@ -253,7 +253,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                         primary={item.text}
                         primaryTypographyProps={{
                           sx: {
-                            color: isActive ? '#FFD700' : 'rgba(255, 255, 255, 0.75)',
+                            color: isActive ? '#8B0000' : '#444',
                             fontWeight: isActive ? 700 : 500,
                             fontSize: '14px',
                             transition: 'color 0.2s ease',
@@ -282,7 +282,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
           {/* User info + Logout */}
           <Box
             sx={{
-              borderTop: '1px solid rgba(255, 215, 0, 0.1)',
+              borderTop: '1px solid #e8e8e8',
               px: 1,
               py: 1.5,
             }}
@@ -298,7 +298,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                   py: 1,
                   mb: 1,
                   borderRadius: '10px',
-                  background: 'rgba(255, 255, 255, 0.03)',
+                  background: 'rgba(0, 0, 0, 0.02)',
                 }}
               >
                 <Box
@@ -321,7 +321,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                 <Box sx={{ overflow: 'hidden', flex: 1 }}>
                   <Typography
                     sx={{
-                      color: 'rgba(255, 255, 255, 0.85)',
+                      color: '#333',
                       fontSize: '13px',
                       fontWeight: 600,
                       whiteSpace: 'nowrap',
@@ -333,7 +333,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                   </Typography>
                   <Typography
                     sx={{
-                      color: 'rgba(255, 255, 255, 0.35)',
+                      color: '#999',
                       fontSize: '11px',
                       whiteSpace: 'nowrap',
                       textOverflow: 'ellipsis',
@@ -369,7 +369,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                     minWidth: 0,
                     justifyContent: 'center',
                     mr: isExpanded ? 2 : 0,
-                    color: 'rgba(255, 255, 255, 0.4)',
+                    color: '#999',
                     transition: 'color 0.2s ease',
                     '& .MuiSvgIcon-root': { fontSize: 20 },
                   }}
@@ -382,7 +382,7 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
                     primary="Đăng xuất"
                     primaryTypographyProps={{
                       sx: {
-                        color: 'rgba(255, 255, 255, 0.5)',
+                        color: '#666',
                         fontSize: '13px',
                         fontWeight: 500,
                         transition: 'color 0.2s ease',
