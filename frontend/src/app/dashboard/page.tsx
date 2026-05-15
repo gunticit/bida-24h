@@ -161,7 +161,7 @@ export default function DashboardPage() {
                       textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
                     }}
                   >
-                    🎊 Chúc Mừng Năm Mới 2026 🎊
+                    🎊 24hbilliardscoffee 🎊
                   </Typography>
                   <Typography
                     variant="h6"

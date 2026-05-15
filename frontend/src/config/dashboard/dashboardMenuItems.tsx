@@ -1,15 +1,15 @@
 import {
-  Widgets as WidgetsIcon,
-  Settings as SettingsIcon,
+  Dashboard as DashboardIcon,
   AccessTime as AccessTimeIcon,
-  BarChart as BarChartIcon,
-  AttachMoney as AttachMoneyIcon,
+  Analytics as AnalyticsIcon,
+  AccountBalanceWallet as WalletIcon,
+  Tune as TuneIcon,
 } from '@mui/icons-material'
 
 export const dashboardMenuItems = [
-  { text: 'Bảng điều khiển', icon: <WidgetsIcon />, path: '/dashboard' },
+  { text: 'Bảng điều khiển', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'Quản lý giờ chơi', icon: <AccessTimeIcon />, path: '/playtime' },
-  { text: 'Thống kê', icon: <BarChartIcon />, path: '/revenue', admin: true },
-  { text: 'Chi phí', icon: <AttachMoneyIcon />, path: '/expense', admin: true },
-  { text: 'Cài đặt', icon: <SettingsIcon />, path: '/setting', admin: true },
+  { text: 'Thống kê doanh thu', icon: <AnalyticsIcon />, path: '/revenue', admin: true },
+  { text: 'Chi phí', icon: <WalletIcon />, path: '/expense', admin: true },
+  { text: 'Cài đặt', icon: <TuneIcon />, path: '/setting', admin: true },
 ]

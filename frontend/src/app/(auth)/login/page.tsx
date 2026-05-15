@@ -194,7 +194,7 @@ export default function LoginPage() {
                   textShadow: '1px 1px 2px rgba(220, 20, 60, 0.2)',
                 }}
               >
-                🎊 Chúc Mừng Năm Mới 2026 🎊
+                🎊 24hbilliardscoffee 🎊
               </Typography>
               <Typography
                 variant="body2"

@@ -228,7 +228,7 @@ export default function Home() {
               🧧 Menu 🧧
             </Typography>
             <Typography variant="body2" sx={{ color: '#FFB6C1', mt: 1 }}>
-              Chúc Mừng Năm Mới 2026
+              24hbilliardscoffee
             </Typography>
           </Box>
           <List>
@@ -342,7 +342,7 @@ export default function Home() {
               mb: 1,
             }}
           >
-            🎊 Chúc Mừng Năm Mới 2026 🎊
+            🎊 24hbilliardscoffee 🎊
           </Typography>
 
           <Typography

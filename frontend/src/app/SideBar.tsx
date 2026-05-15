@@ -1,10 +1,9 @@
 import * as React from 'react'
-import { useState, useEffect } from 'react'
-import { styled, useTheme } from '@mui/material'
+import { useState } from 'react'
+import { styled, useTheme, alpha } from '@mui/material'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
 import CssBaseline from '@mui/material/CssBaseline'
-import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -12,15 +11,16 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { AppBar as AppBarDOM } from '@/components/ui'
 import { dashboardMenuItems } from '@/config/dashboard/dashboardMenuItems'
-import Button from '@mui/material/Button'
 import { apiService } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import LogoutIcon from '@mui/icons-material/Logout'
 
-const drawerWidth = 240
+const drawerWidth = 260
 
 interface User {
   id: number
@@ -62,14 +62,8 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [open, setOpen] = useState(false)
 
-  const handleDrawerOpen = () => {
-    console.log('Opening drawer, isMobile:', isMobile)
-    setOpen(true)
-  }
-  const handleDrawerClose = () => {
-    console.log('Closing drawer')
-    setOpen(false)
-  }
+  const handleDrawerOpen = () => setOpen(true)
+  const handleDrawerClose = () => setOpen(false)
 
   const router = useRouter()
   const handleLogout = async () => {
@@ -80,6 +74,9 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
       console.error('Logout failed:', error)
     }
   }
+
+  const isExpanded = isMobile ? true : open
+  const collapsedWidth = 72
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -98,106 +95,304 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
         open={open}
         onClose={handleDrawerClose}
         anchor="left"
-        ModalProps={{
-          keepMounted: true,
-        }}
+        ModalProps={{ keepMounted: true }}
         sx={{
-          width: isMobile ? 0 : open ? drawerWidth : theme.spacing(8),
+          width: isMobile ? 0 : open ? drawerWidth : collapsedWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: isMobile ? drawerWidth : (open ? drawerWidth : collapsedWidth),
             boxSizing: 'border-box',
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
-            ...(isMobile
-              ? {}
-              : {
-                  width: open ? drawerWidth : theme.spacing(8),
-                }),
+            background: 'linear-gradient(195deg, #1a0a0a 0%, #2d0e0e 40%, #1a0a0a 100%)',
+            borderRight: '1px solid rgba(255, 215, 0, 0.15)',
           },
         }}
       >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
+        {/* Brand Header */}
+        <DrawerHeader
+          sx={{
+            minHeight: '64px !important',
+            px: isExpanded ? 2 : 1,
+            justifyContent: isExpanded ? 'space-between' : 'center',
+            borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
+          }}
+        >
+          {isExpanded && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden' }}>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  boxShadow: '0 2px 12px rgba(255, 215, 0, 0.3)',
+                  flexShrink: 0,
+                }}
+              >
+                🎱
+              </Box>
+              <Box sx={{ overflow: 'hidden' }}>
+                <Typography
+                  sx={{
+                    color: '#FFD700',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  24H BILLIARDS
+                </Typography>
+                <Typography
+                  sx={{
+                    color: 'rgba(255, 215, 0, 0.5)',
+                    fontSize: '10px',
+                    fontWeight: 500,
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  COFFEE & MORE
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          <IconButton
+            onClick={handleDrawerClose}
+            sx={{
+              color: 'rgba(255, 215, 0, 0.6)',
+              '&:hover': {
+                color: '#FFD700',
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+              },
+            }}
+          >
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
-        <Divider />
+
+        {/* Navigation */}
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',
-            justifyContent: 'center',
-            textAlign: 'center',
+            height: 'calc(100% - 64px)',
+            pt: 1.5,
           }}
         >
-          <Box sx={{ flexGrow: 1 }}>
+          {/* Menu Items */}
+          <Box sx={{ flexGrow: 1, px: 1 }}>
             {dashboardMenuItems.map((item) => {
               if (item.admin && user?.role !== 'admin') return null
 
-              const isExpanded = isMobile ? true : open
               const isActive = href === item.path
 
-              return (
-                <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
+              const button = (
+                <ListItem key={item.text} disablePadding sx={{ display: 'block', mb: 0.5 }}>
                   <ListItemButton
+                    onClick={() => item.path && router.push(item.path)}
                     sx={{
-                      height: 70,
-                      px: 2.5,
+                      minHeight: 48,
+                      px: isExpanded ? 2 : 0,
+                      py: 1.2,
+                      borderRadius: '12px',
                       justifyContent: isExpanded ? 'initial' : 'center',
-                      backgroundColor: isActive ? 'rgba(25, 118, 210, 0.12)' : 'transparent',
-                      color: isActive ? 'primary.main' : 'inherit',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      // Active state
+                      ...(isActive
+                        ? {
+                            background: 'linear-gradient(135deg, rgba(220, 20, 60, 0.25) 0%, rgba(255, 69, 0, 0.15) 100%)',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              left: 0,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              width: '3px',
+                              height: '60%',
+                              borderRadius: '0 4px 4px 0',
+                              background: 'linear-gradient(180deg, #FFD700 0%, #FF8C00 100%)',
+                            },
+                          }
+                        : {}),
                       '&:hover': {
                         backgroundColor: isActive
-                          ? 'rgba(25, 118, 210, 0.2)'
-                          : 'rgba(0, 0, 0, 0.04)',
+                          ? 'rgba(220, 20, 60, 0.3)'
+                          : 'rgba(255, 255, 255, 0.05)',
                       },
-                      borderRight: isActive ? `3px solid ${theme.palette.primary.main}` : 'none',
+                      transition: 'all 0.2s ease',
                     }}
-                    onClick={() => item.path && router.push(item.path)}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
                         justifyContent: 'center',
-                        mr: isExpanded ? 3 : 'auto',
-                        color: isActive ? 'primary.main' : 'inherit',
+                        mr: isExpanded ? 2 : 0,
+                        color: isActive ? '#FFD700' : 'rgba(255, 255, 255, 0.5)',
+                        transition: 'color 0.2s ease',
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 22,
+                        },
                       }}
                     >
                       {item.icon}
                     </ListItemIcon>
-                    <ListItemText
-                      primary={item.text}
-                      sx={{
-                        opacity: isExpanded ? 1 : 0,
-                        color: isActive ? 'primary.main' : 'inherit',
-                        fontWeight: isActive ? 'bold' : 'normal',
-                      }}
-                    />
+                    {isExpanded && (
+                      <ListItemText
+                        primary={item.text}
+                        primaryTypographyProps={{
+                          sx: {
+                            color: isActive ? '#FFD700' : 'rgba(255, 255, 255, 0.75)',
+                            fontWeight: isActive ? 700 : 500,
+                            fontSize: '14px',
+                            transition: 'color 0.2s ease',
+                            whiteSpace: 'nowrap',
+                          },
+                        }}
+                      />
+                    )}
                   </ListItemButton>
                 </ListItem>
               )
+
+              // Wrap with Tooltip when collapsed
+              if (!isExpanded) {
+                return (
+                  <Tooltip key={item.text} title={item.text} placement="right" arrow>
+                    {button}
+                  </Tooltip>
+                )
+              }
+
+              return button
             })}
           </Box>
-          <Button
-            onClick={handleLogout}
+
+          {/* User info + Logout */}
+          <Box
             sx={{
-              height: 70,
-              display: 'flex',
-              px: 2.5,
-              justifyContent: 'center',
-              textAlign: 'center',
-              width: 'calc(100% - 16px)',
-              borderTop: '1px solid',
+              borderTop: '1px solid rgba(255, 215, 0, 0.1)',
+              px: 1,
+              py: 1.5,
             }}
           >
-            <LogoutIcon fontSize="small" />
-            {open && 'Đăng xuất'}
-          </Button>
+            {/* User avatar row */}
+            {isExpanded && user && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 1.5,
+                  py: 1,
+                  mb: 1,
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #FFD700, #FF8C00)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    color: '#8B0000',
+                    flexShrink: 0,
+                  }}
+                >
+                  {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                </Box>
+                <Box sx={{ overflow: 'hidden', flex: 1 }}>
+                  <Typography
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {user.name}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.35)',
+                      fontSize: '11px',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {user.role === 'admin' ? '👑 Quản trị viên' : '👤 Nhân viên'}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
+            {/* Logout button */}
+            <Tooltip title={isExpanded ? '' : 'Đăng xuất'} placement="right" arrow>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  minHeight: 44,
+                  borderRadius: '12px',
+                  justifyContent: isExpanded ? 'initial' : 'center',
+                  px: isExpanded ? 2 : 0,
+                  '&:hover': {
+                    backgroundColor: 'rgba(220, 20, 60, 0.15)',
+                    '& .logout-icon': { color: '#ff4444' },
+                    '& .logout-text': { color: '#ff4444' },
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <ListItemIcon
+                  className="logout-icon"
+                  sx={{
+                    minWidth: 0,
+                    justifyContent: 'center',
+                    mr: isExpanded ? 2 : 0,
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    transition: 'color 0.2s ease',
+                    '& .MuiSvgIcon-root': { fontSize: 20 },
+                  }}
+                >
+                  <LogoutIcon />
+                </ListItemIcon>
+                {isExpanded && (
+                  <ListItemText
+                    className="logout-text"
+                    primary="Đăng xuất"
+                    primaryTypographyProps={{
+                      sx: {
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        transition: 'color 0.2s ease',
+                      },
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            </Tooltip>
+          </Box>
         </Box>
       </MuiDrawer>
       <Main
@@ -205,7 +400,6 @@ export default function SideBar({ title, href, icon, user, children }: SideBarPr
         sx={{
           flexGrow: 1,
           p: 3,
-          marginLeft: isMobile ? 0 : 0,
           transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
